@@ -1,0 +1,96 @@
+# ASP.NET Core
+## Ignore build outputs
+bin/
+obj/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# VS Code specific files
+.vscode/
+.vscode/**
+
+# Rider specific files
+.idea/
+.idea/**
+
+# Logs
+*.log
+logs/
+
+# DotNet specific folders
+artifacts/
+
+# Database
+*.mdf
+*.ldf
+*.ndf
+
+# ASP.NET Scaffolding
+.scaffolding
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Project-specific temporary files
+*.tmp
+
+# Web servers
+wwwroot/node_modules/
+wwwroot/lib/
+
+# Dependency directories
+node_modules/
+
+# DotNet publishing files
+*.publishsettings
+
+# Package files
+*.nupkg
+*.snupkg
+*.nuspec
+.packages/
+
+# Entity Framework migrations
+Migrations/
+
+# JetBrains Rider config
+.idea/
+.idea/**
+
+# Rider files for .NET projects
+*.DotSettings.user
+
+# Visual Studio Code - Project specific settings
+.vscode/*
+
+# MacOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows File Protection
+ehthumbs.db
+
+# Vagrant
+.vagrant/
+
+# Backup files
+*.bak
+*.old
+*.orig
+*.swp
+
+# IDE configurations
+.vs/

@@ -1,0 +1,31 @@
+name: Build and Test ASP.NET Core
+
+on:
+  push:  # Triggers on push to any branch
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.x' # Use your preferred .NET Core version
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build the solution
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test --no-restore --verbosity normal
+
+      - name: Publish the application (Optional)
+        if: success()
+        run: dotnet publish --configuration Release --output ./publish
