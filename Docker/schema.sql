@@ -80,3 +80,6 @@ CREATE TABLE Notification (
     date DATETIME,
     FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE
 );
+
+INSERT INTO User (email,password,phoneNumber,firstName,lastName,role,payRate)
+VALUES ('kate.bednarz@tcu.edu', 'swiftie4lyfe', '8067817554', 'Kate', 'Bednarz', 'STUDENT', null)
