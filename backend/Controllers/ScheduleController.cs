@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("schedule")]
     public class ScheduleController : Controller
     {
         // GET: ScheduleController

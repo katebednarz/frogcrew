@@ -1,13 +1,17 @@
+using backend.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
+    [ApiController]
+    [Route("user")]
     public class UserController : Controller
     {
+        [HttpGet("{id}")]
         // GET: UserController
-        public ActionResult Index()
+        public ActionResult Index(int id)
         {
-            return View();
+            return Ok("ID number given: " + id);
         }
 
     }
