@@ -38,13 +38,11 @@ CREATE TABLE Schedule (
 -- Game Table
 CREATE TABLE Game (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    scheduleId INT,
     opponent VARCHAR(255),
     gameDate DATE,
     gameStart TIME,
     venue VARCHAR(255),
-    isFinalized BOOLEAN,
-    FOREIGN KEY (scheduleId) REFERENCES Schedule(id)
+    isFinalized BOOLEAN
 );
 
 -- Schedule_Game Relationship Table (to map games to schedules)
@@ -130,17 +128,17 @@ INSERT INTO Schedule (sport,season) VALUES
     ('Women''s Basketball', 2024);
 
 -- Game Values
-INSERT INTO Game (scheduleId, opponent, gameDate, gameStart, venue, isFinalized) VALUES
-    (1, 'Texas Tech', '2024-10-26', '14:30:00', 'Carter', true),
-    (1, 'Baylor', '2024-11-9', null, 'Carter', false),
-    (1, 'Arizona', '2024-11-23', null, 'Carter', false),
-    (2, 'Houston Christian', '2024-11-5', '18:30:00', 'Schollmaier', false),
-    (2, 'New Orleans', '2024-11-10', '14:00:00', 'Schollmaier', false),
-    (2, 'Texas State', '2024-11-13', '18:30:00', 'Schollmaier', false),
-    (2, 'NC State', '2024-11-17', '14:00:00', 'Schollmaier', false),
-    (2, 'Incarnate Word', '2024-11-21', '12:00:00', 'Schollmaier', false),
-    (2, 'Idaho State', '2024-11-17', '14:00:00', 'Schollmaier', false),
-    (2, 'Florida Atlantic', '2024-11-17', '14:00:00', 'Schollmaier', false);
+INSERT INTO Game (opponent, gameDate, gameStart, venue, isFinalized) VALUES
+    ('Texas Tech', '2024-10-26', '14:30:00', 'Carter', true),
+    ('Baylor', '2024-11-9', null, 'Carter', false),
+    ('Arizona', '2024-11-23', null, 'Carter', false),
+    ('Houston Christian', '2024-11-5', '18:30:00', 'Schollmaier', false),
+    ('New Orleans', '2024-11-10', '14:00:00', 'Schollmaier', false),
+    ('Texas State', '2024-11-13', '18:30:00', 'Schollmaier', false),
+    ('NC State', '2024-11-17', '14:00:00', 'Schollmaier', false),
+    ('Incarnate Word', '2024-11-21', '12:00:00', 'Schollmaier', false),
+    ('Idaho State', '2024-11-17', '14:00:00', 'Schollmaier', false),
+    ('Florida Atlantic', '2024-11-17', '14:00:00', 'Schollmaier', false);
 
 -- Schedule_Game Values
 INSERT INTO Schedule_Game VALUES
