@@ -1,28 +1,31 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
 
 namespace backend.Models;
 
-public class User
+public partial class User
 {
-    
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    private int Id { get; set; }
+    public int Id { get; set; }
 
-    private string Email { get; set; }
-    private string Password { get; set; }  // Assume encrypted
-    private int PhoneNumber { get; set; }
-    private string FirstName { get; set; }
-    private string LastName { get; set; }
-    private string Role { get; set; }
-    private List<string> QualifiedPositions { get; set; }
-    private string PayRate { get; set; }
+    public string Email { get; set; } = null!;
 
-    public void Register() { /* Implementation */ }
-    public void Login() { /* Implementation */ }
-    public void Invite() { /* Implementation */ }
+    public string Password { get; set; } = null!;
 
+    public string? PhoneNumber { get; set; }
+
+    public string? FirstName { get; set; }
+
+    public string? LastName { get; set; }
+
+    public string? Role { get; set; }
+
+    public string? PayRate { get; set; }
+
+    public virtual ICollection<Availability> Availabilities { get; set; } = new List<Availability>();
+
+    public virtual ICollection<CrewedUser> CrewedUsers { get; set; } = new List<CrewedUser>();
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+    public virtual ICollection<UserQualifiedPosition> UserQualifiedPositions { get; set; } = new List<UserQualifiedPosition>();
 }
-

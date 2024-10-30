@@ -1,16 +1,19 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 
 namespace backend.Models;
 
-public class Availability
+public partial class Availability
 {
+    public int UserId { get; set; }
 
-    private User User { get; set; }
-    private Game Game { get; set; }
-    private bool Open { get; set; }
-    private string Comment { get; set; }
+    public int GameId { get; set; }
 
-    public void SubmitAvailability() { /* Implementation */ }
-    public void EditAvailability() { /* Implementation */ }
+    public bool? Open { get; set; }
 
+    public string? Comment { get; set; }
+
+    public virtual Game Game { get; set; } = null!;
+
+    public virtual User User { get; set; } = null!;
 }

@@ -1,21 +1,19 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
 
 namespace backend.Models;
 
-public class Notification
+public partial class Notification
 {
+    public int Id { get; set; }
 
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    private int Id { get; set; }
+    public int? UserId { get; set; }
 
-    private User User { get; set; }
-    private string Title { get; set; }
-    private string Content { get; set; }
-    private DateTime Date { get; set; }
+    public string? Title { get; set; }
 
-    public void ViewNotifications() { /* Implementation */ }
+    public string? Content { get; set; }
 
+    public DateTime? Date { get; set; }
+
+    public virtual User? User { get; set; }
 }

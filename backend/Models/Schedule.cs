@@ -1,23 +1,15 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
+﻿using System;
+using System.Collections.Generic;
 
 namespace backend.Models;
 
-public class Schedule
+public partial class Schedule
 {
+    public int Id { get; set; }
 
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    private int Id { get; set; }
+    public string? Sport { get; set; }
 
-    private string Sport { get; set; }
-    private string Season { get; set; }
-    private List<Game> Games { get; set; }
+    public string? Season { get; set; }
 
-    public void CreateSchedule() { /* Implementation */ }
-    public void ViewSchedule() { /* Implementation */ }
-    public void PublishSchedule() { /* Implementation */ }
-
+    public virtual ICollection<Game> Games { get; set; } = new List<Game>();
 }

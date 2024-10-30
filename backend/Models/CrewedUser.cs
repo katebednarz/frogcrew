@@ -1,15 +1,19 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
 
 namespace backend.Models;
 
-public class CrewedUser
+public partial class CrewedUser
 {
+    public int UserId { get; set; }
 
-    private User User { get; set; }
-    private Game Game { get; set; }
-    private string CrewedPosition { get; set; }
-    private DateTime ArrivalTime { get; set; }
+    public int GameId { get; set; }
 
+    public string? CrewedPosition { get; set; }
+
+    public DateTime? ArrivalTime { get; set; }
+
+    public virtual Game Game { get; set; } = null!;
+
+    public virtual User User { get; set; } = null!;
 }

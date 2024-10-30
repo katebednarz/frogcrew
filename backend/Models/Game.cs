@@ -1,21 +1,25 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
 
 namespace backend.Models;
 
-public class Game
+public partial class Game
 {
-    
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    private int Id { get; set; }
+    public int Id { get; set; }
 
-    private Schedule Schedule { get; set; }
-    private DateTime GameStart { get; set; }
-    private string Venue { get; set; }
-    private bool IsFinalized { get; set; }
-    private List<string> OpenPositions { get; set; }
-    private List<User> CrewMembers { get; set; }
+    public string? Opponent { get; set; }
 
+    public DateTime? GameDate { get; set; }
+
+    public TimeSpan? GameStart { get; set; }
+
+    public string? Venue { get; set; }
+
+    public bool? IsFinalized { get; set; }
+
+    public virtual ICollection<Availability> Availabilities { get; set; } = new List<Availability>();
+
+    public virtual ICollection<CrewedUser> CrewedUsers { get; set; } = new List<CrewedUser>();
+
+    public virtual ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
 }
