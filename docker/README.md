@@ -8,6 +8,7 @@
 
 # Resetting the database
 The data is configured to build from scratch everytime you compose the container. This will reset table structure and data.
+" docker compose down && docker compose up -d " -> will restart the container 
 
 # Connection Info
 Host: localhost
