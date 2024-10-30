@@ -15,7 +15,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '7.x' # Use your preferred .NET Core version
+          dotnet-version: '8.x' # Use your preferred .NET Core version
 
       - name: Restore dependencies
         run: dotnet restore
