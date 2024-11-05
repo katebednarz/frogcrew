@@ -2,6 +2,7 @@ using backend.DTO;
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace backend.Controllers
 {
@@ -9,9 +10,16 @@ namespace backend.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
+
+        private readonly FrogcrewContext _context;
+        public UserController(FrogcrewContext context)
+        {
+        _context = context;
+        }
+
         // POST /crewMember
         [HttpPost("crewMember")]
-        public IActionResult CreateCrewMember([FromBody] CrewMemberRequest request)
+        public async Task<IActionResult> CreateCrewMember([FromBody] CrewMemberRequest request)
         {
             // validate required fields
             if (string.IsNullOrEmpty(request.FirstName) || 
@@ -38,25 +46,28 @@ namespace backend.Controllers
                 });
             }
 
-            // mocked response for user creation success
-            var response = new CrewMemberResponse
+            var newUser = new User
             {
-                Flag = true,
-                Code = 200,
-                Message = "User creation success",
-                Data = new User
-                {
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    Email = request.Email,
-                    PhoneNumber = request.PhoneNumber,
-                    Role = request.Role,
-                    UserQualifiedPositions = request.Position
-                        .Select(pos => new UserQualifiedPosition(pos))
-                        .ToList()
-                }
+                Email = request.Email,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                PhoneNumber = request.PhoneNumber,
+                Role = request.Role,
+                Password = "password"
             };
 
+            _context.Add(newUser);
+            _context.SaveChanges();
+
+            // mocked response for user creation success
+            var response = new CrewMemberResponse
+                    {
+                        Flag = true,
+                        Code = 200,
+                        Message = "User creation success",
+                        Data = newUser
+                    };
+            //the return Ok basicaly covers the flag and maybe the code in response
             return Ok(response);
         }
     }
