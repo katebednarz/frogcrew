@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using backend.DTO;
 
 namespace backend.Models;
 
@@ -28,4 +29,24 @@ public partial class User
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
     public virtual ICollection<UserQualifiedPosition> UserQualifiedPositions { get; set; } = new List<UserQualifiedPosition>();
+
+    public UserDTO ConvertToUserDTO() {
+        return new UserDTO {
+            Id = Id,
+            FirstName = FirstName,
+            LastName = LastName,
+            Email = Email,
+            PhoneNumber = PhoneNumber,
+            Role = Role,
+            Position = PositionToList()
+        };
+    }
+
+    private List<string> PositionToList() {
+        List<string> list = [];
+        foreach (var pos in UserQualifiedPositions) {
+            list.Add(pos.Position);
+        }
+        return list;
+    }
 }

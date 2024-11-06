@@ -19,7 +19,7 @@ namespace backend.Controllers
 
         // POST /crewMember
         [HttpPost("crewMember")]
-        public async Task<IActionResult> CreateCrewMember([FromBody] CrewMemberRequest request) {   
+        public async Task<IActionResult> CreateCrewMember([FromBody] UserDTO request) {   
 
             if (!ModelState.IsValid) {
                 var errors = ModelState
@@ -40,12 +40,22 @@ namespace backend.Controllers
                     Role = request.Role,
                     Password = "password"
                 };
+            
 
                 _context.Add(newUser);
                 _context.SaveChanges();
 
+                foreach( var pos in request.Position) {
+                    var newPosition = new UserQualifiedPosition {
+                        UserId = newUser.Id,
+                        Position = pos
+                    };
+                    _context.Add(newPosition);
+                    _context.SaveChanges();
+                }
+
                 
-                var response = new Result(true, 200, "Add Success", newUser);
+                var response = new Result(true, 200, "Add Success", newUser.ConvertToUserDTO());
                 return Ok(response);
         }
     }
