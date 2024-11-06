@@ -1,10 +1,12 @@
+using System.Net;
+using System.Net.Mail;
 using backend.DTO;
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
-    [Route("/crewMember")]
+    [Route("")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -16,9 +18,8 @@ namespace backend.Controllers
         }
 
         // POST /crewMember
-        [HttpPost("")]
+        [HttpPost("/crewMember")]
         public async Task<IActionResult> CreateCrewMember([FromBody] UserDTO request) {   
-
             if (!ModelState.IsValid) {
                 var errors = ModelState
                         .SelectMany(kvp => kvp.Value.Errors)
@@ -43,19 +44,69 @@ namespace backend.Controllers
             _context.Add(newUser);
             _context.SaveChanges();
 
-                foreach( var pos in request.Position) {
-                    var newPosition = new UserQualifiedPosition {
-                        UserId = newUser.Id,
-                        Position = pos
-                    };
-                    _context.Add(newPosition);
-                    _context.SaveChanges();
-                }
-
-                
-                var response = new Result(true, 200, "Add Success", newUser.ConvertToUserDTO());
-                return Ok(response);
+            foreach(var pos in request.Position) {
+                var newPosition = new UserQualifiedPosition {
+                    UserId = newUser.Id,
+                    Position = pos
+                };
+                _context.Add(newPosition);
+                _context.SaveChanges();
+            }
+            
+            var response = new Result(true, 200, "Add Success", newUser.ConvertToUserDTO());
+            return Ok(response);
         }
-        
+
+        // POST /invite
+        [HttpPost("/invite")]
+        public async Task<IActionResult> InviteCrewMember([FromBody] EmailDTO request) {   
+            if (!ModelState.IsValid) {
+                var errors = ModelState
+                        .SelectMany(kvp => kvp.Value.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
+
+                return new ObjectResult(errorResponse) { StatusCode = 400 };
+            }
+
+            foreach (var email in request.Emails){
+                SendInviteEmail(email);
+            }
+
+            var response = new Result(true, 200, "Invite success", request.Emails);
+            return Ok(response);
+        }
+
+        private void SendInviteEmail(string email)
+        {
+            // email setup
+            var fromAddress = new MailAddress("frog.crew.invitation@gmail.com", "FrogCrew");
+            var toAddress = new MailAddress(email);
+            const string fromPassword = "icbu ddnf yuhi lssz"; // gmail app key
+            const string subject = "Invitation to Join FrogCrew";
+            const string body = "You have been invited to join our crew! Please click the link below to accept the invitation:\n\n[Invite Link Here]";
+
+            // configure SMTP client
+            var smtp = new SmtpClient
+            {
+                Host = "smtp.gmail.com",
+                Port = 587, // SMTP port
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+            };
+
+            using (var message = new MailMessage(fromAddress, toAddress)
+            {
+                Subject = subject,
+                Body = body
+            })
+            {
+                smtp.Send(message);
+            }
+        }
+
     }
 }
