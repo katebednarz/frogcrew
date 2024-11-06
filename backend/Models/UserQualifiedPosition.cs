@@ -10,9 +10,4 @@ public partial class UserQualifiedPosition
     public string Position { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;
-
-    public UserQualifiedPosition(string positionName)
-    {
-        Position = positionName;
-    }
 }
