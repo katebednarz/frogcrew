@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
-    [Route("/")]
+    [Route("/crewMember")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -16,7 +16,7 @@ namespace backend.Controllers
         }
 
         // POST /crewMember
-        [HttpPost("crewMember")]
+        [HttpPost("")]
         public async Task<IActionResult> CreateCrewMember([FromBody] CrewMemberRequest request) {   
 
             if (!ModelState.IsValid) {
