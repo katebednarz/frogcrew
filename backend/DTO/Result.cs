@@ -1,9 +1,15 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace backend.DTO;
 
 public class Result {
-    public required bool Flag { get; set; }
-    public required int Code { get; set; }
-    public required string Message { get; set; }
+    
+
+    public bool Flag { get; set; }
+
+    public int Code { get; set; }
+
+    public string Message { get; set; }
     public Object? Data { get; set; }
 
     public Result(bool flag, int code, string message) {
