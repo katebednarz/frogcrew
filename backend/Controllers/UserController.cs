@@ -18,6 +18,17 @@ namespace backend.Controllers
         // POST /crewMember
         [HttpPost("crewMember")]
         public async Task<IActionResult> CreateCrewMember([FromBody] CrewMemberRequest request) {   
+
+            if (!ModelState.IsValid) {
+                var errors = ModelState
+                        .SelectMany(kvp => kvp.Value.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
+
+                return new ObjectResult(errorResponse) { StatusCode = 400 };
+            }
+
             var newUser = new User
             {
                 Email = request.Email,
