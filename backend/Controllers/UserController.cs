@@ -26,15 +26,11 @@ namespace backend.Controllers
                         .SelectMany(kvp => kvp.Value.Errors)
                         .Select(e => e.ErrorMessage)
                         .ToList();
-                var response = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
+                var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
 
-                return new ObjectResult(response) { StatusCode = 400 };
+                return new ObjectResult(errorResponse) { StatusCode = 400 };
             }
 
-            // Your action code here
-            return Ok();
-
-            /*
             var newUser = new User
                 {
                     Email = request.Email,
@@ -51,7 +47,6 @@ namespace backend.Controllers
                 
                 var response = new Result(true, 200, "Add Success", newUser);
                 return Ok(response);
-            */
         }
     }
 }
