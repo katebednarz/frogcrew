@@ -7,17 +7,17 @@ public class UserDTO
 {
     public int Id { get; set; }
     [Required(ErrorMessage = "First name is required.")]
-    public string FirstName { get; set; }
+    public required string FirstName { get; set; }
     [Required(ErrorMessage = "Last name is required.")]
-    public string LastName { get; set; }
+    public required string LastName { get; set; }
     [Required(ErrorMessage = "Email is required.")]
-    public string Email { get; set; }
+    public required string Email { get; set; }
     [Required(ErrorMessage = "Phone number is required.")]
-    public string PhoneNumber { get; set; }
+    public required string PhoneNumber { get; set; }
     [Required(ErrorMessage = "Role is required.")]
-    public string Role { get; set; }
+    public required string Role { get; set; }
     [Required(ErrorMessage = "Position is required.")]
-    public List<String> Position { get; set; }
+    public required List<String> Position { get; set; }
 
     
 }

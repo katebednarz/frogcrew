@@ -1,4 +1,5 @@
 using backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -13,7 +14,7 @@ namespace backend.Controllers
         _context = context;
         }
 
-        [HttpGet("game/{id}")]
+        [HttpGet("game/{id}")][Authorize]
         public async Task<IActionResult> FindGameById(int id) {
             var game = await _context.Games.FindAsync(id);
             if (game == null) {
