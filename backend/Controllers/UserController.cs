@@ -24,7 +24,7 @@ namespace backend.Controllers
 
     // POST /crewMember
     [HttpPost("crewMember")]
-    public Task<IActionResult> CreateCrewMember([FromBody] UserDTO request)
+    public async Task<IActionResult> CreateCrewMember([FromBody] UserDTO request)
     {
 
       if (!ModelState.IsValid)
@@ -35,7 +35,7 @@ namespace backend.Controllers
                 .ToList();
         var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
 
-        return Task.FromResult<IActionResult>(new ObjectResult(errorResponse) { StatusCode = 400 });
+        return new ObjectResult(errorResponse) { StatusCode = 400 };
       }
 
       var newUser = new User
@@ -65,7 +65,7 @@ namespace backend.Controllers
 
 
       var response = new Result(true, 200, "Add Success", newUser.ConvertToUserDTO());
-      return Task.FromResult<IActionResult>(Ok(response));
+      return Ok(response);
     }
 
     // POST /invite
