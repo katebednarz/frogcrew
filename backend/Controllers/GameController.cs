@@ -1,6 +1,10 @@
+using backend.DTO;
 using backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Tsp;
 using System.Threading.Tasks;
 
 namespace backend.Controllers
@@ -14,15 +18,14 @@ namespace backend.Controllers
         _context = context;
         }
 
-        [HttpGet("game/{id}")]
-        public async Task<IActionResult> FindGameById(int id) {
-            var game = await _context.Games.FindAsync(id);
+        [HttpGet("gameSchedule/game/{gameId}")]
+        public async Task<IActionResult> FindGameById(int gameId) {
+            var game = await _context.Games.FindAsync(gameId);
             if (game == null) {
-                return NotFound($"Game with ID {id} not found.");
+                return new ObjectResult(new Result(false, 404, $"Game with ID {gameId} not found.")) { StatusCode = 404 };
             }
 
-            return Ok(game);
-
+            return Ok(new Result(true, 200, "Find Success", game));
         }
     }
 }
