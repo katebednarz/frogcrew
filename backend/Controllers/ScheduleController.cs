@@ -24,19 +24,29 @@ namespace backend.Controllers
 
         // POST /gameSchedule
         [HttpPost("gameSchedule")]
-        public Task<IActionResult> CreateGameSchedule([FromBody] GameScheduleRequest request) {   
+        public async Task<IActionResult> CreateGameSchedule([FromBody] GameScheduleDTO request) { 
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                        .SelectMany(kvp => kvp.Value.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
+
+                return new ObjectResult(errorResponse) { StatusCode = 400 };
+            }
+
             var newSchedule = new Schedule
             {
                 Sport = request.Sport,
-                Season = request.Season,
-                Games = request.Games
+                Season = request.Season
             };
 
             _context.Add(newSchedule);
             _context.SaveChanges();
 
             var response = new Result(true, 200, "Add Success", newSchedule);
-            return Task.FromResult<IActionResult>(Ok(response));
+            return Ok(response);
         }
 
     }
