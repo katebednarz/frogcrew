@@ -24,7 +24,7 @@ namespace backend.Controllers
 
         // POST /gameSchedule
         [HttpPost("gameSchedule")]
-        public async Task<IActionResult> CreateGameSchedule([FromBody] GameScheduleRequest request) {   
+        public Task<IActionResult> CreateGameSchedule([FromBody] GameScheduleRequest request) {   
             var newSchedule = new Schedule
             {
                 Sport = request.Sport,
@@ -36,7 +36,7 @@ namespace backend.Controllers
             _context.SaveChanges();
 
             var response = new Result(true, 200, "Add Success", newSchedule);
-            return Ok(response);
+            return Task.FromResult<IActionResult>(Ok(response));
         }
 
     }
