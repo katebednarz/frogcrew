@@ -61,7 +61,7 @@ CREATE TABLE CrewedUser (
 CREATE TABLE Availability (
     userId INT,
     gameId INT,
-    open BOOLEAN,
+    open BOOLEAN NOT NULL,
     comment VARCHAR(255),
     PRIMARY KEY (userId, gameId),
     FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE,

@@ -25,7 +25,8 @@ namespace backend.Controllers
                 return new ObjectResult(new Result(false, 404, $"Game with ID {gameId} not found.")) { StatusCode = 404 };
             }
 
-            return Ok(new Result(true, 200, "Find Success", game));
+
+            return Ok(new Result(true, 200, "Find Success", game.convertToGameDetailedDTO()));
         }
 
         [HttpGet("gameSchedule/{scheduleId}/games")]
@@ -36,8 +37,20 @@ namespace backend.Controllers
             {
                 return new ObjectResult(new Result(false, 404, $"Could not find any games for schedule with Id {scheduleId}.")) { StatusCode = 404 };
             }
+            var gameDTOs = new List<GameDTO>();
+            foreach (var game in games) 
+            {
+                var newGameDTO = new GameDTO {
+                    GameId = game.Id,
+                    ScheduleId = game.ScheduleId,
+                    GameDate = game.GameDate,
+                    Venue = game.Venue,
+                    Opponent = game.Opponent
+                };
+                gameDTOs.Add(newGameDTO);
+            }
 
-            return Ok(new Result(true, 200, "Found Games", games));
+            return Ok(new Result(true, 200, "Found Games", gameDTOs));
             
         }
     }
