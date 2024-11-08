@@ -1,3 +1,4 @@
+using System.Text;
 using backend.DTO;
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -49,5 +50,30 @@ namespace backend.Controllers
             return Ok(response);
         }
 
+        [HttpPost("gameSchedule/{scheduleId}/games")]
+        public async Task<IActionResult> FindScheduleById(int scheduleId, [FromBody] List<GameCreationDTO> games) {
+            var gameSchedule = await _context.Schedules.FindAsync(scheduleId);
+            if (gameSchedule == null) {
+                return new ObjectResult(new Result(false, 404, $"Could not find schedule with ID {scheduleId}.")) { StatusCode = 404 };
+            }
+            if (games == null || games.Count == 0) {
+                return BadRequest(new Result(false, 400, "Games list cannot be null or empty."));
+            }
+
+            foreach (var game in games) {
+                var newGame = new Game {
+                    ScheduleId = scheduleId,
+                    Schedule = gameSchedule,
+                    GameDate = game.GameDate,
+                    Venue = game.Venue,
+                    Opponent = game.Opponent
+                };
+                game.ScheduleId = scheduleId;
+                _context.Games.Add(newGame);
+                _context.SaveChanges();
+            }
+
+            return Ok(new Result(true, 200, "Add Success", games));
+        }
     }
 }
