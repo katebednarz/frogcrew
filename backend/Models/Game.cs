@@ -11,9 +11,9 @@ public partial class Game
 
     public string? Opponent { get; set; }
 
-    public DateTime? GameDate { get; set; }
+    public DateOnly? GameDate { get; set; }
 
-    public TimeSpan? GameStart { get; set; }
+    public TimeOnly? GameStart { get; set; }
 
     public string? Venue { get; set; }
 

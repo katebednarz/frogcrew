@@ -51,16 +51,7 @@ namespace backend.Controllers
         }
 
         [HttpPost("gameSchedule/{scheduleId}/games")]
-        public async Task<IActionResult> FindScheduleById(int scheduleId, [FromBody] List<GameDTO> games) {
-
-            // Read and print the raw request body
-            HttpContext.Request.EnableBuffering(); // Allows multiple reads
-            using (var reader = new StreamReader(HttpContext.Request.Body, Encoding.UTF8, leaveOpen: true)) {
-                var body = await reader.ReadToEndAsync();
-                Console.WriteLine("Raw Request Body: " + body);
-                HttpContext.Request.Body.Position = 0; // Reset the stream position for model binding
-    }
-
+        public async Task<IActionResult> FindScheduleById(int scheduleId, [FromBody] List<GameCreationDTO> games) {
             var gameSchedule = await _context.Schedules.FindAsync(scheduleId);
             if (gameSchedule == null) {
                 return new ObjectResult(new Result(false, 404, $"Could not find schedule with ID {scheduleId}.")) { StatusCode = 404 };
@@ -69,14 +60,16 @@ namespace backend.Controllers
                 return BadRequest(new Result(false, 400, "Games list cannot be null or empty."));
             }
 
-
             foreach (var game in games) {
                 var newGame = new Game {
+                    ScheduleId = scheduleId,
+                    Schedule = gameSchedule,
                     GameDate = game.GameDate,
                     Venue = game.Venue,
                     Opponent = game.Opponent
                 };
-                // _context.Games.Add(newGame);
+                _context.Games.Add(newGame);
+                _context.SaveChanges();
             }
 
             return Ok(new Result(true, 200, "Add Success", games));

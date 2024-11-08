@@ -4,7 +4,7 @@ using backend.Models;
 
 namespace backend.DTO;
 
-public class GameDTO
+public class GameCreationDTO
 {
     [Required(ErrorMessage = "Game date is required.")]
     public DateOnly? GameDate { get; set; }
