@@ -93,6 +93,8 @@ public partial class FrogcrewContext : DbContext
 
             entity.ToTable("Game");
 
+            entity.HasIndex(e => e.ScheduleId, "scheduleId");
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.GameDate)
                 .HasColumnType("date")
@@ -104,9 +106,14 @@ public partial class FrogcrewContext : DbContext
             entity.Property(e => e.Opponent)
                 .HasMaxLength(255)
                 .HasColumnName("opponent");
+            entity.Property(e => e.ScheduleId).HasColumnName("scheduleId");
             entity.Property(e => e.Venue)
                 .HasMaxLength(255)
                 .HasColumnName("venue");
+
+            entity.HasOne(d => d.Schedule).WithMany(p => p.Games)
+                .HasForeignKey(d => d.ScheduleId)
+                .HasConstraintName("Game_ibfk_1");
         });
 
         modelBuilder.Entity<Notification>(entity =>
@@ -148,24 +155,6 @@ public partial class FrogcrewContext : DbContext
             entity.Property(e => e.Sport)
                 .HasMaxLength(255)
                 .HasColumnName("sport");
-
-            entity.HasMany(d => d.Games).WithMany(p => p.Schedules)
-                .UsingEntity<Dictionary<string, object>>(
-                    "ScheduleGame",
-                    r => r.HasOne<Game>().WithMany()
-                        .HasForeignKey("GameId")
-                        .HasConstraintName("Schedule_Game_ibfk_2"),
-                    l => l.HasOne<Schedule>().WithMany()
-                        .HasForeignKey("ScheduleId")
-                        .HasConstraintName("Schedule_Game_ibfk_1"),
-                    j =>
-                    {
-                        j.HasKey("ScheduleId", "GameId").HasName("PRIMARY");
-                        j.ToTable("Schedule_Game");
-                        j.HasIndex(new[] { "GameId" }, "gameId");
-                        j.IndexerProperty<int>("ScheduleId").HasColumnName("scheduleId");
-                        j.IndexerProperty<int>("GameId").HasColumnName("gameId");
-                    });
         });
 
         modelBuilder.Entity<User>(entity =>

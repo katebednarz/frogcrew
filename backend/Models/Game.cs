@@ -7,6 +7,8 @@ public partial class Game
 {
     public int Id { get; set; }
 
+    public int? ScheduleId { get; set; }
+
     public string? Opponent { get; set; }
 
     public DateTime? GameDate { get; set; }
@@ -21,5 +23,5 @@ public partial class Game
 
     public virtual ICollection<CrewedUser> CrewedUsers { get; set; } = new List<CrewedUser>();
 
-    public virtual ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
+    public virtual Schedule? Schedule { get; set; }
 }
