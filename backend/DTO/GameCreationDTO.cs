@@ -6,6 +6,7 @@ namespace backend.DTO;
 
 public class GameCreationDTO
 {
+    public int ScheduleId { get; set; }
     [Required(ErrorMessage = "Game date is required.")]
     public DateOnly? GameDate { get; set; }
 

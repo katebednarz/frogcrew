@@ -68,6 +68,7 @@ namespace backend.Controllers
                     Venue = game.Venue,
                     Opponent = game.Opponent
                 };
+                game.ScheduleId = scheduleId;
                 _context.Games.Add(newGame);
                 _context.SaveChanges();
             }
