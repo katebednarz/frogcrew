@@ -13,7 +13,7 @@ public partial class Game
 
     public DateOnly? GameDate { get; set; }
 
-    public TimeOnly? GameStart { get; set; }
+    public TimeSpan? GameStart { get; set; }
 
     public string? Venue { get; set; }
 

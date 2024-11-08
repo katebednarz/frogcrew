@@ -98,7 +98,8 @@ public partial class FrogcrewContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.GameDate)
                 .HasColumnType("date")
-                .HasColumnName("gameDate");
+                .HasColumnName("gameDate")
+                .HasConversion(new DateOnlyConverter());
             entity.Property(e => e.GameStart)
                 .HasColumnType("time")
                 .HasColumnName("gameStart");
