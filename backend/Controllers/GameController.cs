@@ -2,6 +2,7 @@ using backend.DTO;
 using backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Org.BouncyCastle.Tsp;
@@ -52,6 +53,16 @@ namespace backend.Controllers
 
             return Ok(new Result(true, 200, "Found Games", gameDTOs));
             
+        }
+
+
+        [HttpPost("test")]
+        public async Task<IActionResult> Test() {
+            var crewedUser = await _context.CrewedUsers.FirstOrDefaultAsync(c => c.UserId == 1 && c.GameId == 1);
+            if (crewedUser == null) {
+                return NotFound();
+            }
+            return Ok(new Result(true, 200, "yay", crewedUser.ConvertToCrewedUserDTO()));
         }
     }
 }

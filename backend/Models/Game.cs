@@ -39,15 +39,15 @@ public partial class Game
     }
 
     private List<CrewedUserDTO> CrewedUsersToDTOList() {
-        Console.WriteLine("debug");
-        var DTOList = new List<CrewedUserDTO>();
-
-        foreach (var CrewedUser in CrewedUsers)
+        var CrewedUserDTOList = new List<CrewedUserDTO>();
+        using var _context = new FrogcrewContext(); 
+        var CrewedUserList = _context.CrewedUsers.Where(c => c.GameId == Id).ToList(); 
+        foreach (var CrewedUser in CrewedUserList)
         {
-            DTOList.Add(CrewedUser.convertToCrewedUserDTO());
+            CrewedUserDTOList.Add(CrewedUser.ConvertToCrewedUserDTO());
         }
 
-        return DTOList;
+        return CrewedUserDTOList;
     }
     
 }
