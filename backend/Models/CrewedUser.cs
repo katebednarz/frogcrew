@@ -18,18 +18,17 @@ public partial class CrewedUser
 
     public virtual User User { get; set; } = null!;
 
-    public CrewedUserDTO convertToCrewedUserDTO() {
+    public CrewedUserDTO ConvertToCrewedUserDTO() {
 
-        using (var _context = new FrogcrewContext() )
-        {
-            var user = _context.Users.FirstOrDefault(u => u.Id == UserId);
-            return new CrewedUserDTO {
-                FullName = $"{user.FirstName} {user.LastName}",
-                Position = CrewedPosition,
-                ReportTime = ArrivalTime.ToString()
-            };
-        }
-        
-        
-    }
+    using var _context = new FrogcrewContext();
+    var user = _context.Users.FirstOrDefault(u => u.Id == UserId);
+    return new CrewedUserDTO
+    {
+      FullName = $"{user.FirstName} {user.LastName}",
+      Position = CrewedPosition,
+      ReportTime = ArrivalTime.ToString()
+    };
+
+
+  }
 }
