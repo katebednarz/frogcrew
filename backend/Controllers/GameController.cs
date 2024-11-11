@@ -38,7 +38,6 @@ namespace backend.Controllers
             }
 
             return Ok(new Result(true, 200, "Found Games", games));
-            
         }
     }
 }
