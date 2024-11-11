@@ -76,5 +76,22 @@ namespace backend.Controllers
 
             return Ok(new Result(true, 200, "Add Success", games));
         }
+
+        [HttpGet("gameSchedule/{scheduleId}")]
+        public async Task<IActionResult> FindScheduleById(int scheduleId) {
+            var schedule = await _context.Schedules.FindAsync(scheduleId);
+
+            if (schedule == null) {
+                return new ObjectResult(new Result(false, 404, $"Could not find schedule with Id {scheduleId}.")) { StatusCode = 404 };
+            }
+
+            var gameScheduleDTO = new GameScheduleDTO {
+                Id = schedule.Id,
+                Sport = schedule.Sport,
+                Season = schedule.Season
+            };
+            
+            return Ok(new Result(true, 200, "Find Success", gameScheduleDTO));
+        }
     }
 }
