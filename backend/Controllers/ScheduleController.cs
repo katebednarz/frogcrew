@@ -51,7 +51,7 @@ namespace backend.Controllers
         }
 
         [HttpPost("gameSchedule/{scheduleId}/games")]
-        public async Task<IActionResult> FindScheduleById(int scheduleId, [FromBody] List<GameDTO> games) {
+        public async Task<IActionResult> CreateGameScheduleGames(int scheduleId, [FromBody] List<GameDTO> games) {
             var gameSchedule = await _context.Schedules.FindAsync(scheduleId);
             if (gameSchedule == null) {
                 return new ObjectResult(new Result(false, 404, $"Could not find schedule with ID {scheduleId}.")) { StatusCode = 404 };
@@ -66,7 +66,8 @@ namespace backend.Controllers
                     Schedule = gameSchedule,
                     GameDate = game.GameDate,
                     Venue = game.Venue,
-                    Opponent = game.Opponent
+                    Opponent = game.Opponent,
+                    IsFinalized = false
                 };
                 game.ScheduleId = scheduleId;
                 _context.Games.Add(newGame);
