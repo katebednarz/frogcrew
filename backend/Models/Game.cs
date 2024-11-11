@@ -26,7 +26,7 @@ public partial class Game
 
     public virtual Schedule? Schedule { get; set; }
 
-    public GameDTO convertToGameDTO() {
+    public GameDTO ConvertToGameDTO() {
         return new GameDTO {
             GameId = Id,
             ScheduleId = ScheduleId,
@@ -59,15 +59,4 @@ public partial class Game
 
         return CrewedUserDTOList;
     }
-    
-    public Game updateGame(CrewListDTO gameUpdate) {
-        return new Game {
-            Id = gameUpdate.GameId,
-            GameStart = gameUpdate.GameStart,
-            GameDate = gameUpdate.GameDate,
-            Venue = gameUpdate.Venue,
-            Opponent = gameUpdate.Opponent,
-        };
-    }
-    
 }

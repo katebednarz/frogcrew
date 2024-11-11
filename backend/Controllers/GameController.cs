@@ -27,7 +27,7 @@ namespace backend.Controllers
             if (game == null) {
                 return new ObjectResult(new Result(false, 404, $"Game with ID {gameId} not found.")) { StatusCode = 404 };
             }
-            return Ok(new Result(true, 200, "Find Success", game.convertToGameDTO()));
+            return Ok(new Result(true, 200, "Find Success", game.ConvertToGameDTO()));
         }
 
         [HttpGet("gameSchedule/{scheduleId}/games")]
