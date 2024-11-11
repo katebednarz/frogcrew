@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 
 namespace backend.Controllers
 {
+    [Route("/")]
+    [ApiController]
     public class GameController : Controller
     {
         private readonly FrogcrewContext _context;
@@ -25,9 +27,7 @@ namespace backend.Controllers
             if (game == null) {
                 return new ObjectResult(new Result(false, 404, $"Game with ID {gameId} not found.")) { StatusCode = 404 };
             }
-
-
-            return Ok(new Result(true, 200, "Find Success", game.convertToGameDetailedDTO()));
+            return Ok(new Result(true, 200, "Find Success", game.convertToGameDTO()));
         }
 
         [HttpGet("gameSchedule/{scheduleId}/games")]
@@ -56,16 +56,6 @@ namespace backend.Controllers
 
             return Ok(new Result(true, 200, "Found Games", gameDTOs));
             
-        }
-
-
-        [HttpPost("test")]
-        public async Task<IActionResult> Test() {
-            var crewedUser = await _context.CrewedUsers.FirstOrDefaultAsync(c => c.UserId == 1 && c.GameId == 1);
-            if (crewedUser == null) {
-                return NotFound();
-            }
-            return Ok(new Result(true, 200, "yay", crewedUser.ConvertToCrewedUserDTO()));
         }
     }
 }

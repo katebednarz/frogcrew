@@ -24,6 +24,7 @@ public partial class CrewedUser
     var user = _context.Users.FirstOrDefault(u => u.Id == UserId);
     return new CrewedUserDTO
     {
+      UserId = UserId,
       FullName = $"{user.FirstName} {user.LastName}",
       Position = CrewedPosition,
       ReportTime = ArrivalTime.ToString()
