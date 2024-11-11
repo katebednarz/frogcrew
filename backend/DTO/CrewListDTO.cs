@@ -10,6 +10,6 @@ public class CrewListDTO
     public DateOnly? GameDate { get; set; }
     public string? Venue { get; set; }
     public string? Opponent { get; set; }
-    public List<CrewedUserDTO> CrewedMembers { get; set; }
+    public List<CrewedUserDTO>? CrewedMembers { get; set; }
      
 }
