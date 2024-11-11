@@ -16,4 +16,6 @@ public class GameDTO
 
     [Required(ErrorMessage = "Opponent is required.")]
     public string? Opponent { get; set; }
+
+    public Boolean IsFinalized { get; set; }
 }

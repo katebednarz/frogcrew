@@ -25,15 +25,25 @@ public partial class Game
     public virtual ICollection<CrewedUser> CrewedUsers { get; set; } = new List<CrewedUser>();
 
     public virtual Schedule? Schedule { get; set; }
-    
-    public GameDetailedDTO convertToGameDetailedDTO() {
-        return new GameDetailedDTO {
+
+    public GameDTO convertToGameDTO() {
+        return new GameDTO {
             GameId = Id,
             ScheduleId = ScheduleId,
             GameDate = GameDate,
             Venue = Venue,
             Opponent = Opponent,
-            Finalized = IsFinalized,
+            IsFinalized = IsFinalized
+        };
+    }
+    
+    public CrewListDTO ConvertToCrewListDTO() {
+        return new CrewListDTO {
+            GameId = Id,
+            GameStart = GameStart,
+            GameDate = GameDate,
+            Venue = Venue,
+            Opponent = Opponent,
             CrewedMembers = CrewedUsersToDTOList()
         };
     }
@@ -48,6 +58,16 @@ public partial class Game
         }
 
         return CrewedUserDTOList;
+    }
+    
+    public Game updateGame(CrewListDTO gameUpdate) {
+        return new Game {
+            Id = gameUpdate.GameId,
+            GameStart = gameUpdate.GameStart,
+            GameDate = gameUpdate.GameDate,
+            Venue = gameUpdate.Venue,
+            Opponent = gameUpdate.Opponent,
+        };
     }
     
 }
