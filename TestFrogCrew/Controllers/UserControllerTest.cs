@@ -14,6 +14,7 @@ using System.Linq;
 using backend.Models;
 using backend.DTO;
 using backend.Auth;
+using Microsoft.AspNetCore.Http;
 
 namespace backend.Controllers.Tests
 {
@@ -22,6 +23,8 @@ namespace backend.Controllers.Tests
     {
         private Mock<FrogcrewContext>? _mockContext;
         private UserController? _controller;
+        private Mock<IHttpContextAccessor> _mockHttpContextAccessor;
+        private Mock<ISession> _mockSession;
 
 
         [SetUp]
