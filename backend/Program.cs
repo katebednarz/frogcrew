@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using backend.Models;
+using backend;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -86,5 +87,7 @@ app.UseAuthorization();
 
 app.UseHttpsRedirection();
 app.MapControllers();
+
+StartUpFile.RunStartupFile();
 
 app.Run();
