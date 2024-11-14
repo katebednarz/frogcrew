@@ -140,9 +140,51 @@ namespace backend.Controllers.Tests
 
 
         [Test()]
-        public void InviteCrewMemberTestSuccess()
+        public async Task InviteCrewMemberTestSuccess()
         {
-            Assert.Pass();
+            // Arrange
+            var request = new EmailDTO
+            {
+                Emails = new List<string> { "test1@example.com", "test2@example.com" }
+            };
+
+            // Act
+            var result = await _controller.InviteCrewMember(request) as ObjectResult;
+            var response = result?.Value as Result;
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsTrue(response?.Flag); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(200)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Invite success")); //Verify Message
+            CollectionAssert.AreEquivalent(request.Emails, response?.Data as List<string>);
+        }
+
+        [Test()]
+        public async Task InviteCrewMemberTestBadRequest()
+        {
+            // Arrange
+            var request = new EmailDTO // Empty or invalid DTO to simulate model validation failure
+            {
+                Emails = null
+            }; 
+
+            _controller.ModelState.AddModelError("Emails", "Emails are required.");
+
+            // Act
+            var result = await _controller.InviteCrewMember(request) as ObjectResult;
+            var response = result?.Value as Result;
+
+            // Expected data
+            var expectedErrors = new List<string> { "Emails are required." };
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.IsFalse(response?.Flag);
+            Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
+            // Check that the data contains the expected error message
+            CollectionAssert.AreEquivalent(expectedErrors, response?.Data as List<string>);
         }
 
         [Test()]
