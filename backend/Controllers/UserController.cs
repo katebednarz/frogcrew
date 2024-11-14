@@ -7,12 +7,13 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using backend.Auth;
 
 namespace backend.Controllers
 {
   [Route("/")]
   [ApiController]
-  public class UserController : ControllerBase
+  public class UserController : Controller
   {
 
     private readonly FrogcrewContext _context;

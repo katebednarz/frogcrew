@@ -1,5 +1,6 @@
 
 using backend.Models;
+using backend.Auth;
 
 
 public class StartUpFile() {
