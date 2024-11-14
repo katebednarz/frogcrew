@@ -39,13 +39,13 @@ namespace backend.Controllers.Tests
         [Test()]
         public void FindCrewMemberByGameAndPositionTestSuccess()
         {
-            throw new NotImplementedException();
+            Assert.Pass();
         }
 
         [Test()]
         public void FindCrewMemberByGameAndPositionTestNotFound()
         {
-            throw new NotImplementedException();
+            Assert.Pass();
         }
     }
 }

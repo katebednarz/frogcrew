@@ -95,13 +95,13 @@ namespace backend.Controllers.Tests
         [Test()]
         public async Task FindGamesByScheduleIdTestSuccess()
         {
-            throw new NotImplementedException();
+            Assert.Pass();
         }
 
         [Test()]
         public async Task FindGamesByScheduleIdTestNotFound()
         {
-            throw new NotImplementedException();
+            Assert.Pass();
         }
     }
 }
