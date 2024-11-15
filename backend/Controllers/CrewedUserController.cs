@@ -18,20 +18,23 @@ namespace backend.Controllers
         }
 
         [HttpGet("crewMember/{gameId}/{position}")]
-        public IActionResult FindCrewMemberByGameAndPosition(int gameId, string position) {
-            var availableUsers =  _context.Users
-            .Where(u => u.Availabilities
-                .Any(a => a.GameId == gameId && a.Open)) // Check user availability for the game
-            .Where(u => u.UserQualifiedPositions
-                .Any(qp => qp.Position == position)) // Check user qualifications for the position
-            .ToList();
+        public async Task<IActionResult> FindCrewMemberByGameAndPosition(int gameId, string position) {
+            var availableQualifiedUsers = await _context.Users
+            .Where(u => u.Availabilities.Any(a => a.GameId == gameId && a.Open)
+                     && u.UserQualifiedPositions.Any(qp => qp.Position == position))
+            .Select(u => new UserSimpleDTO
+            {
+                UserId = u.Id,
+                FullName = $"{u.FirstName} {u.LastName}"
+            })
+            .ToListAsync();
 
-            var AvailableQualifiedUsers = new List<UserSimpleDTO>();
-            foreach (var user in availableUsers) {
-                AvailableQualifiedUsers.Add(user.ConvertToUserSimpleDTO());
+            if (!availableQualifiedUsers.Any())
+            {
+                return NotFound(new Result(false, 404, "No matching crew members found", null));
             }
 
-            return Ok(new Result(true, 200, "Find Success", AvailableQualifiedUsers));
+            return Ok(new Result(true, 200, "Find Success", availableQualifiedUsers));
         }
 
     }
