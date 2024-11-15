@@ -96,10 +96,6 @@ namespace backend.Controllers.Tests
       // Arrange
       var request = new AvailabilityDTO
       {
-        UserId = null,
-        GameId = null,
-        Open = null,
-        Comment = null
       };
 
       _controller?.ModelState.AddModelError("userId", "userId is required.");
