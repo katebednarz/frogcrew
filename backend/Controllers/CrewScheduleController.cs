@@ -1,4 +1,7 @@
 using backend.DTO;
+using backend.Models;
+using Microsoft.AspNetCore.Mvc;
+
 
 namespace backend.Controllers
 {
@@ -7,14 +10,14 @@ namespace backend.Controllers
     public class CrewScheduleController : Controller
     {
         private readonly FrogcrewContext _context;
-        public AvailabilityController(FrogcrewContext context)
+        public void AvailabilityController(FrogcrewContext context)
         {
             _context = context;
         }
 
         // POST /crewSchedule
         [HttpPost("crewSchedule")]
-        public async Task<IActionResult> crewSchedule([FromBody] CrewScheduleDTO request)
+        public IActionResult crewSchedule([FromBody] CrewScheduleDTO request)
         {
             if (!ModelState.IsValid)
             {
