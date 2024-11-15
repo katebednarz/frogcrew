@@ -18,13 +18,13 @@ namespace backend.Controllers
         }
 
         [HttpGet("crewMember/{gameId}/{position}")]
-        public async Task<IActionResult> FindCrewMemberByGameAndPosition(int gameId, string position) {
-            var availableUsers = await _context.Users
+        public IActionResult FindCrewMemberByGameAndPosition(int gameId, string position) {
+            var availableUsers =  _context.Users
             .Where(u => u.Availabilities
                 .Any(a => a.GameId == gameId && a.Open)) // Check user availability for the game
             .Where(u => u.UserQualifiedPositions
                 .Any(qp => qp.Position == position)) // Check user qualifications for the position
-            .ToListAsync();
+            .ToList();
 
             var AvailableQualifiedUsers = new List<UserSimpleDTO>();
             foreach (var user in availableUsers) {
