@@ -33,9 +33,9 @@ namespace backend.Controllers
         [HttpGet("gameSchedule/{scheduleId}/games")]
         public async Task<IActionResult> FindGamesByScheduleId(int scheduleId)
         {
+            var schedule = await _context.Schedules.FindAsync(scheduleId);
 
-            // Validate schedule existence
-            if (!_context.Schedules.Any(s => s.Id == scheduleId))
+            if (schedule == null)
             {
                 return new ObjectResult(new Result(false, 404, $"Could not find schedule with Id {scheduleId}.")) { StatusCode = 404 };
             }

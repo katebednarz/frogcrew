@@ -132,10 +132,5 @@ namespace backend.Controllers.Tests
 
     }
 
-    [Test()]
-    public void SubmitAvailabilityTestNotFound()
-    {
-      Assert.Pass();
-    }
   }
 }
