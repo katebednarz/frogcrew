@@ -4,8 +4,9 @@ using backend.Models;
 
 namespace backend.DTO;
 
-public class GameCreationDTO
+public class GameDTO
 {
+    public int GameId { get; set; }
     public int ScheduleId { get; set; }
     [Required(ErrorMessage = "Game date is required.")]
     public DateOnly? GameDate { get; set; }
@@ -15,4 +16,6 @@ public class GameCreationDTO
 
     [Required(ErrorMessage = "Opponent is required.")]
     public string? Opponent { get; set; }
+
+    public Boolean IsFinalized { get; set; }
 }

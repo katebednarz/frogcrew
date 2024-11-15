@@ -53,4 +53,11 @@ public partial class User
 		}
 		return list;
 	}
+
+	public UserSimpleDTO ConvertToUserSimpleDTO() {
+		return new UserSimpleDTO {
+			UserId = Id,
+			FullName = $"{FirstName} {LastName}"
+		};
+	}
 }
