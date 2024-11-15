@@ -24,7 +24,8 @@ namespace backend.Controllers
 
         // POST /gameSchedule
         [HttpPost("gameSchedule")]
-        public async Task<IActionResult> CreateGameSchedule([FromBody] GameScheduleDTO request) { 
+        public IActionResult CreateGameSchedule([FromBody] GameScheduleDTO request)
+        {
             if (!ModelState.IsValid)
             {
                 var errors = ModelState

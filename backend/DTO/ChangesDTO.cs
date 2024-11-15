@@ -11,6 +11,5 @@ namespace backend.DTO
         [Required(ErrorMessage = "Position is required.")]
         public string Position { get; set; }
         public string? FullName { get; set; }
-        
     }
 }
