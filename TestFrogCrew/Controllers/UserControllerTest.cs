@@ -129,7 +129,7 @@ namespace backend.Controllers.Tests
             { "position", "position is required." }
         };
 
-        // Assert
+      // Assert
       Assert.Multiple(() =>
       {
         Assert.That(response?.Flag, Is.False); //Verify Flag
@@ -145,7 +145,6 @@ namespace backend.Controllers.Tests
         Assert.That(errors?.Any(e => e.Contains(error.Value)), Is.True, $"Expected error message '{error.Value}' not found.");
       }
     }
-
 
     [Test()]
     public async Task InviteCrewMemberTestSuccess()

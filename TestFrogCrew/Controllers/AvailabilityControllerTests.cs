@@ -90,9 +90,50 @@ namespace backend.Controllers.Tests
     }
 
     [Test()]
-    public void SubmitAvailabilityTestBadRequest()
+    public async Task SubmitAvailabilityTestBadRequest()
     {
       Assert.Pass();
+      // Arrange
+      var request = new AvailabilityDTO
+      {
+        UserId = null,
+        GameId = null,
+        Open = null,
+        Comment = null
+      };
+
+      _controller?.ModelState.AddModelError("userId", "userId is required.");
+      _controller?.ModelState.AddModelError("gameId", "gameId is required.");
+      _controller?.ModelState.AddModelError("open", "open is required.");
+
+      // Act
+      var result = await _controller!.SubmitAvailability(request) as ObjectResult;
+      var response = result?.Value as Result;
+
+      // Expected data
+      var expectedData = new Dictionary<string, string>
+        {
+            { "userId", "userId is required." },
+            { "gameId", "gameId is required." },
+            { "open", "open is required." }
+        };
+
+      // Assert
+      Assert.Multiple(() =>
+      {
+        Assert.That(response?.Flag, Is.False); //Verify Flag
+        Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
+        Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
+      });
+
+      // Check that the data contains the expected error messages
+      Assert.That(response?.Data, Is.Not.Null);
+      var errors = response?.Data as List<string>;
+      foreach (var error in expectedData)
+      {
+        Assert.That(errors?.Any(e => e.Contains(error.Value)), Is.True, $"Expected error message '{error.Value}' not found.");
+      }
+
     }
 
     [Test()]
