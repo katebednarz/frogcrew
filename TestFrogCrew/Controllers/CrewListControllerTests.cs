@@ -106,9 +106,9 @@ namespace backend.Controllers.Tests
       var result = await _controller!.FindCrewListById(gameId) as ObjectResult;
       var response = result?.Value as Result;
 
+      // Assert
       Assert.Multiple(() =>
       {
-        // Assert
         Assert.That(result, Is.Not.Null);
         Assert.That(response?.Flag, Is.True); //Verify Flag
         Assert.That(response?.Code, Is.EqualTo(200)); //Verify Code
@@ -117,9 +117,9 @@ namespace backend.Controllers.Tests
 
       // Verify data matches expected CrewListDTO structure
       var data = response?.Data as CrewListDTO;
+      Assert.That(data, Is.Not.Null);
       Assert.Multiple(() =>
       {
-        Assert.That(data, Is.Not.Null);
         Assert.That(data?.GameId, Is.EqualTo(gameId));
         Assert.That(data?.GameStart.ToString(), Is.EqualTo(TimeOnly.Parse("6:30").ToString()));
         Assert.That(data?.GameDate.ToString(), Is.EqualTo(DateOnly.Parse("2024-11-09").ToString()));
@@ -148,9 +148,28 @@ namespace backend.Controllers.Tests
     }
 
     [Test()]
-    public void FindCrewListByIdTestNotFound()
+    public async Task FindCrewListByIdTestNotFound()
     {
-      Assert.Pass();
+      var gameId = 1;
+      #pragma warning disable CS8600
+      _mockContext?.Setup(c => c.Games.FindAsync(gameId)).ReturnsAsync((Game)null);
+      #pragma warning restore CS8602
+
+      // Act
+      var result = await _controller!.FindCrewListById(gameId) as ObjectResult;
+      var response = result?.Value as Result;
+
+      // Assert
+      Assert.Multiple(() =>
+      {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(response?.Flag, Is.False); //Verify Flag
+        Assert.That(response?.Code, Is.EqualTo(404)); //Verify Code
+        Assert.That(response?.Message, Is.EqualTo($"Game with ID {gameId} not found.")); //Verify Message
+      });
+
+      // Verify FindAsync was called once
+      _mockContext?.Verify(c => c.Games.FindAsync(gameId), Times.Once);
     }
   }
 }

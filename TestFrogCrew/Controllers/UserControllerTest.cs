@@ -18,106 +18,108 @@ using Microsoft.AspNetCore.Http;
 
 namespace backend.Controllers.Tests
 {
-    [TestFixture()]
-    public class UserControllerTest
+  [TestFixture()]
+  public class UserControllerTest
+  {
+    private Mock<FrogcrewContext>? _mockContext;
+    private UserController? _controller;
+
+    [SetUp]
+    public void Setup()
     {
-        private Mock<FrogcrewContext>? _mockContext;
-        private UserController? _controller;
-        private Mock<IHttpContextAccessor> _mockHttpContextAccessor;
-        private Mock<ISession> _mockSession;
+      _mockContext = new Mock<FrogcrewContext>();
+      _controller = new UserController(_mockContext.Object);
+    }
 
+    [TearDown]
+    public void Teardown()
+    {
+      _controller?.Dispose();
+    }
 
-        [SetUp]
-        public void Setup()
-        {
-            _mockContext = new Mock<FrogcrewContext>();
-            _controller = new UserController(_mockContext.Object);
-        }
+    [Test()]
+    public async Task CreateCrewMemberTestSuccess()
+    {
+      // Arrange
+      var request = new UserDTO
+      {
+        Email = "test@example.com",
+        FirstName = "John",
+        LastName = "Doe",
+        PhoneNumber = "1234567890",
+        Role = "STUDENT",
+        Position = ["DIRECTOR", "PRODUCER"]
+      };
 
-        [TearDown]
-        public void Teardown()
-        {
-            _controller?.Dispose();
-        }
+      var mockUser = new User
+      {
+        Id = 1,
+        Email = request.Email,
+        FirstName = request.FirstName,
+        LastName = request.LastName,
+        PhoneNumber = request.PhoneNumber,
+        Role = request.Role,
+        Password = PasswordHasher.HashPassword("password")
+      };
 
-        [Test()]
-        public async Task CreateCrewMemberTestSuccess()
-        {
-            // Arrange
-            var request = new UserDTO
-            {
-                Email = "test@example.com",
-                FirstName = "John",
-                LastName = "Doe",
-                PhoneNumber = "1234567890",
-                Role = "STUDENT",
-                Position = new List<string> { "DIRECTOR", "PRODUCER" }
-            };
+      _mockContext?.Setup(c => c.Add(It.IsAny<User>())).Callback<User>(user => user.Id = mockUser.Id);
+      _mockContext?.Setup(c => c.SaveChanges()).Returns(1);
 
-            var mockUser = new User
-            {
-                Id = 1,
-                Email = request.Email,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                PhoneNumber = request.PhoneNumber,
-                Role = request.Role,
-                Password = PasswordHasher.HashPassword("password")
-            };
+      //Act
+      var result = await _controller!.CreateCrewMember(request) as ObjectResult;
+      var response = result?.Value as Result;
+      //Assert
+      Assert.Multiple(() =>
+      {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(response?.Flag, Is.True); //Verify Flag
+        Assert.That(response?.Code, Is.EqualTo(200)); //Verify Code
+        Assert.That(response?.Message, Is.EqualTo("Add Success")); //Verify Message
+      });
 
-            _mockContext.Setup(c => c.Add(It.IsAny<User>())).Callback<User>(user => user.Id = mockUser.Id);
-            _mockContext.Setup(c => c.SaveChanges()).Returns(1);
+      //Verify Data
+      var userDTO = response?.Data as UserDTO;
+      Assert.That(userDTO, Is.Not.Null);
+      Assert.Multiple(() =>
+      {
+        Assert.That(userDTO?.Email, Is.EqualTo(request.Email));
+        Assert.That(userDTO?.FirstName, Is.EqualTo(request.FirstName));
+        Assert.That(userDTO?.LastName, Is.EqualTo(request.LastName));
+        Assert.That(userDTO?.PhoneNumber, Is.EqualTo(request.PhoneNumber));
+        Assert.That(userDTO?.Role, Is.EqualTo(request.Role));
+      });
 
-            //Act
-            var result = await _controller.CreateCrewMember(request) as ObjectResult;
-            var response = result?.Value as Result;
+      //Verify Database Saves
+      _mockContext?.Verify(c => c.Add(It.IsAny<User>()), Times.Once);
+      _mockContext?.Verify(c => c.SaveChanges(), Times.Exactly(3)); // 1 for user, 2 for positions
+    }
 
-            //Assert
-            Assert.IsNotNull(result);
-            Assert.IsTrue(response?.Flag); //Verify Flag
-            Assert.That(response?.Code, Is.EqualTo(200)); //Verify Code
-            Assert.That(response?.Message, Is.EqualTo("Add Success")); //Verify Message
+    [Test()]
+    public async Task CreateCrewMemberTestBadRequest()
+    {
+      // Arrange
+      var request = new UserDTO  // Empty DTO to simulate missing required fields
+      {
+        FirstName = null,
+        LastName = null,
+        Email = null,
+        PhoneNumber = null,
+        Role = null,
+        Position = null
+      };
+      _controller?.ModelState.AddModelError("firstName", "first name is required.");
+      _controller?.ModelState.AddModelError("lastName", "last name is required.");
+      _controller?.ModelState.AddModelError("email", "email is required.");
+      _controller?.ModelState.AddModelError("phoneNumber", "phone number is required.");
+      _controller?.ModelState.AddModelError("role", "role is required.");
+      _controller?.ModelState.AddModelError("position", "position is required.");
 
-            //Verify Data
-            var userDTO = response?.Data as UserDTO;
-            Assert.IsNotNull(userDTO);
-            Assert.That(userDTO?.Email, Is.EqualTo(request.Email));
-            Assert.That(userDTO?.FirstName, Is.EqualTo(request.FirstName));
-            Assert.That(userDTO?.LastName, Is.EqualTo(request.LastName));
-            Assert.That(userDTO?.PhoneNumber, Is.EqualTo(request.PhoneNumber));
-            Assert.That(userDTO?.Role, Is.EqualTo(request.Role));
+      // Act
+      var result = await _controller!.CreateCrewMember(request) as ObjectResult;
+      var response = result?.Value as Result;
 
-            //Verify Database Saves
-            _mockContext.Verify(c => c.Add(It.IsAny<User>()), Times.Once);
-            _mockContext.Verify(c => c.SaveChanges(), Times.Exactly(3)); // 1 for user, 2 for positions
-        }
-
-        [Test()]
-        public async Task CreateCrewMemberTestBadRequest()
-        {
-            // Arrange
-            var request = new UserDTO  // Empty DTO to simulate missing required fields
-            {
-                FirstName = null,
-                LastName = null,
-                Email = null,
-                PhoneNumber = null,
-                Role = null,
-                Position = null
-            };
-            _controller.ModelState.AddModelError("firstName", "first name is required.");
-            _controller.ModelState.AddModelError("lastName", "last name is required.");
-            _controller.ModelState.AddModelError("email", "email is required.");
-            _controller.ModelState.AddModelError("phoneNumber", "phone number is required.");
-            _controller.ModelState.AddModelError("role", "role is required.");
-            _controller.ModelState.AddModelError("position", "position is required.");
-
-            // Act
-            var result = await _controller.CreateCrewMember(request) as ObjectResult;
-            var response = result?.Value as Result;
-
-            // Expected data
-            var expectedData = new Dictionary<string, string>
+      // Expected data
+      var expectedData = new Dictionary<string, string>
         {
             { "firstName", "first name is required." },
             { "lastName", "last name is required." },
@@ -127,79 +129,88 @@ namespace backend.Controllers.Tests
             { "position", "position is required." }
         };
 
-            // Assert
-            Assert.IsFalse(response?.Flag); //Verify Flag
-            Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
-            Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
+        // Assert
+      Assert.Multiple(() =>
+      {
+        Assert.That(response?.Flag, Is.False); //Verify Flag
+        Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
+        Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
+      });
 
-            // Check that the data contains the expected error messages
-            Assert.IsNotNull(response?.Data);
-            var errors = response.Data as List<string>;
-            foreach (var error in expectedData)
-            {
-                Assert.IsTrue(errors.Any(e => e.Contains(error.Value)), $"Expected error message '{error.Value}' not found.");
-            }
-        }
-
-
-        [Test()]
-        public async Task InviteCrewMemberTestSuccess()
-        {
-            // Arrange
-            var request = new EmailDTO
-            {
-                Emails = new List<string> { "test1@example.com", "test2@example.com" }
-            };
-
-            // Act
-            var result = await _controller.InviteCrewMember(request) as ObjectResult;
-            var response = result?.Value as Result;
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.IsTrue(response?.Flag); //Verify Flag
-            Assert.That(response?.Code, Is.EqualTo(200)); //Verify Code
-            Assert.That(response?.Message, Is.EqualTo("Invite success")); //Verify Message
-            CollectionAssert.AreEquivalent(request.Emails, response?.Data as List<string>);
-        }
-
-        [Test()]
-        public async Task InviteCrewMemberTestBadRequest()
-        {
-            // Arrange
-            var request = new EmailDTO // Empty or invalid DTO to simulate model validation failure
-            {
-                Emails = null
-            }; 
-
-            _controller.ModelState.AddModelError("Emails", "Emails are required.");
-
-            // Act
-            var result = await _controller.InviteCrewMember(request) as ObjectResult;
-            var response = result?.Value as Result;
-
-            // Expected data
-            var expectedErrors = new List<string> { "Emails are required." };
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.IsFalse(response?.Flag);
-            Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
-            Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
-            // Check that the data contains the expected error message
-            CollectionAssert.AreEquivalent(expectedErrors, response?.Data as List<string>);
-        }
-
-        [Test()]
-        public void LoginTestSuccess()
-        {
-            Assert.Pass();
-        }
-
-        [Test()]
-        public void LoginTestBadCredentials()
-        {
-            Assert.Pass();
-        }
+      // Check that the data contains the expected error messages
+      Assert.That(response?.Data, Is.Not.Null);
+      var errors = response?.Data as List<string>;
+      foreach (var error in expectedData)
+      {
+        Assert.That(errors?.Any(e => e.Contains(error.Value)), Is.True, $"Expected error message '{error.Value}' not found.");
+      }
     }
+
+
+    [Test()]
+    public async Task InviteCrewMemberTestSuccess()
+    {
+      // Arrange
+      var request = new EmailDTO
+      {
+        Emails = ["test1@example.com", "test2@example.com"]
+      };
+
+      // Act
+      var result = await _controller!.InviteCrewMember(request) as ObjectResult;
+      var response = result?.Value as Result;
+
+      // Assert
+      Assert.Multiple(() =>
+      {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(response?.Flag, Is.True); //Verify Flag
+        Assert.That(response?.Code, Is.EqualTo(200)); //Verify Code
+        Assert.That(response?.Message, Is.EqualTo("Invite success")); //Verify Message
+      });
+      CollectionAssert.AreEquivalent(request.Emails, response?.Data as List<string>);
+    }
+
+    [Test()]
+    public async Task InviteCrewMemberTestBadRequest()
+    {
+      // Arrange
+      var request = new EmailDTO // Empty or invalid DTO to simulate model validation failure
+      {
+        Emails = null
+      };
+
+      _controller?.ModelState.AddModelError("Emails", "Emails are required.");
+
+      // Act
+      var result = await _controller!.InviteCrewMember(request) as ObjectResult;
+      var response = result?.Value as Result;
+
+      // Expected data
+      var expectedErrors = new List<string> { "Emails are required." };
+
+      // Assert
+      Assert.Multiple(() =>
+      {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(response?.Flag, Is.False);
+        Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
+        Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
+      });
+      // Check that the data contains the expected error message
+      CollectionAssert.AreEquivalent(expectedErrors, response?.Data as List<string>);
+    }
+
+    [Test()]
+    public void LoginTestSuccess()
+    {
+      Assert.Pass();
+    }
+
+    [Test()]
+    public void LoginTestBadCredentials()
+    {
+      Assert.Pass();
+    }
+  }
 }
