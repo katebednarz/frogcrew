@@ -14,7 +14,7 @@ public partial class Game
 
     public DateOnly? GameDate { get; set; }
 
-    public TimeSpan? GameStart { get; set; }
+    public TimeOnly? GameStart { get; set; }
 
     public string? Venue { get; set; }
 
@@ -37,24 +37,23 @@ public partial class Game
         };
     }
     
-    public CrewListDTO ConvertToCrewListDTO() {
+    public CrewListDTO ConvertToCrewListDTO(FrogcrewContext _context) {
         return new CrewListDTO {
             GameId = Id,
             GameStart = GameStart,
             GameDate = GameDate,
             Venue = Venue,
             Opponent = Opponent,
-            CrewedMembers = CrewedUsersToDTOList()
+            CrewedMembers = CrewedUsersToDTOList(_context)
         };
     }
 
-    private List<CrewedUserDTO> CrewedUsersToDTOList() {
+    private List<CrewedUserDTO> CrewedUsersToDTOList(FrogcrewContext _context) {
         var CrewedUserDTOList = new List<CrewedUserDTO>();
-        using var _context = new FrogcrewContext(); 
         var CrewedUserList = _context.CrewedUsers.Where(c => c.GameId == Id).ToList(); 
         foreach (var CrewedUser in CrewedUserList)
         {
-            CrewedUserDTOList.Add(CrewedUser.ConvertToCrewedUserDTO());
+            CrewedUserDTOList.Add(CrewedUser.ConvertToCrewedUserDTO(_context));
         }
 
         return CrewedUserDTOList;

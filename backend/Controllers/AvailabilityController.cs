@@ -17,7 +17,7 @@ namespace backend.Controllers
 
 		// POST /availability
 		[HttpPost("availability")]
-		public ActionResult<Availability> availability([FromBody] AvailabilityDTO request)
+		public async Task<IActionResult> SubmitAvailability([FromBody] AvailabilityDTO request)
 		{
 			if (!ModelState.IsValid)
 			{
@@ -41,7 +41,7 @@ namespace backend.Controllers
 			_context.Add(newAvailability);
 			_context.SaveChanges();
 
-			var response = new Result(true, 200, "Availability updated", newAvailability.ConvertToAvailabilityDTO());
+			var response = new Result(true, 200, "Add Success", newAvailability.ConvertToAvailabilityDTO());
 			return Ok(response);
 		}
 	}
