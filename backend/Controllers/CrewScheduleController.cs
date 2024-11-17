@@ -113,6 +113,72 @@ namespace backend.Controllers
             return Ok(response);
         }
 
+
+        // PUT /crewSchedule/{gameId}
+        [HttpPut("crewSchedule/{gameId}")]
+        public async Task<IActionResult> UpdateCrewSchedule([FromBody] CrewScheduleDTO request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                        .SelectMany(kvp => kvp.Value!.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+                var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
+
+                return new ObjectResult(errorResponse) { StatusCode = 400 };
+            }
+
+            // first check if Game exists
+            Game? Game = await _context.Games.FirstOrDefaultAsync(g => g.Id == request.gameId);
+            if (Game == null)
+            {
+                return new ObjectResult(new Result(false, 404, $"Could not find game with ID {request.gameId}.")) { StatusCode = 404 };
+            }
+
+            // set up DTO for later
+            CrewScheduleDTO crewScheduleDTO = new()
+            {
+                gameId = Game.Id,
+                changes = []
+            };
+
+            foreach (ChangesDTO change in request.changes)
+            {
+                CrewedUser? crewedUser = await _context.CrewedUsers.FirstOrDefaultAsync(cu => cu.UserId == change.Id && cu.GameId == request.gameId);
+                if (crewedUser == null)
+                {
+                    return new ObjectResult(new Result(false, 404, $"Crewed user with User ID {change.Id} and Game Id {request.gameId} not found.")) { StatusCode = 404 };
+                }
+
+                if (change.Action.ToLower() == "assign")
+                {
+                    crewedUser.CrewedPosition = change.Position;
+                    // NEED TO HANDLE CHANGE IN ARRIVAL TIME!
+                }
+                else if (change.Action.ToLower() == "unassign")
+                {
+                    _context.CrewedUsers.Remove(crewedUser);
+                }
+
+                ChangesDTO changesDTO = new()
+                {
+                    Action = change.Action,
+                    Id = change.Id,
+                    Position = change.Position
+                };
+                crewScheduleDTO.changes.Add(changesDTO);
+            }
+
+            // save and push changes to DB
+            await _context.SaveChangesAsync();
+
+            var response = new Result(true, 200, "Crew schedule updated", crewScheduleDTO);
+            return Ok(response);
+        }
+
+
+        // GET /crewSchedule/{gameId}
         [HttpGet("crewSchedule/{gameId}")]
         public async Task<IActionResult> FindCrewScheduleByGameId(int gameId)
         {
