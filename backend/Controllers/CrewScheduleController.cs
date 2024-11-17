@@ -91,7 +91,7 @@ namespace backend.Controllers
                     UserId = changes.Id,
                     GameId = request.gameId,
                     CrewedPosition = changes.Position,
-                    ArrivalTime = arrivalTime
+                    ArrivalTime = new TimeOnly(arrivalTime.Hour, arrivalTime.Minute, arrivalTime.Second, arrivalTime.Millisecond)
                 };
                 await _context.AddAsync(newCrewedUser);
 
