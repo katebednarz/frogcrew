@@ -115,6 +115,28 @@ namespace backend.Controllers
 
 
         // PUT /crewSchedule/{gameId}
+
+        /*
+            MUST CHANGE THE FOLLOWING IN ORDER TO WORK... will fix later.
+                {
+                    "gameId": "1",
+                    "changes": [
+                        {
+                        "action": "assign",
+                        "userId": "1",              <--- this needs to be changes to `Id` in the request body
+                        "position": "PRODUCER",
+                        "fullName": "John Smith"
+                        },
+                        {
+                        "action": "unassign",
+                        "userId": "2",              <--- this needs to be changes to `Id` in the request body
+                        "position": "DIRECTOR",
+                        "fullName": "Jane Doe"
+                        }
+                    ]
+                }
+        */
+
         [HttpPut("crewSchedule/{gameId}")]
         public async Task<IActionResult> UpdateCrewSchedule([FromBody] CrewScheduleDTO request)
         {
