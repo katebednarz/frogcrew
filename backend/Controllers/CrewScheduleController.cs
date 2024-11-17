@@ -54,7 +54,12 @@ namespace backend.Controllers
             DateTime arrivalTime = new(2024, 1, 1, 0, 0, 0);
             if (Game.GameDate.HasValue && Game.GameStart.HasValue)
             {
-                arrivalTime = Game.GameDate.Value.ToDateTime(TimeOnly.FromTimeSpan(Game.GameStart.Value));
+                TimeOnly gameStartTime = Game.GameStart.Value;
+                DateTime gameDate = Game.GameDate.Value.ToDateTime(TimeOnly.MinValue);
+                arrivalTime = gameDate.AddHours(gameStartTime.Hour)
+                                       .AddMinutes(gameStartTime.Minute)
+                                       .AddSeconds(gameStartTime.Second)
+                                       .AddMilliseconds(gameStartTime.Millisecond);
             }
 
             // set up DTO for later
@@ -91,7 +96,7 @@ namespace backend.Controllers
                     UserId = changes.Id,
                     GameId = request.gameId,
                     CrewedPosition = changes.Position,
-                    ArrivalTime = arrivalTime
+                    ArrivalTime = new TimeOnly(arrivalTime.Hour, arrivalTime.Second, arrivalTime.Millisecond)
                 };
                 await _context.AddAsync(newCrewedUser);
 

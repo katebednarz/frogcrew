@@ -12,15 +12,14 @@ public partial class CrewedUser
 
     public string? CrewedPosition { get; set; }
 
-    public DateTime? ArrivalTime { get; set; }
+    public TimeOnly? ArrivalTime { get; set; }
 
     public virtual Game Game { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;
 
-    public CrewedUserDTO ConvertToCrewedUserDTO()
+    public CrewedUserDTO ConvertToCrewedUserDTO(FrogcrewContext _context)
     {
-        using var _context = new FrogcrewContext();
         var user = _context.Users.FirstOrDefault(u => u.Id == UserId);
         return new CrewedUserDTO
         {
