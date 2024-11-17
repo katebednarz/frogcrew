@@ -113,10 +113,42 @@ namespace backend.Controllers
             return Ok(response);
         }
 
-        // [HttpGet("crewSchedule/{gameId}")]
-        // public async Task<IActionResult> FindCrewScheduleByGameId(int gameId)
-        // {
-        //     var crewSchedule = await _context.
-        // }
+        [HttpGet("crewSchedule/{gameId}")]
+        public async Task<IActionResult> FindCrewScheduleByGameId(int gameId)
+        {
+            CrewScheduleDTO crewScheduleDTO = new()
+            {
+                gameId = gameId,
+                changes = []
+            };
+
+
+            var crewedUsers = await _context.CrewedUsers.Where(c => c.GameId == gameId).ToListAsync();
+            if (crewedUsers == null)
+            {
+                return new ObjectResult(new Result(false, 404, $"Crewed users associated with Game ID {gameId} not found.")) { StatusCode = 404 };
+            }
+
+            foreach (CrewedUser crewedUser in crewedUsers)
+            {
+                var user = await _context.Users.FindAsync(crewedUser.UserId);
+                if (user == null)
+                {
+                    return new ObjectResult(new Result(false, 404, $"User with ID {crewedUser.UserId} not found.")) { StatusCode = 404 };
+                }
+
+                ChangesDTO changesDTO = new()
+                {
+                    Id = user.Id,
+                    Position = crewedUser.CrewedPosition,
+                    FullName = $"{user.FirstName} {user?.LastName}",
+                };
+
+                crewScheduleDTO.changes.Add(changesDTO);
+            }
+
+            var response = new Result(true, 200, "Crew schedule found", crewScheduleDTO);
+            return Ok(response);
+        }
     }
 }
