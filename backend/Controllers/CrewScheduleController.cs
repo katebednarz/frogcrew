@@ -11,7 +11,7 @@ namespace backend.Controllers
     public class CrewScheduleController : Controller
     {
         private readonly FrogcrewContext _context;
-        public AvailabilityController(FrogcrewContext context)
+        public CrewScheduleController(FrogcrewContext context)
         {
             _context = context;
         }
@@ -20,6 +20,18 @@ namespace backend.Controllers
         [HttpPost("crewschedule/")]
         public async Task<IActionResult> CrewSchedule([FromBody] CrewScheduleDTO request)
         {
+            //testing for model binding
+            if (request == null)
+            {
+                return BadRequest("Request body is null");
+            }
+
+            if (request.gameId == 0)
+            {
+                return BadRequest("gameId is 0");
+            }
+
+
             if (!ModelState.IsValid)
             {
                 var errors = ModelState
@@ -32,10 +44,10 @@ namespace backend.Controllers
             }
 
             // first check if Game exists
-            Game? Game = await _context.Games.FirstOrDefaultAsync(g => g.Id == request.Id);
+            Game? Game = await _context.Games.FirstOrDefaultAsync(g => g.Id == request.gameId);
             if (Game == null)
             {
-                return NotFound($"Game with ID {request.Id} not found.");
+                return new ObjectResult(new Result(false, 404, $"Could not find game with ID {request.gameId}.")) { StatusCode = 404 };
             }
 
             // setting base datetime to Jan 1, 2024
@@ -48,25 +60,25 @@ namespace backend.Controllers
             // set up DTO for later
             CrewScheduleDTO crewScheduleDTO = new()
             {
-                Id = Game.Id
+                gameId = Game.Id
             };
 
-            foreach (ChangesDTO changes in request.Changes)
+            foreach (ChangesDTO changes in request.changes)
             {
                 // each position has a different start time, so we will calculate those here.
                 switch (changes.Position)
                 {
                     case "DIRECTOR":
-                        arrivalTime.AddHours(-4);
+                        arrivalTime = arrivalTime.AddHours(-4);
                         break;
                     case "PRODUCER":
-                        arrivalTime.AddHours(-2);
+                        arrivalTime = arrivalTime.AddHours(-2);
                         break;
                     case "SOUND":
-                        arrivalTime.AddHours(-1);
+                        arrivalTime = arrivalTime.AddHours(-1);
                         break;
                     case "CAMERA":
-                        arrivalTime.AddHours(-1);
+                        arrivalTime = arrivalTime.AddHours(-1);
                         break;
                     default:
                         break;
@@ -76,7 +88,7 @@ namespace backend.Controllers
                 var newCrewedUser = new CrewedUser
                 {
                     UserId = changes.Id,
-                    GameId = request.Id,
+                    GameId = request.gameId,
                     CrewedPosition = changes.Position,
                     ArrivalTime = arrivalTime
                 };
@@ -89,9 +101,9 @@ namespace backend.Controllers
                     Action = changes.Action,
                     Id = changes.Id,
                     Position = changes.Position,
-                    FullName = $"{user.FirstName} {user.LastName}",
+                    FullName = $"{user?.FirstName} {user?.LastName}",
                 };
-                crewScheduleDTO.Changes.Add(changesDTO);
+                crewScheduleDTO.changes.Add(changesDTO);
             }
             // save and push changes to DB
             await _context.SaveChangesAsync();
