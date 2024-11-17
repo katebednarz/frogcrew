@@ -17,7 +17,7 @@ namespace backend.Controllers
         }
 
         // POST /crewSchedule
-        [HttpPost("crewschedule/")]
+        [HttpPost("crewSchedule/")]
         public async Task<IActionResult> CrewSchedule([FromBody] CrewScheduleDTO request)
         {
             //testing for model binding
@@ -60,7 +60,8 @@ namespace backend.Controllers
             // set up DTO for later
             CrewScheduleDTO crewScheduleDTO = new()
             {
-                gameId = Game.Id
+                gameId = Game.Id,
+                changes = []
             };
 
             foreach (ChangesDTO changes in request.changes)
@@ -111,5 +112,11 @@ namespace backend.Controllers
             var response = new Result(true, 200, "Crew schedule added", crewScheduleDTO);
             return Ok(response);
         }
+
+        // [HttpGet("crewSchedule/{gameId}")]
+        // public async Task<IActionResult> FindCrewScheduleByGameId(int gameId)
+        // {
+        //     var crewSchedule = await _context.
+        // }
     }
 }
