@@ -125,7 +125,7 @@ namespace backend.Controllers
             }
         }
 
-        [HttpPost("login")]
+        [HttpPost("auth/login")]
         public IActionResult Login()
         {
             // Check if Authorization header is present
