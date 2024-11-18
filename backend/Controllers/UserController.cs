@@ -159,7 +159,14 @@ namespace backend.Controllers
 
             var token = GenerateJwtToken(user);
 
-            return Ok(new Result(true, 200, "Login successful", token));
+            var AuthDTO = new AuthDTO
+            {
+                UserId = user.Id,
+                Role = user.Role,
+                Token = token
+            };
+
+            return Ok(new Result(true, 200, "Login successful", AuthDTO));
         }
 
         private string GenerateJwtToken(User user)
