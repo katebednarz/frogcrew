@@ -47,7 +47,7 @@ namespace backend.Controllers
             _context.Add(newSchedule);
             _context.SaveChanges();
 
-            var response = new Result(true, 200, "Add Success", newSchedule);
+            var response = new Result(true, 200, "Add Success", newSchedule.ConvertToGameScheduleDTO());
             return Ok(response);
         }
 

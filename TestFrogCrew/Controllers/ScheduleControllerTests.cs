@@ -39,13 +39,82 @@ namespace backend.Controllers.Tests
         [Test()]
         public void CreateGameScheduleTestSuccess()
         {
-            Assert.Pass();
+            // Arrange
+            var request = new GameScheduleDTO
+            {
+                Sport = "Women's Basketball",
+                Season = "2024"
+            };
+
+            var mockSchedule = new Schedule
+            {
+                Id = 1,
+                Sport = request.Sport,
+                Season = request.Season
+            };
+
+            _mockContext?.Setup(c => c.Add(It.IsAny<Schedule>())).Callback<Schedule>(schedule => schedule.Id = mockSchedule.Id);
+            _mockContext?.Setup(c => c.SaveChanges()).Returns(1);
+
+            // Act
+            var result = _controller!.CreateGameSchedule(request) as ObjectResult;
+            var response = result?.Value as Result;
+
+            // Assert
+            Assert.Multiple(() => {
+                Assert.IsNotNull(result);
+                Assert.IsTrue(response?.Flag); // Verify Flag
+                Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
+                Assert.That(response?.Message, Is.EqualTo("Add Success")); // Verify Message
+            });
+
+            // Verify Data
+            var gameScheduleDTO = response?.Data as GameScheduleDTO;
+            Assert.Multiple(() => {
+                Assert.IsNotNull(gameScheduleDTO);
+                Assert.That(gameScheduleDTO?.Sport, Is.EqualTo(request.Sport));
+                Assert.That(gameScheduleDTO?.Season, Is.EqualTo(request.Season));
+            });
+            // Verify Database Saves
+            _mockContext?.Verify(c => c.Add(It.IsAny<Schedule>()), Times.Once);
+            _mockContext?.Verify(c => c.SaveChanges(), Times.Exactly(1)); // 1 for schedule
         }
 
         [Test()]
         public void CreateGameScheduleTestBadRequest()
         {
-            Assert.Pass();
+            // Arrange
+            var request = new GameScheduleDTO  // Empty DTO to simulate missing required fields
+            {
+                Sport = null,
+                Season = null
+            };
+            _controller!.ModelState.AddModelError("Sport", "Sport is required.");
+            _controller.ModelState.AddModelError("Season", "Season is required.");
+
+            // Act
+            var result = _controller.CreateGameSchedule(request) as ObjectResult;
+            var response = result?.Value as Result;
+
+            // Expected data
+            var expectedData = new Dictionary<string, string>
+            {
+                { "Sport", "Sport is required." },
+                { "Season", "Season is required." }
+            };
+
+            // Assert
+            Assert.IsFalse(response?.Flag); // Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(400)); // Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); // Verify Message
+
+            // Check that the data contains the expected error messages
+            Assert.IsNotNull(response?.Data);
+            var errors = response!.Data as List<string>;
+            foreach (var error in expectedData)
+            {
+                Assert.IsTrue(errors!.Any(e => e.Contains(error.Value)), $"Expected error message '{error.Value}' not found.");
+            }
         }
 
         [Test()]
