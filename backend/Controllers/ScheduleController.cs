@@ -1,7 +1,7 @@
-using System.Text;
 using backend.DTO;
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers
 {
@@ -25,7 +25,8 @@ namespace backend.Controllers
 
         // POST /gameSchedule
         [HttpPost("gameSchedule")]
-        public async Task<IActionResult> CreateGameSchedule([FromBody] GameScheduleDTO request) { 
+        public IActionResult CreateGameSchedule([FromBody] GameScheduleDTO request)
+        {
             if (!ModelState.IsValid)
             {
                 var errors = ModelState
@@ -93,6 +94,23 @@ namespace backend.Controllers
             };
             
             return Ok(new Result(true, 200, "Find Success", gameScheduleDTO));
+        }
+
+        [HttpGet("gameSchedule/season/{season}")]
+        public async Task<IActionResult> FindGameSchedulesBySeason(string season) {
+            var schedules = await _context.Schedules.Where(s => s.Season == season).ToListAsync();
+
+            if (schedules == null || schedules.Count == 0) {
+                return new ObjectResult(new Result(false, 404, $"Could not find any schedules for season {season}.")) { StatusCode = 404 };
+            }
+            
+            var gameScheduleDTOs = schedules.Select(s => new GameScheduleDTO {
+                Id = s.Id,
+                Sport = s.Sport,
+                Season = s.Season
+            }).ToList();
+
+            return Ok(new Result(true, 200, "Find Success", gameScheduleDTOs));
         }
     }
 }

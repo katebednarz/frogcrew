@@ -70,8 +70,9 @@ public partial class FrogcrewContext : DbContext
             entity.Property(e => e.UserId).HasColumnName("userId");
             entity.Property(e => e.GameId).HasColumnName("gameId");
             entity.Property(e => e.ArrivalTime)
-                .HasColumnType("datetime")
-                .HasColumnName("arrivalTime");
+                .HasColumnType("time")
+                .HasColumnName("arrivalTime")
+                .HasConversion(new TimeOnlyConverter());
             entity.Property(e => e.CrewedPosition)
                 .HasMaxLength(255)
                 .HasColumnName("crewedPosition");
@@ -102,7 +103,8 @@ public partial class FrogcrewContext : DbContext
                 .HasConversion(new DateOnlyConverter());
             entity.Property(e => e.GameStart)
                 .HasColumnType("time")
-                .HasColumnName("gameStart");
+                .HasColumnName("gameStart")
+                .HasConversion(new TimeOnlyConverter());
             entity.Property(e => e.IsFinalized).HasColumnName("isFinalized");
             entity.Property(e => e.Opponent)
                 .HasMaxLength(255)

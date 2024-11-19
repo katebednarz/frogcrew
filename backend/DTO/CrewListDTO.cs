@@ -6,7 +6,7 @@ namespace backend.DTO;
 public class CrewListDTO
 {
     public int GameId { get; set; }
-    public TimeSpan? GameStart { get; set; }
+    public TimeOnly? GameStart { get; set; }
     public DateOnly? GameDate { get; set; }
     public string? Venue { get; set; }
     public string? Opponent { get; set; }
