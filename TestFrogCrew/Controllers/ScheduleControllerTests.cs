@@ -37,7 +37,7 @@ namespace backend.Controllers.Tests
         }
 
         [Test()]
-        public async Task CreateGameScheduleTestSuccess()
+        public void CreateGameScheduleTestSuccess()
         {
             // Arrange
             var request = new GameScheduleDTO
@@ -57,7 +57,7 @@ namespace backend.Controllers.Tests
             _mockContext?.Setup(c => c.SaveChanges()).Returns(1);
 
             // Act
-            var result = await _controller!.CreateGameSchedule(request) as ObjectResult;
+            var result = _controller!.CreateGameSchedule(request) as ObjectResult;
             var response = result?.Value as Result;
 
             // Assert
@@ -81,7 +81,7 @@ namespace backend.Controllers.Tests
         }
 
         [Test()]
-        public async Task CreateGameScheduleTestBadRequest()
+        public void CreateGameScheduleTestBadRequest()
         {
             // Arrange
             var request = new GameScheduleDTO  // Empty DTO to simulate missing required fields
@@ -93,7 +93,7 @@ namespace backend.Controllers.Tests
             _controller.ModelState.AddModelError("Season", "Season is required.");
 
             // Act
-            var result = await _controller!.CreateGameSchedule(request) as ObjectResult;
+            var result = _controller.CreateGameSchedule(request) as ObjectResult;
             var response = result?.Value as Result;
 
             // Expected data
@@ -110,10 +110,10 @@ namespace backend.Controllers.Tests
 
             // Check that the data contains the expected error messages
             Assert.IsNotNull(response?.Data);
-            var errors = response.Data as List<string>;
+            var errors = response!.Data as List<string>;
             foreach (var error in expectedData)
             {
-                Assert.IsTrue(errors.Any(e => e.Contains(error.Value)), $"Expected error message '{error.Value}' not found.");
+                Assert.IsTrue(errors!.Any(e => e.Contains(error.Value)), $"Expected error message '{error.Value}' not found.");
             }
         }
 
