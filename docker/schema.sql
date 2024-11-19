@@ -91,29 +91,21 @@ INSERT INTO User (email,password,phoneNumber,firstName,lastName,role,payRate) VA
 -- UserQualifiedPositions Values
 INSERT INTO UserQualifiedPositions VALUES
     (1,'PRODUCER'),
-    (1,'ASSISTANT_PRODUCER'),
+    (1,'ASST PROD'),
     (1,'DIRECTOR'),
-    (1,'ASSISTANT_DIRECTOR'),
-    (2,'TECHNICAL_DIRECTOR'),
-    (2,'GRAPHICS_OPERATOR'),
-    (3,'BUG_OPERATOR'),
-    (3,'EVS_REPLAY_LEAD'),
-    (3,'EVS_REPLAY_R/O'),
-    (4,'VIDEO_OPERATOR'),
+    (1,'ASST DIRECTOR'),
+    (2,'TECHNICAL DIR'),
+    (2,'GRAPHICS'),
+    (3,'BUG OP'),
+    (3,'REPLAY EVS'),
+    (4,'VIDEO'),
     (4,'EIC'),
-    (4,'ENG_2'),
-    (5,'AUDIO_A1'),
-    (5,'AUDIO_ASSISTANT_A2'),
-    (5,'CAMERA_FIXED'),
-    (6,'CAMERA_FIXED'),
-    (7,'CAMERA_FIXED'),
-    (5,'CAMERA_HANDHELD'),
-    (6,'CAMERA_HANDHELD'),
-    (7,'CAMERA_HANDHELD'),
-    (6,'CAMERA_STEADICAM'),
-    (7,'CAMERA_STEADICAM'),
-    (7,'UTILITY'),
-    (7,'TIME_OUT_COORDINATOR');
+    (4,'2ND ENG'),
+    (5,'AUDIO'),
+    (5,'CAMERA'),
+    (6,'CAMERA'),
+    (7,'CAMERA'),
+    (7,'UTILITY');
 
 -- Schedule Values
 INSERT INTO Schedule (sport,season) VALUES
@@ -136,12 +128,12 @@ INSERT INTO Game (scheduleId, opponent, gameDate, gameStart, venue, isFinalized)
 -- CrewedUser Values
 INSERT INTO CrewedUser VALUES
     (1, 1, 'PRODUCER', null),
-    (2, 1, 'TECHNICAL_DIRECTOR', null),
-    (3, 1, 'EVS_REPLAY_LEAD', null),
-    (4, 1, 'VIDEO_OPERATOR', null),
-    (5, 1, 'CAMERA_FIXED', null),
-    (6, 1, 'CAMERA_HANDHELD', null),
-    (7, 1, 'CAMERA_STEADICAM', null);
+    (2, 1, 'TECHNICAL DIR', null),
+    (3, 1, 'REPLAY EVS 1', null),
+    (4, 1, 'VIDEO', null),
+    (5, 1, 'CAMERA 1', null),
+    (6, 1, 'CAMERA 2', null),
+    (7, 1, 'CAMERA 3', null);
 
 -- Availability Values
 INSERT INTO Availability VALUES
