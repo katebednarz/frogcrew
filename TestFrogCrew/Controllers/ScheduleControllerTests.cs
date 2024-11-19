@@ -80,9 +80,40 @@ namespace backend.Controllers.Tests
         }
 
         [Test()]
-        public void CreateGameScheduleTestBadRequest()
+        public async Task CreateGameScheduleTestBadRequest()
         {
-            Assert.Pass();
+            // Arrange
+            var request = new GameScheduleDTO  // Empty DTO to simulate missing required fields
+            {
+                Sport = null,
+                Season = null
+            };
+            _controller!.ModelState.AddModelError("Sport", "Sport is required.");
+            _controller.ModelState.AddModelError("Season", "Season is required.");
+
+            // Act
+            var result = await _controller!.CreateGameSchedule(request) as ObjectResult;
+            var response = result?.Value as Result;
+
+            // Expected data
+            var expectedData = new Dictionary<string, string>
+            {
+                { "Sport", "Sport is required." },
+                { "Season", "Season is required." }
+            };
+
+            // Assert
+            Assert.IsFalse(response?.Flag); // Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(400)); // Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); // Verify Message
+
+            // Check that the data contains the expected error messages
+            Assert.IsNotNull(response?.Data);
+            var errors = response.Data as List<string>;
+            foreach (var error in expectedData)
+            {
+                Assert.IsTrue(errors.Any(e => e.Contains(error.Value)), $"Expected error message '{error.Value}' not found.");
+            }
         }
 
         [Test()]
