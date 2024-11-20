@@ -86,7 +86,8 @@ INSERT INTO User (email,password,phoneNumber,firstName,lastName,role,payRate) VA
     ('michala.rogers@tcu.edu', 'superfrog', '1231231234', 'Michala', 'Rogers', 'STUDENT', null),
     ('james.clark@tcu.edu', 'h0ck3y4lif3', '3213214321', 'James', 'Clarke', 'FREELANCER', '265'),
     ('james.edmonson@tcu.edu', 'password', '9876543210', 'James', 'Edmonson', 'FREELANCER', '270'),
-    ('manuel.burciaga@tcu.edu', 'wordpass', '9876543210', 'Manny', 'Burciaga', 'FREELANCER', '260');
+    ('manuel.burciaga@tcu.edu', 'wordpass', '9876543210', 'Manny', 'Burciaga', 'FREELANCER', '260'),
+    ('m.martin@tcu.edu', 'password', '9876543210', 'Mike', 'Martin', 'ADMIN',  null);
 
 -- UserQualifiedPositions Values
 INSERT INTO UserQualifiedPositions VALUES
