@@ -31,7 +31,7 @@ namespace backend.Controllers
 
             if (!availableQualifiedUsers.Any())
             {
-                return NotFound(new Result(false, 404, "No matching crew members found", null));
+                return NotFound(new Result(false, 404, $"No matching crew members available for {position}", null));
             }
 
             return Ok(new Result(true, 200, "Find Success", availableQualifiedUsers));

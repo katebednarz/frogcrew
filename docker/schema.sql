@@ -91,21 +91,24 @@ INSERT INTO User (email,password,phoneNumber,firstName,lastName,role,payRate) VA
 -- UserQualifiedPositions Values
 INSERT INTO UserQualifiedPositions VALUES
     (1,'PRODUCER'),
-    (1,'ASST PROD'),
-    (1,'DIRECTOR'),
-    (1,'ASST DIRECTOR'),
-    (2,'TECHNICAL DIR'),
-    (2,'GRAPHICS'),
-    (3,'BUG OP'),
-    (3,'REPLAY EVS'),
-    (4,'VIDEO'),
+    (2,'ASSISTANT PRODUCER'),
+    (3,'DIRECTOR'),
+    (4,'ASSISTANT DIRECTOR'),
+    (5,'TECHNICAL DIRECTOR'),
+    (6,'GRAPHICS OPERATOR'),
+    (7,'BUG OPERATOR'),
+    (1,'EVS REPLAY-LEAD'),
+    (2,'EVS REPLAY-R/O'),
+    (3,'VIDEO OPERATOR'),
     (4,'EIC'),
-    (4,'2ND ENG'),
-    (5,'AUDIO'),
-    (5,'CAMERA'),
-    (6,'CAMERA'),
-    (7,'CAMERA'),
-    (7,'UTILITY');
+    (5,'ENG 2'),
+    (6,'AUDIO A1'),
+    (7,'AUDIO ASSISTANT A2'),
+    (1,'CAMERA-FIXED'),
+    (2,'CAMERA-HANDHELD'),
+    (3,'CAMERA-STEADICAM'),
+    (4,'UTILITY'),
+    (5,'TIME OUT COORDINATOR');
 
 -- Schedule Values
 INSERT INTO Schedule (sport,season) VALUES
@@ -240,8 +243,12 @@ INSERT INTO CrewedUser VALUES
 -- Availability Values
 INSERT INTO Availability VALUES
     (1, 1, true, null),
-    (1, 2, true, null),
-    (1, 3, false, null);
+    (2, 1, true, null),
+    (3, 1, true, null),
+    (4, 1, true, null),
+    (5, 1, true, null),
+    (6, 1, true, null),
+    (7, 1, true, null);
 
 -- Notification Values
 INSERT INTO Notification (userId, title, content, date) VALUES
