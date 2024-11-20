@@ -113,7 +113,7 @@ INSERT INTO Schedule (sport,season) VALUES
     ('Women''s Basketball', '2024-2025'),
     ('Men''s Basketball', '2024-2025'),
     ('Baseball', '2024-2025'),
-    ('Beach Volleyball', '2024-2025'),
+    ('Volleyball', '2024-2025'),
     ('Soccer', '2024-2025');
 
 
@@ -197,12 +197,24 @@ INSERT INTO Game (scheduleId, opponent, gameDate, gameStart, venue, isFinalized)
     (4, 'Cincinnati', '2025-05-09', '18:00:00', 'Lupton Stadium', False),
     (4, 'Cincinnati', '2025-05-10', '14:00:00', 'Lupton Stadium', False),
     (4, 'Cincinnati', '2025-05-11', '13:00:00', 'Lupton Stadium', False);
--- Beach Volleyball
+-- Volleyball
 INSERT INTO Game (scheduleId, opponent, gameDate, gameStart, venue, isFinalized) VALUES
-    (5, 'TCU Fall Challenge', '2024-10-03', '08:00:00', 'TCU Beach Volleyball Courts', False),
-    (5, 'TCU Fall Challenge', '2024-10-04', '08:00:00', 'TCU Beach Volleyball Courts', False),
-    (5, 'Purple vs. White Scrimmage', '2025-03-01', null, 'TCU Beach Volleyball Courts', False),
-    (5, 'Big 12 Conference Championships', '2025-04-23', null, 'TCU Beach Volleyball Courts', False);
+    (5, 'Texas A&M Commerce', '2024-09-12', '13:00:00', 'Fort Worth, Texas', False),
+    (5, 'Prairie View A&M', '2024-09-12', '19:00:00', 'Fort Worth, Texas', False),
+    (5, 'UCLA', '2024-09-13', '18:30:00', 'Fort Worth, Texas', False),
+    (5, 'UT Arlington', '2024-09-17', '18:30:00', 'Fort Worth, Texas', False),
+    (5, 'Denver', '2024-09-20', '18:30:00', 'Fort Worth, Texas', False),
+    (5, 'Rice', '2024-09-21', '17:00:00', 'Fort Worth, Texas', False),
+    (5, 'Arizona State', '2024-09-25', '20:00:00', 'Fort Worth, Texas', False),
+    (5, 'Arizona', '2024-09-27', '18:30:00', 'Fort Worth, Texas', False),
+    (5, 'Baylor', '2024-10-06', '14:00:00', 'Fort Worth, Texas', False),
+    (5, 'Cincinnati', '2024-10-19', '13:00:00', 'Fort Worth, Texas', False),
+    (5, 'Colorado', '2024-10-30', '18:30:00', 'Fort Worth, Texas', False),
+    (5, 'Iowa State', '2024-11-01', '18:30:00', 'Fort Worth, Texas', False),
+    (5, 'UCF', '2024-11-07', '18:30:00', 'Fort Worth, Texas', False),
+    (5, 'Houston', '2024-11-20', '18:30:00', 'Fort Worth, Texas', False),
+    (5, 'Texas Tech', '2024-11-22', '18:30:00', 'Fort Worth, Texas', False);
+
 -- Soccer
 INSERT INTO Game (scheduleId, opponent, gameDate, gameStart, venue, isFinalized) VALUES
     (6, 'Rice (Exhibition)', '2024-08-06', '19:00:00', 'Fort Worth, Texas', False),
