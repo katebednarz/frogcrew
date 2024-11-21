@@ -102,7 +102,7 @@ namespace backend.Controllers
             var toAddress = new MailAddress(email);
             const string fromPassword = "icbu ddnf yuhi lssz"; // gmail app key
             const string subject = "Invitation to Join FrogCrew";
-            const string body = "You have been invited to join our crew! Please click the link below to accept the invitation:\n\n[Invite Link Here]";
+            const string body = "You have been invited to join our crew! Please click the link below to accept the invitation:\n\nhttp://localhost:5173/register";
 
             // configure SMTP client
             var smtp = new SmtpClient
