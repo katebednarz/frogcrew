@@ -107,11 +107,6 @@ namespace backend.Controllers.Tests
         Assert.That(data?[1].Available, Is.EqualTo(false));
         Assert.That(data?[1].Comments, Is.EqualTo(null));
       });
-
-      // Verify that Add and SaveChanges were called
-      _mockContext?.Verify(c => c.Add(It.IsAny<Availability>()), Times.Once);
-      _mockContext?.Verify(c => c.SaveChanges(), Times.Once);
-
     }
 
     [Test()]

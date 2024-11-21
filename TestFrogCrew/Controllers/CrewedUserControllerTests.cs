@@ -154,7 +154,7 @@ namespace backend.Controllers.Tests
                 Assert.That(result, Is.Not.Null);
                 Assert.That(response?.Flag, Is.False); //Verify Flag
                 Assert.That(response?.Code, Is.EqualTo(404)); //Verify Code
-                Assert.That(response?.Message, Is.EqualTo("No matching crew members found")); //Verify Message
+                Assert.That(response?.Message, Is.EqualTo($"No matching crew members available for {position}")); //Verify Message
             });
 
         }
