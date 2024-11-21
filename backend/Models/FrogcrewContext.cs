@@ -45,10 +45,10 @@ public partial class FrogcrewContext : DbContext
 
             entity.Property(e => e.UserId).HasColumnName("userId");
             entity.Property(e => e.GameId).HasColumnName("gameId");
-            entity.Property(e => e.Comment)
+            entity.Property(e => e.Comments)
                 .HasMaxLength(255)
                 .HasColumnName("comment");
-            entity.Property(e => e.Open).HasColumnName("open");
+            entity.Property(e => e.Available).HasColumnName("open");
 
             entity.HasOne(d => d.Game).WithMany(p => p.Availabilities)
                 .HasForeignKey(d => d.GameId)

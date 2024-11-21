@@ -20,7 +20,7 @@ namespace backend.Controllers
         [HttpGet("crewMember/{gameId}/{position}")]
         public async Task<IActionResult> FindCrewMemberByGameAndPosition(int gameId, string position) {
             var availableQualifiedUsers = await _context.Users
-            .Where(u => u.Availabilities.Any(a => a.GameId == gameId && a.Open)
+            .Where(u => u.Availabilities.Any(a => a.GameId == gameId && a.Available)
                      && u.UserQualifiedPositions.Any(qp => qp.Position == position))
             .Select(u => new UserSimpleDTO
             {
