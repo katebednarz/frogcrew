@@ -61,7 +61,7 @@ public partial class FrogcrewContext : DbContext
 
         modelBuilder.Entity<CrewedUser>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.GameId }).HasName("PRIMARY");
+            entity.HasKey(e => new { e.UserId, e.GameId, e.CrewedPosition }).HasName("PRIMARY");
 
             entity.ToTable("CrewedUser");
 

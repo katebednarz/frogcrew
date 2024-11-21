@@ -52,7 +52,7 @@ CREATE TABLE CrewedUser (
     gameId INT,
     crewedPosition VARCHAR(255),
     arrivalTime TIME,
-    PRIMARY KEY (userId, gameId),
+    PRIMARY KEY (userId, gameId, crewedPosition),
     FOREIGN KEY (userId) REFERENCES User(id),
     FOREIGN KEY (gameId) REFERENCES Game(id)
 );
