@@ -178,7 +178,7 @@ namespace backend.Controllers.Tests
             _mockContext?.Setup(c => c.Schedules).Returns(mockScheduleSet.Object);
 
             // Act
-            var result = await _controller.FindGamesByScheduleId(scheduleId) as ObjectResult;
+            var result = await _controller!.FindGamesByScheduleId(scheduleId) as ObjectResult;
             var response = result?.Value as Result;
 
             // Assert
