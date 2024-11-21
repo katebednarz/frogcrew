@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using backend.Models;
 using backend.DTO;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers.Tests
 {
@@ -35,29 +36,59 @@ namespace backend.Controllers.Tests
     {
       _controller?.Dispose();
     }
+    
+    private static Mock<DbSet<T>> CreateMockDbSet<T>(IList<T> sourceList) where T : class
+    {
+      var queryable = sourceList.AsQueryable();
+      var mockDbSet = new Mock<DbSet<T>>();
+
+      mockDbSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(queryable.Provider);
+      mockDbSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(queryable.Expression);
+      mockDbSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
+      mockDbSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
+
+      return mockDbSet;
+    }
 
     [Test()]
     public async Task SubmitAvailabilityTestSuccess()
     {
       // Arrange
-      var request = new AvailabilityDTO
+      var request = new List<AvailabilityDTO>
       {
-        UserId = 1,
-        GameId = 1,
-        Open = true,
-        Comment = "Coming from another game, will be 30 mins late."
+        new() {
+          UserId = 1,
+          GameId = 1,
+          Available = true,
+          Comments = "Coming from another game, will be 30 mins late."
+        },
+        new() {
+          UserId = 1,
+          GameId = 2,
+          Available = false,
+          Comments = null
+        }
+      };
+      
+      var availabilityList = new List<Availability>
+      {
+        new() {
+          UserId = 1,
+          GameId = 1,
+          Available = true,
+          Comments = "Coming from another game, will be 30 mins late."
+        },
+        new() {
+          UserId = 1,
+          GameId = 2,
+          Available = false,
+          Comments = null
+        }
       };
 
-      var mockAvailability = new Availability
-      {
-        UserId = request.UserId,
-        GameId = request.GameId,
-        Open = request.Open,
-        Comment = request.Comment
-      };
-
-      _mockContext?.Setup(c => c.Add(It.IsAny<Availability>())).Callback<Availability>(a => a.GameId = 1);
-      _mockContext?.Setup(c => c.SaveChanges()).Returns(1);
+      var mockDbSet = CreateMockDbSet(availabilityList);
+      
+      _mockContext?.Setup(c => c.Availabilities).Returns(mockDbSet.Object);
 
       // Act
       var result = await _controller!.SubmitAvailability(request) as ObjectResult;
@@ -73,14 +104,19 @@ namespace backend.Controllers.Tests
       });
 
       // Check data returned as AvailabilityDTO
-      var availabilityDTO = response?.Data as AvailabilityDTO;
-      Assert.That(availabilityDTO, Is.Not.Null);
+      var data = response?.Data as List<AvailabilityDTO>;
+      Assert.That(data, Is.Not.Null);
       Assert.Multiple(() =>
       {
-        Assert.That(availabilityDTO?.UserId, Is.EqualTo(request.UserId));
-        Assert.That(availabilityDTO?.GameId, Is.EqualTo(request.GameId));
-        Assert.That(availabilityDTO?.Open, Is.EqualTo(request.Open));
-        Assert.That(availabilityDTO?.Comment, Is.EqualTo(request.Comment));
+        Assert.That(data?.Count, Is.EqualTo(2));
+        Assert.That(data?[0].UserId, Is.EqualTo(1));
+        Assert.That(data?[0].GameId, Is.EqualTo(1));
+        Assert.That(data?[0].Available, Is.EqualTo(true));
+        Assert.That(data?[0].Comments, Is.EqualTo("Coming from another game, will be 30 mins late."));
+        Assert.That(data?[1].UserId, Is.EqualTo(1));
+        Assert.That(data?[1].GameId, Is.EqualTo(2));
+        Assert.That(data?[1].Available, Is.EqualTo(false));
+        Assert.That(data?[1].Comments, Is.EqualTo(null));
       });
 
       // Verify that Add and SaveChanges were called
@@ -94,7 +130,7 @@ namespace backend.Controllers.Tests
     {
       Assert.Pass();
       // Arrange
-      var request = new AvailabilityDTO
+      var request = new List<AvailabilityDTO>
       {
       };
 

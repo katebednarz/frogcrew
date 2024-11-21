@@ -56,7 +56,7 @@ namespace backend.Controllers.Tests
                 LastName = "Bob",
                 Availabilities = new List<Availability>
                 {
-                    new Availability { GameId = 1, Open = true }
+                    new Availability { GameId = 1, Available = true }
                 },
                 UserQualifiedPositions = new List<UserQualifiedPosition>
                 {
@@ -70,7 +70,7 @@ namespace backend.Controllers.Tests
                 LastName = "Smith",
                 Availabilities = new List<Availability>
                 {
-                    new Availability { GameId = 1, Open = true }
+                    new Availability { GameId = 1, Available = true }
                 },
                 UserQualifiedPositions = new List<UserQualifiedPosition>
                 {
@@ -84,7 +84,7 @@ namespace backend.Controllers.Tests
                 LastName = "Smith",
                 Availabilities = new List<Availability>
                 {
-                    new Availability { GameId = 1, Open = true }
+                    new Availability { GameId = 1, Available = true }
                 },
                 UserQualifiedPositions = new List<UserQualifiedPosition>
                 {
