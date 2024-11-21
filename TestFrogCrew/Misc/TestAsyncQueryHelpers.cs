@@ -32,13 +32,15 @@ namespace misc
     {
         private readonly IEnumerator<T> _enumerator;
 
+        #pragma warning disable IDE0290
         public TestAsyncEnumerator(IEnumerator<T> enumerator)
         {
             _enumerator = enumerator;
         }
-
+        #pragma warning restore IDE0290
+        #pragma warning disable CA1816
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
-
+        #pragma warning restore CA1816
         public ValueTask<bool> MoveNextAsync()
         {
             return new ValueTask<bool>(_enumerator.MoveNext());
@@ -50,11 +52,12 @@ namespace misc
     public class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
     {
         private readonly IQueryProvider _inner;
-
+        #pragma warning disable IDE0290
         public TestAsyncQueryProvider(IQueryProvider inner)
         {
             _inner = inner;
         }
+        #pragma warning restore IDE0290
 
         public IQueryable CreateQuery(Expression expression)
         {
@@ -66,10 +69,12 @@ namespace misc
             return new TestAsyncEnumerable<TElement>(expression);
         }
 
+        #pragma warning disable CS8603
         public object Execute(Expression expression)
         {
             return _inner.Execute(expression);
         }
+        #pragma warning restore CS8603
 
         public TResult Execute<TResult>(Expression expression)
         {
@@ -80,11 +85,12 @@ namespace misc
         {
             return new TestAsyncEnumerable<TResult>(expression);
         }
-
+        #pragma warning disable IDE0060
         public Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
         {
             return Task.FromResult(Execute<TResult>(expression));
         }
+        #pragma warning disable IDE0060
 
         TResult IAsyncQueryProvider.ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
         {

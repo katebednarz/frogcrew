@@ -22,7 +22,7 @@ namespace backend.Controllers.Tests
     public class CrewedUserControllerTests
     {
         private Mock<FrogcrewContext>? _mockContext;
-        private Mock<DbSet<User>> _mockUsersDbSet;
+        private Mock<DbSet<User>>? _mockUsersDbSet;
         private CrewedUserController? _controller;
 
 
@@ -49,59 +49,56 @@ namespace backend.Controllers.Tests
 
             var users = new List<User>
         {
-            new User
-            {
+            new() {
                 Id = 1,
                 FirstName = "Billy",
                 LastName = "Bob",
                 Availabilities = new List<Availability>
                 {
-                    new Availability { GameId = 1, Available = true }
+                    new() { GameId = 1, Available = true }
                 },
                 UserQualifiedPositions = new List<UserQualifiedPosition>
                 {
-                    new UserQualifiedPosition { Position = "PRODUCER" }
+                    new() { Position = "PRODUCER" }
                 }
             },
-            new User
-            {
+            new() {
                 Id = 2,
                 FirstName = "Bob",
                 LastName = "Smith",
                 Availabilities = new List<Availability>
                 {
-                    new Availability { GameId = 1, Available = true }
+                    new() { GameId = 1, Available = true }
                 },
                 UserQualifiedPositions = new List<UserQualifiedPosition>
                 {
-                    new UserQualifiedPosition { Position = "DIRECTOR" }
+                    new() { Position = "DIRECTOR" }
                 }
             },
-            new User
-            {
+            new() {
                 Id = 3,
                 FirstName = "Joe",
                 LastName = "Smith",
                 Availabilities = new List<Availability>
                 {
-                    new Availability { GameId = 1, Available = true }
+                    new() { GameId = 1, Available = true }
                 },
                 UserQualifiedPositions = new List<UserQualifiedPosition>
                 {
-                    new UserQualifiedPosition { Position = "PRODUCER" }
+                    new() { Position = "PRODUCER" }
                 }
             }
         }.AsQueryable();
 
             var asyncUsers = new TestAsyncEnumerable<User>(users);
-            _mockUsersDbSet.As<IAsyncEnumerable<User>>().Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
+            _mockUsersDbSet?.As<IAsyncEnumerable<User>>().Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
                 .Returns(asyncUsers.GetAsyncEnumerator);
-            _mockUsersDbSet.As<IQueryable<User>>().Setup(m => m.Provider).Returns(asyncUsers.AsQueryable().Provider);
-            _mockUsersDbSet.As<IQueryable<User>>().Setup(m => m.Expression).Returns(asyncUsers.AsQueryable().Expression);
-            _mockUsersDbSet.As<IQueryable<User>>().Setup(m => m.ElementType).Returns(asyncUsers.AsQueryable().ElementType);
-            _mockUsersDbSet.As<IQueryable<User>>().Setup(m => m.GetEnumerator()).Returns(asyncUsers.AsQueryable().GetEnumerator);
+            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.Provider).Returns(asyncUsers.AsQueryable().Provider);
+            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.Expression).Returns(asyncUsers.AsQueryable().Expression);
+            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.ElementType).Returns(asyncUsers.AsQueryable().ElementType);
+            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.GetEnumerator()).Returns(asyncUsers.AsQueryable().GetEnumerator);
 
-            _mockContext?.Setup(c => c.Users).Returns(_mockUsersDbSet.Object);
+            _mockContext?.Setup(c => c.Users).Returns(_mockUsersDbSet!.Object);
 
             // Act
             var result = await _controller!.FindCrewMemberByGameAndPosition(gameId, position) as ObjectResult;
@@ -138,14 +135,14 @@ namespace backend.Controllers.Tests
             var users = new List<User>().AsQueryable(); // No users in the database
 
             var asyncUsers = new TestAsyncEnumerable<User>(users);
-            _mockUsersDbSet.As<IAsyncEnumerable<User>>().Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
+            _mockUsersDbSet?.As<IAsyncEnumerable<User>>().Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
                 .Returns(asyncUsers.GetAsyncEnumerator);
-            _mockUsersDbSet.As<IQueryable<User>>().Setup(m => m.Provider).Returns(asyncUsers.AsQueryable().Provider);
-            _mockUsersDbSet.As<IQueryable<User>>().Setup(m => m.Expression).Returns(asyncUsers.AsQueryable().Expression);
-            _mockUsersDbSet.As<IQueryable<User>>().Setup(m => m.ElementType).Returns(asyncUsers.AsQueryable().ElementType);
-            _mockUsersDbSet.As<IQueryable<User>>().Setup(m => m.GetEnumerator()).Returns(asyncUsers.AsQueryable().GetEnumerator);
+            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.Provider).Returns(asyncUsers.AsQueryable().Provider);
+            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.Expression).Returns(asyncUsers.AsQueryable().Expression);
+            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.ElementType).Returns(asyncUsers.AsQueryable().ElementType);
+            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.GetEnumerator()).Returns(asyncUsers.AsQueryable().GetEnumerator);
 
-            _mockContext.Setup(c => c.Users).Returns(_mockUsersDbSet.Object);
+            _mockContext?.Setup(c => c.Users).Returns(_mockUsersDbSet!.Object);
 
             // Act
             var result = await _controller!.FindCrewMemberByGameAndPosition(gameId, position) as ObjectResult;

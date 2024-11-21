@@ -37,6 +37,7 @@ namespace backend.Controllers.Tests
             _controller?.Dispose();
         }
 
+        
         private static Mock<DbSet<T>> CreateMockDbSet<T>(IEnumerable<T> data) where T : class
         {
             var queryable = data.AsQueryable();
@@ -49,12 +50,12 @@ namespace backend.Controllers.Tests
 
             mockSet.As<IAsyncEnumerable<T>>().Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
                 .Returns(new TestAsyncEnumerator<T>(queryable.GetEnumerator()));
-
+            #pragma warning disable CS8605, CS8602
             mockSet.Setup(m => m.FindAsync(It.IsAny<object[]>())).ReturnsAsync((object[] ids) => queryable.FirstOrDefault(d => (int)d.GetType().GetProperty("Id").GetValue(d) == (int)ids[0]));
-
+            #pragma warning restore CS8605, CS8602
             return mockSet;
         }
-
+        
 
         [Test()]
         public async Task FindGameByIdTestSuccess()
@@ -129,18 +130,18 @@ namespace backend.Controllers.Tests
             var schedule = new Schedule { Id = scheduleId };
             var games = new List<Game>
             {
-                new Game { Id = 1, ScheduleId = scheduleId, Opponent = "Team A" },
-                new Game { Id = 2, ScheduleId = scheduleId, Opponent = "Team B" }
+                new() { Id = 1, ScheduleId = scheduleId, Opponent = "Team A" },
+                new() { Id = 2, ScheduleId = scheduleId, Opponent = "Team B" }
             };
 
             var mockScheduleSet = CreateMockDbSet(new List<Schedule> { schedule });
             var mockGameSet = CreateMockDbSet(games);
 
-            _mockContext.Setup(c => c.Schedules).Returns(mockScheduleSet.Object);
-            _mockContext.Setup(c => c.Games).Returns(mockGameSet.Object);
+            _mockContext?.Setup(c => c.Schedules).Returns(mockScheduleSet.Object);
+            _mockContext?.Setup(c => c.Games).Returns(mockGameSet.Object);
 
             // Act
-            var result = await _controller.FindGamesByScheduleId(scheduleId) as ObjectResult;
+            var result = await _controller!.FindGamesByScheduleId(scheduleId) as ObjectResult;
             var response = result?.Value as Result;
 
             // Assert
