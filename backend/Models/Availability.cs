@@ -8,9 +8,9 @@ public partial class Availability
 
     public int GameId { get; set; }
 
-    public bool Open { get; set; }
+    public bool Available { get; set; }
 
-    public string? Comment { get; set; }
+    public string? Comments { get; set; }
 
     public virtual Game Game { get; set; } = null!;
 
@@ -22,8 +22,8 @@ public partial class Availability
 		{
 			UserId = UserId,
 			GameId = GameId,
-			Open = Open,
-			Comment = Comment
+			Available = Available,
+			Comments = Comments
 		};
 	}
 }

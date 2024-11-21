@@ -17,7 +17,7 @@ namespace backend.Controllers
 
 		// POST /availability
 		[HttpPost("availability")]
-		public async Task<IActionResult> SubmitAvailability([FromBody] AvailabilityDTO request)
+		public async Task<IActionResult> SubmitAvailability([FromBody] List<AvailabilityDTO> request)
 		{
 			if (!ModelState.IsValid)
 			{
@@ -30,18 +30,28 @@ namespace backend.Controllers
 				return new ObjectResult(errorResponse) { StatusCode = 400 };
 			}
 
-			var newAvailability = new Availability
+			List<Availability> availabilityList = request.Select(s => new Availability {
+				UserId = s.UserId,
+				GameId = s.GameId,
+				Available = s.Available,
+				Comments = s.Comments
+			}).ToList();
+
+			await _context.AddRangeAsync(availabilityList);
+			await _context.SaveChangesAsync();
+
+			List<AvailabilityDTO> availabilityDTO = [];
+			foreach (Availability availability in availabilityList)
 			{
-				UserId = request.UserId,
-				GameId = request.GameId,
-				Open = request.Open,
-				Comment = request.Comment
-			};
+				availabilityDTO.Add(new AvailabilityDTO {
+					UserId = availability.UserId,
+					GameId = availability.GameId,
+					Available = availability.Available,
+					Comments = availability.Comments
+				});
+			}
 
-			_context.Add(newAvailability);
-			_context.SaveChanges();
-
-			var response = new Result(true, 200, "Add Success", newAvailability.ConvertToAvailabilityDTO());
+			var response = new Result(true, 200, "Add Success", availabilityDTO);
 			return Ok(response);
 		}
 	}
