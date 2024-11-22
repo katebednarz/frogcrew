@@ -9,6 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using backend.Auth;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers
 {
@@ -187,6 +188,24 @@ namespace backend.Controllers
             return tokenHandler.WriteToken(token);
         }
 
-
+        [HttpGet("users")]
+        public async Task<IActionResult> GetUsers()
+        {
+            var users = await _context.Users.ToListAsync();
+            
+            List<UserSimpleDTO> userDTOs = [];
+            foreach (var user in users)
+            {
+               var userDto = new UserSimpleDTO {
+                    UserId = user.Id,
+                    FullName = user.FirstName + " " + user.LastName
+                };
+                
+                userDTOs.Add(userDto);
+            }
+            
+            var response = new Result(true, 200, "Found Users", userDTOs);
+            return Ok(response);
+        }
     }
 }
