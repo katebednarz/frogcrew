@@ -198,7 +198,9 @@ namespace backend.Controllers
             {
                var userDto = new UserSimpleDTO {
                     UserId = user.Id,
-                    FullName = user.FirstName + " " + user.LastName
+                    FullName = user.FirstName + " " + user.LastName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber
                 };
                 
                 userDTOs.Add(userDto);
