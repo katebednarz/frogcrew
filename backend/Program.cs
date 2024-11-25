@@ -106,6 +106,6 @@ app.UseAuthorization();
 //app.UseHttpsRedirection();
 app.MapControllers();
 
-StartUpFile.RunStartupFile();
+StartUpFile.RunStartupFile(app.Services);
 
 app.Run();
