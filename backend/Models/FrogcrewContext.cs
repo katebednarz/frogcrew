@@ -15,19 +15,19 @@ public partial class FrogcrewContext : DbContext
     {
     }
 
-    public virtual DbSet<Availability> Availabilities { get; set; }
+    public virtual DbSet<Availability>? Availabilities { get; set; }
 
-    public virtual DbSet<CrewedUser> CrewedUsers { get; set; }
+    public virtual DbSet<CrewedUser>? CrewedUsers { get; set; }
 
-    public virtual DbSet<Game> Games { get; set; }
+    public virtual DbSet<Game>? Games { get; set; }
 
-    public virtual DbSet<Notification> Notifications { get; set; }
+    public virtual DbSet<Notification>? Notifications { get; set; }
 
-    public virtual DbSet<Schedule> Schedules { get; set; }
+    public virtual DbSet<Schedule>? Schedules { get; set; }
 
-    public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<User>? Users { get; set; }
 
-    public virtual DbSet<UserQualifiedPosition> UserQualifiedPositions { get; set; }
+    public virtual DbSet<UserQualifiedPosition>? UserQualifiedPositions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
