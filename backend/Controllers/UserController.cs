@@ -19,11 +19,13 @@ namespace backend.Controllers
     {
 
         private readonly FrogcrewContext _context;
+        private readonly IConfiguration _configuration;
         private readonly string _jwtSecret = "kate-has-badbarz!--kate-has-badbarz!";
         private const string BasicAuthScheme = "Basic";
-        public UserController(FrogcrewContext context)
+        public UserController(FrogcrewContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // POST /crewMember
@@ -89,14 +91,14 @@ namespace backend.Controllers
 
             foreach (var email in request.Emails)
             {
-                SendInviteEmail(email);
+        SendInviteEmail(email);
             }
 
             var response = new Result(true, 200, "Invite success", request.Emails);
             return Ok(response);
         }
 
-        private void SendInviteEmail(string email)
+        private static void SendInviteEmail(string email)
         {
             // email setup
             var fromAddress = new MailAddress("frog.crew.invitation@gmail.com", "FrogCrew");
@@ -130,19 +132,20 @@ namespace backend.Controllers
         public IActionResult Login()
         {
             // Check if Authorization header is present
-            if (!Request.Headers.ContainsKey("Authorization"))
-                return Unauthorized("Missing Authorization Header");
-
-            var authHeader = Request.Headers["Authorization"].ToString();
+            if (!Request.Headers.TryGetValue("Authorization", out Microsoft.Extensions.Primitives.StringValues value))
+                return Unauthorized(new Result(false, 401, "Missing Authorization Header"));
+            
+            // Check if Authorization header is in the correct format
+            var authHeader = value.ToString();
             if (!authHeader.StartsWith(BasicAuthScheme + " "))
-                return Unauthorized("Invalid Authorization Header");
+                return Unauthorized(new Result(false, 401, "Invalid Authorization Header"));
 
             // Decode the Base64 encoded credentials
-            var encodedUsernamePassword = authHeader.Substring("Basic ".Length).Trim();
+            var encodedUsernamePassword = authHeader["Basic ".Length..].Trim();
             var decodedUsernamePassword = Encoding.UTF8.GetString(Convert.FromBase64String(encodedUsernamePassword));
             var credentials = decodedUsernamePassword.Split(':', 2);
             if (credentials.Length != 2)
-                return Unauthorized("Invalid Authorization Header");
+                return Unauthorized(new Result(false, 401, "Invalid Authorization Header"));
 
             var username = credentials[0];
             var password = credentials[1];
@@ -151,19 +154,17 @@ namespace backend.Controllers
             var user = _context.Users.FirstOrDefault(u => u.Email == username);
             if (user == null || !PasswordHasher.VerifyPassword(password, user.Password))
             {
-                return Unauthorized("Invalid email or password");
+                return Unauthorized(new Result(false, 401, "Invalid email or password"));
             }
 
-
-            HttpContext.Session.SetString("UserId", user.Id.ToString());
-            HttpContext.Session.SetString("UserRole", user.Role);
-
+            // Generate JWT token
             var token = GenerateJwtToken(user);
 
+            // Return the token
             var AuthDTO = new AuthDTO
             {
                 UserId = user.Id,
-                Role = user.Role,
+                Role = user.Role ?? string.Empty,
                 Token = token
             };
 
@@ -172,14 +173,19 @@ namespace backend.Controllers
 
         private string GenerateJwtToken(User user)
         {
+            var secretKey = _configuration["JwtSecret"];
+            if (string.IsNullOrEmpty(secretKey))
+            {
+                throw new InvalidOperationException("JWT Secret Key is not configured.");
+            }
+            var key = Encoding.ASCII.GetBytes(secretKey);
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_jwtSecret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim("id", user.Id.ToString()),
-                    new Claim(ClaimTypes.Role, user.Role)
+                    new Claim(ClaimTypes.Role, user.Role ?? string.Empty)
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
