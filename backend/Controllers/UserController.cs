@@ -20,7 +20,6 @@ namespace backend.Controllers
 
         private readonly FrogcrewContext _context;
         private readonly IConfiguration _configuration;
-        private readonly string _jwtSecret = "kate-has-badbarz!--kate-has-badbarz!";
         private const string BasicAuthScheme = "Basic";
         public UserController(FrogcrewContext context, IConfiguration configuration)
         {
