@@ -18,8 +18,14 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();          // This is how we can inject dependencies...
 
 // Register FrogcrewContext with dependency injection and set up the database connection
+var connectionString = builder.Configuration.GetConnectionString("Default");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'Default' is not found.");
+}
+
 builder.Services.AddDbContext<FrogcrewContext>(options =>
-    options.UseMySQL(builder.Configuration.GetConnectionString("Default")));
+    options.UseMySQL(connectionString));
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {

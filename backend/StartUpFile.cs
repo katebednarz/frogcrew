@@ -2,7 +2,7 @@
 using backend.Models;
 using backend.Auth;
 
-
+namespace backend;
 public class StartUpFile() {
 
   public static void RunStartupFile() {
