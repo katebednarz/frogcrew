@@ -5,6 +5,7 @@ using backend.Models;
 using backend.DTO;
 using backend.Auth;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Moq.EntityFrameworkCore;
 
 namespace backend.Controllers.Tests
@@ -13,27 +14,33 @@ namespace backend.Controllers.Tests
     public class UserControllerTest
     {
         private Mock<FrogcrewContext>? _mockContext;
-        private UserController? _controller;
+        private IConfiguration _config;
         private Mock<ISession>? _mockSession;
+        private UserController? _controller;
 
         [SetUp]
         public void Setup()
         {
             _mockContext = new Mock<FrogcrewContext>();
+            _config = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
             _mockSession = new Mock<ISession>();
 
             var httpContext = new DefaultHttpContext
             {
                 Session = _mockSession.Object
             };
-
-            _controller = new UserController(_mockContext.Object)
+            
+            _controller = new UserController(_mockContext.Object, _config)
             {
                 ControllerContext = new ControllerContext
                 {
                     HttpContext = httpContext
                 }
             };
+
         }
 
         [TearDown]
@@ -249,10 +256,10 @@ namespace backend.Controllers.Tests
             var result = _controller.Login();
 
             // Assert
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.IsInstanceOf<UnauthorizedObjectResult>(result);
             var unauthorizedResult = result as UnauthorizedObjectResult;
-            Assert.That(unauthorizedResult?.Value, Is.EqualTo("Invalid email or password"));
-
+            Assert.That(unauthorizedResult?.StatusCode, Is.EqualTo(401));
+            Assert.That(((Result)unauthorizedResult.Value!).Message, Is.EqualTo("Invalid email or password"));
         }
 
         [Test()]
@@ -265,9 +272,10 @@ namespace backend.Controllers.Tests
             var result = _controller!.Login();
 
             // Assert
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.IsInstanceOf<UnauthorizedObjectResult>(result);
             var unauthorizedResult = result as UnauthorizedObjectResult;
-            Assert.That(unauthorizedResult?.Value, Is.EqualTo("Missing Authorization Header"));
+            Assert.That(unauthorizedResult?.StatusCode, Is.EqualTo(401));
+            Assert.That(((Result)unauthorizedResult.Value!).Message, Is.EqualTo("Missing Authorization Header"));
         }
 
         [Test()]
@@ -280,9 +288,10 @@ namespace backend.Controllers.Tests
             var result = _controller.Login();
 
             // Assert
-            Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
+            Assert.IsInstanceOf<UnauthorizedObjectResult>(result);
             var unauthorizedResult = result as UnauthorizedObjectResult;
-            Assert.That(unauthorizedResult?.Value, Is.EqualTo("Invalid Authorization Header"));
+            Assert.That(unauthorizedResult?.StatusCode, Is.EqualTo(401));
+            Assert.That(((Result)unauthorizedResult.Value!).Message, Is.EqualTo("Invalid Authorization Header"));
 
         }
     }
