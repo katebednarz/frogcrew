@@ -12,7 +12,7 @@ public partial class CrewedUser
 
     public required string CrewedPosition { get; set; }
 
-    public TimeOnly ArrivalTime { get; set; }
+    public TimeOnly? ArrivalTime { get; set; }
 
     public virtual Game Game { get; set; } = null!;
 
