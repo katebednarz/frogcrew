@@ -1,6 +1,51 @@
 @backend_HostAddress = http://localhost:5228
 
-GET {{backend_HostAddress}}/weatherforecast/
+### Add New Availability
+POST {{backend_HostAddress}}/availability
+Content-Type: application/json
+
+[
+{
+  "userId": 1,
+  "gameId": 5,
+  "available": true,
+  "comments": "string"
+ }
+]
+
+### Find Crew Members Available and Qualified
+GET {{backend_HostAddress}}/crewMember/1/DIRECTOR
+Content-Type: application/json
+
+### Find CrewList by Id
+GET {{backend_HostAddress}}/crewList/1
+Content-Type: application/json
+
+
+
+
+
+### Find Games By Schedule Id
+GET {{backend_HostAddress}}/gameSchedule/1/games
+
+### Find Game Schedule by Id
+GET {{backend_HostAddress}}/gameSchedule/1
+
+### Find Game Schedules by Season
+GET {{backend_HostAddress}}/gameSchedule/season/2024-2025
+
+### Add New Game Schedule
+POST {{backend_HostAddress}}/gameSchedule
+Content-Type: application/json
+
+{
+  "sport": "New Sport",
+  "season": "2024-2025"
+}
+
+### Find All Users
+GET {{backend_HostAddress}}/users
 Accept: application/json
 
-###
+
+
