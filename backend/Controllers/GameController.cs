@@ -21,7 +21,8 @@ namespace backend.Controllers
         _context = context;
         }
 
-        [HttpGet("gameSchedule/game/{gameId}")]
+        // Find Game by ID
+        [HttpGet("gameSchedule/game/{gameId}")] [Authorize]
         public async Task<IActionResult> FindGameById(int gameId) {
             var game = await _context.Games.FindAsync(gameId);
             if (game == null) {

@@ -10,7 +10,7 @@ public partial class CrewedUser
 
     public int GameId { get; set; }
 
-    public string? CrewedPosition { get; set; }
+    public required string CrewedPosition { get; set; }
 
     public TimeOnly? ArrivalTime { get; set; }
 
@@ -24,7 +24,7 @@ public partial class CrewedUser
         return new CrewedUserDTO
         {
             UserId = UserId,
-            FullName = $"{user.FirstName} {user.LastName}",
+            FullName = $"{user?.FirstName} {user?.LastName}",
             Position = CrewedPosition,
             ReportTime = ArrivalTime.ToString()
         };

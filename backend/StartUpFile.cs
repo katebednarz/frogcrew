@@ -2,12 +2,13 @@
 using backend.Models;
 using backend.Auth;
 
-
+namespace backend;
 public class StartUpFile() {
 
-  public static void RunStartupFile() {
+  public static void RunStartupFile(IServiceProvider services)  {
 
-        using var _context = new FrogcrewContext();
+        using var scope = services.CreateScope();
+        var _context = scope.ServiceProvider.GetRequiredService<FrogcrewContext>();
         var userId = 1;
         var passwords = new List<string>();
         passwords = ["swiftie4lyfe", "awsom3sauce", "1<3Coffee", "superfrog", "h0ck3y4lif3", "password", "wordpass", "admin"];

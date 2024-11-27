@@ -18,8 +18,14 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();          // This is how we can inject dependencies...
 
 // Register FrogcrewContext with dependency injection and set up the database connection
+var connectionString = builder.Configuration.GetConnectionString("Default");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'Default' is not found.");
+}
+
 builder.Services.AddDbContext<FrogcrewContext>(options =>
-    options.UseMySQL(builder.Configuration.GetConnectionString("Default")));
+    options.UseMySQL(connectionString));
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
@@ -27,15 +33,14 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 });
 
 builder.Services.AddDistributedMemoryCache();
-
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
     
 // Configure JWT Authentication
+var secretKey = builder.Configuration["JwtSecret"];
+if (string.IsNullOrEmpty(secretKey))
+{
+    throw new InvalidOperationException("JWT Secret Key is not configured.");
+}
+var key = Encoding.ASCII.GetBytes(secretKey);
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -46,7 +51,7 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("kate-has-badbarz!--kate-has-badbarz!")),
+        IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateIssuer = false,
         ValidateAudience = false,
         ClockSkew = TimeSpan.Zero
@@ -91,8 +96,7 @@ if (app.Environment.IsDevelopment())
 // Use CORS
 app.UseCors("AllowAll");
 
-//app.UseHttpsRedirection();
-app.UseSession();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -100,6 +104,6 @@ app.UseAuthorization();
 //app.UseHttpsRedirection();
 app.MapControllers();
 
-StartUpFile.RunStartupFile();
+StartUpFile.RunStartupFile(app.Services);
 
 app.Run();

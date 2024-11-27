@@ -1,6 +1,120 @@
 @backend_HostAddress = http://localhost:5228
+@username = m.martin@tcu.edu
+@password = admin
 
-GET {{backend_HostAddress}}/weatherforecast/
+### Login
+POST {{backend_HostAddress}}/auth/login
+Authorization: Basic {{username}} {{password}}
+
+> {% client.global.set("auth_token", response.body.data.token); %}
+
+### Add New Availability
+POST {{backend_HostAddress}}/availability
+Content-Type: application/json
+
+[
+{
+  "userId": 1,
+  "gameId": 5,
+  "available": true,
+  "comments": "string"
+ }
+]
+
+### Find Crew Members Available and Qualified
+GET {{backend_HostAddress}}/crewMember/1/DIRECTOR
+Content-Type: application/json
+
+### Find CrewList by Id
+GET {{backend_HostAddress}}/crewList/1
+Content-Type: application/json
+
+### Add New Crew Schedule
+POST {{backend_HostAddress}}/crewSchedule
+Content-Type: application/json
+
+{
+  "gameId": 1,
+  "changes": [
+    {
+      "action": "assign",
+      "id": 1,
+      "position": "DIRECTOR",
+      "fullName": "Kate Bednarz"
+    }
+  ]
+}
+
+### Find Crew Schedule by Id
+GET {{backend_HostAddress}}/crewSchedule/1
+
+### Find Game by Game Id
+GET {{backend_HostAddress}}/gameSchedule/game/1
+Authorization: Bearer {{auth_token}}
+
+### Find Game Schedule by Id
+GET {{backend_HostAddress}}/gameSchedule/1
+
+### Find Games By Schedule Id
+GET {{backend_HostAddress}}/gameSchedule/1/games
+
+### Add Games to Game Schedule
+POST {{backend_HostAddress}}/gameSchedule/2/games
+Content-Type: application/json
+
+[
+  {
+    "scheduleId": 2,
+    "gameDate": "2024-11-25",
+    "venue": "Venue",
+    "opponent": "Opponent",
+    "isFinalized": true
+  }
+]
+
+### Add New Game Schedule
+POST {{backend_HostAddress}}/gameSchedule
+Content-Type: application/json
+
+{
+  "sport": "New Sport",
+  "season": "2024-2025"
+}
+
+### Find Game Schedule By Schedule Id
+GET {{backend_HostAddress}}/gameSchedule/1
+
+### Find Game Schedules by Season
+GET {{backend_HostAddress}}/gameSchedule/season/2024-2025
+
+### Add New Crew Member
+POST {{backend_HostAddress}}/crewMember
+Content-Type: application/json
+
+{
+  "firstName": "Joe",
+  "lastName": "Schmoe",
+  "email": "joe.schmoe@gmail.com",
+  "phoneNumber": "1234567890",
+  "role": "STUDENT",
+  "position": [
+    "DIRECTOR"
+  ]
+}
+
+### Invite New Crew Member
+POST {{backend_HostAddress}}/invite
+Content-Type: application/json
+
+{
+  "emails": [
+    "kate.bednarz@tcu.edu"
+  ]
+}
+
+### Find All Users
+GET {{backend_HostAddress}}/users
 Accept: application/json
 
-###
+
+
