@@ -17,6 +17,12 @@ namespace backend.Controllers
         _context = context;
         }
 
+        /*
+            * Adds a crewed user
+            * 
+            * @param request The crewed user to add
+            * @return The result of the operation
+        */
         [HttpGet("crewMember/{gameId}/{position}")]
         public async Task<IActionResult> FindCrewMemberByGameAndPosition(int gameId, string position) {
             var availableQualifiedUsers = await _context.Users
@@ -29,7 +35,7 @@ namespace backend.Controllers
             })
             .ToListAsync();
 
-            if (!availableQualifiedUsers.Any())
+            if (availableQualifiedUsers.Count == 0)
             {
                 return NotFound(new Result(false, 404, $"No matching crew members available for {position}", null));
             }

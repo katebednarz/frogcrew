@@ -5,6 +5,12 @@ namespace backend.Auth
 {
     public class PasswordHasher
     {
+        /*
+            * Hashes the password using a random salt and PBKDF2
+            * 
+            * @param password The password to hash
+            * @return The hashed password
+        */
         public static string HashPassword(string password)
         {
             byte[] salt = new byte[128 / 8];
@@ -24,6 +30,13 @@ namespace backend.Auth
             return $"{Convert.ToBase64String(salt)}:{hashed}";
         }
 
+        /*
+            * Verifies the password against the stored hash
+            * 
+            * @param enteredPassword The password entered by the user
+            * @param storedHash The stored hash
+            * @return True if the password is correct, false otherwise
+        */
         public static bool VerifyPassword(string enteredPassword, string storedHash)
         {
             var parts = storedHash.Split(':');

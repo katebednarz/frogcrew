@@ -16,6 +16,12 @@ namespace backend.Controllers
         _context = context;
         }
 
+        /*
+            * Finds a crew list by game ID
+            * 
+            * @param gameId The ID of the game
+            * @return The result of the operation
+        */
         [HttpGet("crewList/{gameId}")]
         public async Task<IActionResult> FindCrewListById(int gameId) {
             var game = await _context.Games.FindAsync(gameId);

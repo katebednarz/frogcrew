@@ -27,7 +27,12 @@ namespace backend.Controllers
             _configuration = configuration;
         }
 
-        // POST /crewMember
+        /*
+            * Adds a crew member
+            * 
+            * @param request The crew member to add
+            * @return The result of the operation
+        */
         [HttpPost("crewMember")]
         public async Task<IActionResult> CreateCrewMember([FromBody] UserDTO request)
         {
@@ -73,7 +78,12 @@ namespace backend.Controllers
             return Ok(response);
         }
 
-        // POST /invite
+        /*
+            * Adds a crew member
+            * 
+            * @param request The crew member to add
+            * @return The result of the operation
+        */
         [HttpPost("invite")]
         public async Task<IActionResult> InviteCrewMember([FromBody] EmailDTO request)
         {
@@ -96,7 +106,12 @@ namespace backend.Controllers
             var response = new Result(true, 200, "Invite success", request.Emails);
             return Ok(response);
         }
-
+    
+        /*
+            * Sends an email to the user with the invite link
+            * 
+            * @param email The email to send the invite to
+        */
         private static void SendInviteEmail(string email)
         {
             // email setup
@@ -127,6 +142,11 @@ namespace backend.Controllers
             }
         }
 
+        /*
+            * Logs in a user
+            * 
+            * @return The result of the operation
+        */
         [HttpPost("auth/login")]
         public IActionResult Login()
         {
@@ -170,6 +190,12 @@ namespace backend.Controllers
             return Ok(new Result(true, 200, "Login successful", AuthDTO));
         }
 
+        /*
+            * Generates a JWT token for the user
+            * 
+            * @param user The user to generate the token for
+            * @return The generated token
+        */
         private string GenerateJwtToken(User user)
         {
             var secretKey = _configuration["JwtSecret"];
@@ -193,6 +219,12 @@ namespace backend.Controllers
             return tokenHandler.WriteToken(token);
         }
 
+        /*
+            * Finds a crew member by ID
+            * 
+            * @param userId The ID of the crew member
+            * @return The result of the operation
+        */
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers()
         {

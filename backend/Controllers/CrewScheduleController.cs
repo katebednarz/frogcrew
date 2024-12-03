@@ -16,7 +16,12 @@ namespace backend.Controllers
             _context = context;
         }
 
-        // POST /crewSchedule
+        /*
+            * Adds a crew schedule
+            * 
+            * @param request The crew schedule to add
+            * @return The result of the operation
+        */
         [HttpPost("crewSchedule/")]
         public async Task<IActionResult> CrewSchedule([FromBody] CrewScheduleDTO request)
         {
@@ -204,8 +209,12 @@ namespace backend.Controllers
             return Ok(response);
         }
 
-
-        // GET /crewSchedule/{gameId}
+        /*
+            * Finds a crew schedule by game ID
+            * 
+            * @param gameId The ID of the game
+            * @return The result of the operation
+        */
         [HttpGet("crewSchedule/{gameId}")]
         public async Task<IActionResult> FindCrewScheduleByGameId(int gameId)
         {
