@@ -15,15 +15,13 @@ namespace backend.Controllers
         {
             _context = context;
         }
-
-        // GET: ScheduleController
-        [HttpGet]
-        public ActionResult Index()
-        {
-            return Ok("Hello from schedule!");
-        }
-
-        // POST /gameSchedule
+        
+        /*
+            * Adds a game schedule
+            * 
+            * @param request The game schedule to add
+            * @return The result of the operation
+        */
         [HttpPost("gameSchedule")]
         public IActionResult CreateGameSchedule([FromBody] GameScheduleDTO request)
         {
@@ -51,6 +49,13 @@ namespace backend.Controllers
             return Ok(response);
         }
 
+        /*
+            * Adds games to a game schedule
+            * 
+            * @param scheduleId The ID of the schedule to add games to
+            * @param games The games to add
+            * @return The result of the operation
+        */
         [HttpPost("gameSchedule/{scheduleId}/games")]
         public async Task<IActionResult> CreateGameScheduleGames(int scheduleId, [FromBody] List<GameDTO> games) {
             var gameSchedule = await _context.Schedules.FindAsync(scheduleId);
@@ -79,6 +84,12 @@ namespace backend.Controllers
             return Ok(new Result(true, 200, "Add Success", games));
         }
 
+        /*
+            * Finds a game schedule by ID
+            * 
+            * @param scheduleId The ID of the schedule
+            * @return The result of the operation
+        */
         [HttpGet("gameSchedule/{scheduleId}")]
         public async Task<IActionResult> FindScheduleById(int scheduleId) {
             var schedule = await _context.Schedules.FindAsync(scheduleId);
@@ -96,6 +107,12 @@ namespace backend.Controllers
             return Ok(new Result(true, 200, "Find Success", gameScheduleDTO));
         }
 
+        /*
+            * Finds game schedules by season
+            * 
+            * @param season The season to find schedules for
+            * @return The result of the operation
+        */
         [HttpGet("gameSchedule/season/{season}")]
         public async Task<IActionResult> FindGameSchedulesBySeason(string season) {
             var schedules = await _context.Schedules.Where(s => s.Season == season).ToListAsync();

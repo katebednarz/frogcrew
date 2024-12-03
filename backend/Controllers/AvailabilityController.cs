@@ -15,7 +15,12 @@ namespace backend.Controllers
 			_context = context;
 		}
 
-		// POST /availability
+		/*
+			* Adds availability for a user
+			* 
+			* @param request The availability to add
+			* @return The result of the operation
+		*/
 		[HttpPost("availability")]
 		public async Task<IActionResult> SubmitAvailability([FromBody] List<AvailabilityDTO> request)
 		{

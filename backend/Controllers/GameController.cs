@@ -21,7 +21,12 @@ namespace backend.Controllers
         _context = context;
         }
 
-        // Find Game by ID
+        /*
+            * Find a game by gameId
+            * 
+            * @param request The id of the game to find
+            * @return The result of the operation
+        */         
         [HttpGet("gameSchedule/game/{gameId}")] [Authorize]
         public async Task<IActionResult> FindGameById(int gameId) {
             var game = await _context.Games.FindAsync(gameId);
@@ -31,6 +36,12 @@ namespace backend.Controllers
             return Ok(new Result(true, 200, "Find Success", game.ConvertToGameDTO()));
         }
 
+        /*
+            * Find games by scheduleId
+            * 
+            * @param request The id of the schedule to find games for
+            * @return The result of the operation
+        */
         [HttpGet("gameSchedule/{scheduleId}/games")]
         public async Task<IActionResult> FindGamesByScheduleId(int scheduleId)
         {
