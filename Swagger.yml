@@ -1,0 +1,39 @@
+#Use this extension to get the best experience with OpenAPI in VS Code
+#https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi
+
+openapi: '3.0.3'
+info:
+  title: FrogCrew API
+  description: This is the FrogCrew API
+  termsOfService: http://swagger.io/terms/
+  contact:
+    name: Kate Bednarz
+    email: kate.bednarz@tcu.edu
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers: []
+tags:
+  - name: crew members
+    description: Endpoints related to crew members
+  - name: availability
+    description: Endpoints related to crew member availability
+  - name: game schedule
+    description: Endpoints related to game schedules
+  - name: crew schedule
+    description: Endpoints related to crew schedules
+  - name: crew list
+    description: Endpoints related to crew list
+  - name: misc
+    description: Endpoints related to miscellaneous activities
+  - name: reports
+    description: Endpoints related to reports
+  - name: auth
+    description: Endpoints related to user authentication
+paths:
+  /test:
+    get:
+      responses:
+        '200':
+          description: OK
