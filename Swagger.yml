@@ -32,8 +32,169 @@ tags:
   - name: auth
     description: Endpoints related to user authentication
 paths:
-  /test:
-    get:
+  /crewMember:
+    post:
+      tags:
+        - crew members
+        - MVP
+      summary: Add a new crew member
+      description: Add a new crew member and return the saved one.
+      requestBody:
+        required: true
+        description: Crew member that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
       responses:
         '200':
-          description: OK
+          description: crew member profile successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUserCreation'
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/ApiResponseUserBadRequest'
+        
+components:
+  schemas:
+    User:
+      title: User
+      description: A User
+      type: object
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - phone
+        - role
+        - position
+      properties:
+        id:
+          title: Id
+          description: Id of the crew member
+          type: string
+          readOnly: true
+        email:
+          title: Email
+          description: Email of the crew member
+          type: string
+        phoneNumber:
+          title: Phone Number
+          description: Phone Number of the crew member
+          type: string
+        firstName:
+          title: First Name
+          description: First Name of the crew member
+          type: string
+        lastName:
+          title: Last Name
+          description: Last Name of the crew member
+          type: string
+        role:
+          title: Role
+          description: Role of the crew member
+          type: string
+        positions:
+          title: Positions
+          description: Postions the crew member can hold
+          type: array
+          items:
+            type: string
+        payRate:
+          title: Pay Rate
+          description: Pay Rate of the Crew Member
+          type: string
+      example: 
+        id: '12345'
+        firstName: John
+        lastName: Smith
+        email: john.smith@tcu.edu
+        phoneNumber: '1234567890'
+        role: student
+        positions:
+          - Director
+          - Producer
+    ApiResponseUserCreation:
+      title: API response for user creation
+      type: object
+      properties:
+        flag:
+          type: boolean
+          description: Success or not
+        code:
+          type: integer
+          description: Return code
+          example: 200
+        message:
+          type: string
+          example: Add Success
+        data:
+          allOf:
+            - $ref: '#/components/schemas/User'
+    ApiResponseUserBadRequest:
+      title: API response for bad request error
+      description: The schema for bad request error
+      type: object
+      properties:
+        flag:
+          title: flag
+          description: Success or not
+          type: boolean
+          example: false
+          readOnly: true
+        code:
+          title: Http status code
+          description: Http status code
+          type: integer
+          example: 400
+          readOnly: true
+        message:
+          title: Message
+          description: The long error message
+          type: string
+          example: Provided arguments are invalid, see data for details.
+          readOnly: true
+        data:
+          $ref: '#/components/schemas/UserBadRequest'
+    UserBadRequest:
+      title: User bad request
+      description: Messages describing a bad request error
+      type: object
+      properties:
+        firstName:
+          title: First name of the user
+          description: The error message
+          type: string
+        lastName:
+          title: Last name of the user
+          description: The error message
+          type: string
+        email:
+          title: email of the user
+          description: The error message
+          type: string
+        phoneNumber:
+          title: phone number of the user
+          description: The error message
+          type: string
+        role:
+          title: role of the user
+          description: The error message
+          type: string
+        position:
+          title: position of the user
+          description: The error message
+          type: string
+      example:
+        firstName: first name is required.
+        lastName: last name is required.
+        email: email is required.
+        phoneNumber: phone number is required.
+        role: role is required.
+        position: position is required.
