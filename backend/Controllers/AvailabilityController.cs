@@ -38,9 +38,10 @@ namespace backend.Controllers
 			List<Availability> availabilityList = request.Select(s => new Availability {
 				UserId = s.UserId,
 				GameId = s.GameId,
-				Available = s.Available,
+				Available = s.Available ? 1 : 0,
 				Comments = s.Comments
 			}).ToList();
+
 
 			await _context.AddRangeAsync(availabilityList);
 			await _context.SaveChangesAsync();
@@ -51,7 +52,7 @@ namespace backend.Controllers
 				availabilityDTO.Add(new AvailabilityDTO {
 					UserId = availability.UserId,
 					GameId = availability.GameId,
-					Available = availability.Available,
+					Available = availability.Available == 1,
 					Comments = availability.Comments
 				});
 			}

@@ -25,7 +25,7 @@ if (string.IsNullOrEmpty(connectionString))
 }
 
 builder.Services.AddDbContext<FrogcrewContext>(options =>
-    options.UseMySQL(connectionString));
+    options.UseSqlServer(connectionString));
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
