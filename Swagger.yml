@@ -94,7 +94,7 @@ paths:
       tags:
         - crew members
       summary: Find crew members
-      description: Returns a list of all crew members. (The endpoint in the backend is /users, plan to change it to /crewMembers)
+      description: Return a list of all crew members. (The endpoint in the backend is /users, plan to change it to /crewMembers)
       responses:
         '200':
           description: A list of all crew members
@@ -117,18 +117,132 @@ paths:
                   fullName: Bob Marley
                   email: Bob.Marley@example.com
                   phoneNumber: '1231231234'
-  ##/availability:
-    ##post:
-  ##/gameSchedule:
-    ##post:
-  ##/gameSchedule/{scheduleId}:
-    ##get:
-    ##put:
-    ##delete:
-  ##/crewSchedule:
+  /crewMember/{gameId}/{position}:
+    get:
+      tags:
+        - crew members
+      summary: Find crew members by availability and position
+      description: Return a list of crew member who are qualified for the position and available for the game.
+      responses:
+        '200':
+          description: OK
+  /availability:
+    post:
+      tags:
+        - availability
+      summary: Add availability.
+      description: Add new availability and return the saved one.
+      responses:
+        '200':
+          description: OK
+  /gameSchedule:
+    post:
+      tags:
+        - game schedule
+      summary: Add game schedule
+      description: Add a new game schedule and return the saved one.
+      responses:
+        '200':
+          description: OK
+  /gameSchedule/{scheduleId}:
+    get:
+      tags:
+        - game schedule
+      summary: Find game schedule by scheduleId
+      description: Find a specifc game schedule and return it.
+      responses:
+        '200':
+          description: OK
+  /gameSchedule/{scheduleId}/games:
+    post:
+      tags:
+        - game schedule
+      summary: Add game to schedule
+      description: Add game to schedule and return saved one.
+      responses:
+        '200':
+          description: OK
+    get:
+      tags:
+        - game schedule
+      summary: Find games by scheduleId
+      description: Return a list of games for a specific schedule.
+      responses:
+        '200':
+          description: OK
+  /gameSchedule/game/{gameId}:
+    get:
+      tags:
+        - game schedule
+      summary: Find game by gameId
+      description: Find a specific game and return it.
+      responses:
+        '200':
+          description: OK
+  /gameSchedule/season/{season}:
+    get:
+      tags:
+        - game schedule
+      summary: Find game schedules by season
+      description: Return a list of game schedules for a specified season.
+      responses:
+        '200':
+          description: OK
+  /crewSchedule:
+    post:
+      tags:
+        - crew schedule
+      summary: Add new crew schedule
+      description: add new crew schedule and return the saved one.
+      responses:
+        '200':
+          description: OK
+  /crewSchedule/{gameId}:
+    get:
+      tags:
+        - crew schedule
+      summary: Find crew schedule by Id
+      description: Find a specific crew schedule and return it.
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+        - crew schedule
+      summary: Update a crew schedule
+      description: Updates an existing crew schedule and return the updated one.
+      responses:
+        '200':
+          description: OK
+  /crewList/{gameId}:
+    get:
+      tags:
+        - crew list
+      summary: Find a crew list by Id
+      description: Find a specific crew list and return it.
+      responses:
+        '200':
+          description: OK
+  /invite:
+    post:
+      tags:
+        - misc
+      summary: Invite Crew Member
+      description: Send invite to crew members.
+      responses:
+        '200':
+          description: OK
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Logs a user into the system.
+      description: Use HTTP basic authentication to log in users and then return JWT Token.
+      responses:
+        '200':
+          description: OK
       
-                        
-        
+
 components:
   schemas:
     AuthDTO:
