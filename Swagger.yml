@@ -123,6 +123,19 @@ paths:
         - crew members
       summary: Find crew members by availability and position
       description: Return a list of crew member who are qualified for the position and available for the game.
+      parameters:
+        - in: path
+          name: gameId
+          description: Id of the game
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: position
+          description: Position of the crew member
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -150,6 +163,13 @@ paths:
         - game schedule
       summary: Find game schedule by scheduleId
       description: Find a specifc game schedule and return it.
+      parameters:
+        - in: path
+          name: scheduleId
+          description: id of the game schedule to return
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -159,6 +179,13 @@ paths:
         - game schedule
       summary: Add game to schedule
       description: Add game to schedule and return saved one.
+      parameters:
+        - in: path
+          name: scheduleId
+          description: id of the game schedule to add game to
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -167,6 +194,13 @@ paths:
         - game schedule
       summary: Find games by scheduleId
       description: Return a list of games for a specific schedule.
+      parameters:
+        - in: path
+          name: scheduleId
+          description: id of the game schedule to add game to
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -176,6 +210,13 @@ paths:
         - game schedule
       summary: Find game by gameId
       description: Find a specific game and return it.
+      parameters:
+        - in: path
+          name: gameId
+          description: id of the game to return
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -185,6 +226,13 @@ paths:
         - game schedule
       summary: Find game schedules by season
       description: Return a list of game schedules for a specified season.
+      parameters:
+        - in: path
+          name: season
+          description: Season of the game schedule
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -203,6 +251,13 @@ paths:
         - crew schedule
       summary: Find crew schedule by Id
       description: Find a specific crew schedule and return it.
+      parameters:
+        - in: path
+          name: gameId
+          description: Id of the game
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -211,6 +266,13 @@ paths:
         - crew schedule
       summary: Update a crew schedule
       description: Updates an existing crew schedule and return the updated one.
+      parameters:
+        - in: path
+          name: gameId
+          description: Id of the game 
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -220,6 +282,13 @@ paths:
         - crew list
       summary: Find a crew list by Id
       description: Find a specific crew list and return it.
+      parameters:
+        - in: path
+          name: gameId
+          description: Id of the game
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -238,9 +307,24 @@ paths:
         - auth
       summary: Logs a user into the system.
       description: Use HTTP basic authentication to log in users and then return JWT Token.
+      parameters:
+        - name: username
+          in: query
+          description: The username for login
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The password for login in (clear text)
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: OK
+        '401':
+          description: Bad Credentials
       
 
 components:
