@@ -4,7 +4,7 @@ namespace backend.DTO
 {
     public class CrewScheduleDTO
     {
-        public int gameId { get; set; }
-        public List<ChangesDTO>? changes { get; set; }
+        public int GameId { get; set; }
+        public List<ChangesDTO>? Changes { get; set; }
     }
 }
