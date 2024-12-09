@@ -52,44 +52,47 @@ paths:
               phoneNumber: '1234567890'
               password: P@ssw0rd
               role: ADMIN
+              positions:
+                - Director
+                - Producer
       responses:
         '200':
-          description: crew member profile successfully created
+          description: "Crew member profile successfully created"
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/ApiResponseAddSuccess'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/UserDTO'
-                example:
-                  userId: 1
+                $ref: '#/components/schemas/ApiResponseAddSuccess'
+              example:
+                flag: true
+                code: 200
+                message: Add Success
+                data:
+                  id: 1
                   firstName: John
                   lastName: Doe
                   email: john.doe@example.com
                   phoneNumber: '1234567890'
-                  password: P@ssw0rd
-                  role: ADMIN               
+                  role: ADMIN
+                  positions:
+                    - Director
+                    - Producer             
         '400':
           description: bad input parameter
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/ApiResponseBadRequest'
-                  - type: object
-                    properties:
-                      data: 
-                        type: object
-                example:
+                $ref: '#/components/schemas/ApiResponseBadRequest'
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
                   firstName: "First name is required"
                   lastName: "Last name is required"
                   email: "Email is required"
                   phoneNumber: "Phone number is required"
-                  password: "Password is required"
                   role: "Role is required"
+                  positions: "Positions is required"
     get:
       tags:
         - crew members
@@ -138,7 +141,19 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          description: A list of crew members who can work the position and are available
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApiResponseFindSuccess'
+              example:
+                - userId: 1
+                  fullName: John Doe
+                  email:
+        '404':
+          description: game not found
   /availability:
     post:
       tags:
@@ -514,22 +529,40 @@ components:
         phoneNumber:  
           type: string
           description: Phone number of the user
+        
     ApiResponseAddSuccess:
       type: object
-      description: Success response schema
+      description: Add Success response schema
       properties:
         flag:
           type: boolean
           description: Success or not
-          example: true
         code:
           type: integer
           description: Http status code
-          example: 200
         message:
           type: string
-          description: The long success message
-          example: Add Success
+          description: The add success message
+        data:
+          oneOf:
+            - $ref: '#/components/schemas/UserDTO'
+            - type: array
+              items:
+                $ref: '#/components/schemas/UserDTO'
+    
+    ApiResponseFindSuccess:
+      type: object
+      description: Find Success response schema
+      properties:
+        flag:
+          type: boolean
+          description: Success or not
+        code:
+          type: integer
+          description: Http status code
+        message:
+          type: string
+          description: The endpoint specific success message
         data:
           type: object
           description: Endpoint specific success details
@@ -550,6 +583,6 @@ components:
           description: The long error message
           example: Provided arguments are invalid, see data for details.
         data:
-          type : object
-          description: Endpoint specific error details
+          oneOf:
+            - $ref: '#/components/schemas/UserDTO'
     
