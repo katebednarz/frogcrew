@@ -43,8 +43,6 @@ paths:
         description: Crew member that needs to be added
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/UserDTO'
             example:
               firstName: John
               lastName: Doe
@@ -57,11 +55,9 @@ paths:
                 - Producer
       responses:
         '200':
-          description: "Crew member profile successfully created"
+          description: Crew member added and returned
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponseAddSuccess'
               example:
                 flag: true
                 code: 200
@@ -74,14 +70,12 @@ paths:
                   phoneNumber: '1234567890'
                   role: ADMIN
                   positions:
-                    - Director
-                    - Producer             
+                    - DIRECTOR
+                    - PRODUCER   
         '400':
           description: bad input parameter
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponseBadRequest'
               example:
                 flag: false
                 code: 400
@@ -100,26 +94,26 @@ paths:
       description: Return a list of all crew members. (The endpoint in the backend is /users, plan to change it to /crewMembers)
       responses:
         '200':
-          description: A list of all crew members
+          description: Crew member found and returned
           content:
             application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/UserSimpleDTO'
               example:
-                - userId: 1
-                  fullName: John Doe
-                  email: john.doe@example.com
-                  phoneNumber: '1234567890'
-                - userId: 2
-                  fullName: Jane Smith
-                  email: Jane.Smith@example.com
-                  phoneNumber: '1112223333'
-                - userId: 3
-                  fullName: Bob Marley
-                  email: Bob.Marley@example.com
-                  phoneNumber: '1231231234'
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  - userId: 1
+                    fullName: John Doe
+                    email: john.doe@example.com
+                    phoneNumber: '1234567890'
+                  - userId: 2
+                    fullName: Jane Smith
+                    email: Jane.Smith@example.com
+                    phoneNumber: '1112223333'
+                  - userId: 3
+                    fullName: Bob Marley
+                    email: Bob.Marley@example.com
+                    phoneNumber: '1231231234'
   /crewMember/{gameId}/{position}:
     get:
       tags:
@@ -133,45 +127,134 @@ paths:
           required: true
           schema:
             type: string
+            example: 1
         - in: path
           name: position
           description: Position of the crew member
           required: true
           schema:
             type: string
+            example: DIRECTOR
       responses:
         '200':
-          description: A list of crew members who can work the position and are available
+          description: Crew members found and returned
           content:
             application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ApiResponseFindSuccess'
               example:
-                - userId: 1
-                  fullName: John Doe
-                  email:
+                flag: true
+                code: 200
+                message: Find Crew Members Success
+                data:
+                  - userId: 1
+                    fullName: John Doe
+                  - userId: 2
+                    fullName: Jane Smith
         '404':
           description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
   /availability:
     post:
       tags:
         - availability
       summary: Add availability.
       description: Add new availability and return the saved one.
+      requestBody:
+        required: true
+        description: Availability that needs to be added
+        content:
+          application/json:
+            example:
+              - userId: 1
+                gameId: 1
+                available: true
+                comments: "I can work"
+              - userId: 1
+                gameId: 2
+                available: false
+                comments: "I can't work"
       responses:
         '200':
-          description: OK
+          description: Availability added and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Add Success
+                data:
+                  - userId: 1
+                    gameId: 1
+                    available: true
+                    comments: "I can work"
+                  - userId: 1
+                    gameId: 2
+                    available: false
+                    comments: "I can't work"
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  userId: "UserId is required"
+                  gameId: "GameId is required"
+                  available: "Available is required"
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
   /gameSchedule:
     post:
       tags:
         - game schedule
       summary: Add game schedule
       description: Add a new game schedule and return the saved one.
+      requestBody:
+        required: true
+        description: Game schedule that needs to be added
+        content:
+          application/json:
+            example:
+              sport: Football
+              season: '2024-2025'
       responses:
         '200':
-          description: OK
+          description: Game schedule added and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Add Success
+                data:
+                  id: 1
+                  sport: Football
+                  season: '2024-2025'
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  sport: "Sport is required"
+                  season: "Season is required"
   /gameSchedule/{scheduleId}:
     get:
       tags:
@@ -185,9 +268,29 @@ paths:
           required: true
           schema:
             type: string
+            example: 1
       responses:
         '200':
-          description: OK
+          description: Game schedule found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  id: 1
+                  sport: Football
+                  season: '2024-2025'
+        '404':
+          description: schedule not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find schedule with id 1
+                data: null
   /gameSchedule/{scheduleId}/games:
     post:
       tags:
@@ -201,9 +304,55 @@ paths:
           required: true
           schema:
             type: string
+            example: 1
+      requestBody:
+        required: true
+        description: Game that needs to be added
+        content:
+          application/json:
+            example:
+              gameDate: "2021-10-10"
+              venue: "Amon G. Carter Stadium"
+              opponent: "Texas Longhorns"
+              isFinalized: true
       responses:
         '200':
-          description: OK
+          description: Games added and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Add Success
+                data:
+                  gameId: 1
+                  scheduleId: 1
+                  gameDate: "2021-10-10"
+                  venue: "Amon G. Carter Stadium"
+                  opponent: "Texas Longhorns"
+                  isFinalized: true
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  gameDate: "Game date is required"
+                  venue: "Venue is required"
+                  opponent: "Opponent is required"
+                  isFinalized: "Is finalized is required"
+        '404':
+          description: schedule not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find schedule with id 1
+                data: null
     get:
       tags:
         - game schedule
@@ -216,9 +365,38 @@ paths:
           required: true
           schema:
             type: string
+            example: 1
       responses:
         '200':
-          description: OK
+          description: Games found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  - gameId: 1
+                    scheduleId: 1
+                    gameDate: "2021-10-10"
+                    venue: "Amon G. Carter Stadium"
+                    opponent: "Texas Longhorns"
+                    isFinalized: true
+                  - gameId: 2
+                    scheduleId: 1
+                    gameDate: "2021-10-17"
+                    venue: "Amon G. Carter Stadium"
+                    opponent: "Texas Longhorns"
+                    isFinalized: true
+        '404':
+          description: schedule not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find schedule with id 1
+                data: null
   /gameSchedule/game/{gameId}:
     get:
       tags:
@@ -232,9 +410,32 @@ paths:
           required: true
           schema:
             type: string
+            example: 1
       responses:
         '200':
-          description: OK
+          description: Game found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  gameId: 1
+                  scheduleId: 1
+                  gameDate: "2021-10-10"
+                  venue: "Amon G. Carter Stadium"
+                  opponent: "Texas Longhorns"
+                  isFinalized: true
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
   /gameSchedule/season/{season}:
     get:
       tags:
@@ -248,18 +449,87 @@ paths:
           required: true
           schema:
             type: string
+            example: '2024-2025'
       responses:
         '200':
-          description: OK
+          description: Game schedules found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  - id: 1
+                    sport: Football
+                    season: '2024-2025'
+                  - id: 2
+                    sport: Basketball
+                    season: '2024-2025'
+        '404':
+          description: schedules not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find any schedules for the '2024-2025' season
+                data: null
   /crewSchedule:
     post:
       tags:
         - crew schedule
       summary: Add new crew schedule
       description: add new crew schedule and return the saved one.
+      requestBody:
+        required: true
+        description: Crew schedule that needs to be added
+        content:
+          application/json:
+            example:
+              gameId: 1
+              changes:
+                - action: ASSIGN
+                  id: 1
+                  position: DIRECTOR
+                  fullName: John Doe
+                - action: ASSIGN
+                  id: 2
+                  position: PRODUCER
+                  fullName: Jane Smith
       responses:
         '200':
-          description: OK
+          description: Crew schedule added and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Add Success
+                data:
+                  gameId: 1
+                  changes:
+                    - action: ASSIGN
+                      id: 1
+                      position: DIRECTOR
+                      fullName: John Doe
+                    - action: ASSIGN
+                      id: 2
+                      position: PRODUCER
+                      fullName: Jane Smith
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  gameId: "GameId is required"
+                  position: "Position is required"
+                  fullName: "Full name is required"
+                  changes: "Changes is required"
   /crewSchedule/{gameId}:
     get:
       tags:
@@ -273,9 +543,36 @@ paths:
           required: true
           schema:
             type: string
+            example: 1
       responses:
         '200':
-          description: OK
+          description: Crew schedule found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  gameId: 1
+                  changes:
+                    - action: ASSIGN
+                      id: 1
+                      position: DIRECTOR
+                      fullName: John Doe
+                    - action: ASSIGN
+                      id: 2
+                      position: PRODUCER
+                      fullName: Jane Smith
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
     put:
       tags:
         - crew schedule
@@ -288,9 +585,65 @@ paths:
           required: true
           schema:
             type: string
+            example: 1
+      requestBody:
+        required: true
+        description: Crew schedule that needs to be updated
+        content:
+          application/json:
+            example:
+              gameId: 1
+              changes:
+                - action: ASSIGN
+                  id: 1
+                  position: DIRECTOR
+                  fullName: John Doe
+                - action: UNASSIGN
+                  id: 2
+                  position: PRODUCER
+                  fullName: Jane Smith
       responses:
         '200':
-          description: OK
+          description: Crew schedule updated and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Update Success
+                data:
+                  gameId: 1
+                  changes:
+                    - action: ASSIGN
+                      id: 1
+                      position: DIRECTOR
+                      fullName: John Doe
+                    - action: UNASSIGN
+                      id: 2
+                      position: PRODUCER
+                      fullName: Jane Smith
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  gameId: "GameId is required"
+                  position: "Position is required"
+                  fullName: "Full name is required"
+                  changes: "Changes is required"
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
   /crewList/{gameId}:
     get:
       tags:
@@ -304,18 +657,69 @@ paths:
           required: true
           schema:
             type: string
+            example: 1
       responses:
         '200':
-          description: OK
+          description: Crew list found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  gameId: 1
+                  gameStart: "12:00"
+                  gameDate: "2021-10-10"
+                  venue: "Amon G. Carter Stadium"
+                  opponent: "Texas Longhorns"
+                  crewedUsers:
+                    - userId: 1
+                      gameId: 1
+                      fullName: John Doe
+                      Position: DIRECTOR
+                      ReportTime: "12:00"
+                    - userId: 2
+                      gameId: 1
+                      fullName: Jane Smith
+                      Position: PRODUCER
+                      ReportTime: "12:00"
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
   /invite:
     post:
       tags:
         - misc
       summary: Invite Crew Member
       description: Send invite to crew members.
+      requestBody:
+        required: true
+        description: Emails that need to be invited
+        content:
+          application/json:
+            example:
+              emails:
+                - john.smith@example.com
+                - jane.doe@example.com
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Invite Success
+                data: 
+                  - john.smith@example.com
+                  - jane.doe@example.com
   /auth/login:
     post:
       tags:
@@ -329,19 +733,36 @@ paths:
           required: true
           schema:
             type: string
+            example: username
         - name: password
           in: query
           description: The password for login in (clear text)
           required: true
           schema:
             type: string
+            example: password
       responses:
         '200':
-          description: OK
+          description: User logged in
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Login Success
+                data:
+                  userId: 1
+                  role: ADMIN
+                  token: JWT token
         '401':
           description: Bad Credentials
-      
-
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 401
+                message: username or password is incorrect
+                data: null
 components:
   schemas:
     AuthDTO:
@@ -351,12 +772,15 @@ components:
         userId:
           type: integer
           description: Id of the user
+          example: 1
         role:
           type: string
           description: Role of the user
+          example: ADMIN
         token:
           type: string
           description: JWT token
+          example: JWT token
     AvailabilityDTO:
       type: object
       description: AvailabilityDTO schema
@@ -364,15 +788,19 @@ components:
         userId:
           type: integer
           description: Id of the user
+          example: 1
         gameId:
           type: integer
           description: Id of the game
+          example: 1
         available:
           type: boolean
           description: Whether the user is available for the game
+          example: true
         comments:
           type: string
           description: Comments about the user's availability
+          example: "I can work the game"
     ChangesDTO:
       type: object
       description: ChangesDTO schema
@@ -380,15 +808,19 @@ components:
         action:
           type: string
           description: Action to be performed
+          example: ASSIGN
         id:
           type: integer
           description: Id of the user
+          example: 1
         position:
           type: string
           description: Position to be changed
+          example: DIRECTOR
         fullName:
           type: string
           description: Full name of the user
+          example: John Doe
     CrewedUserDTO:
       type: object
       description: CrewedUserDTO schema
@@ -396,18 +828,23 @@ components:
         userId:
           type: integer
           description: Id of the user
+          example: 1
         gameId:
           type: integer
           description: Id of the game
+          example: 1
         fullName:
           type: string
           description: Full name of the user
+          example: John Doe
         Position:
           type: string
           description: Position of the user
+          example: DIRECTOR
         ReportTime:
           type: string
           description: Time of the report
+          example: "12:00"
     CrewListDTO:
       type: object
       description: CrewListDTO schema
@@ -415,18 +852,23 @@ components:
         gameId:
           type: integer
           description: Id of the game
+          example: 1
         gameStart:
           type: string
           description: Start time of the game
+          example: "12:00"
         gameDate:
           type: string
           description: Date of the game
+          example: "2021-10-10"
         venue:
           type: string
           description: Location of the game
+          example: "Amon G. Carter Stadium"
         opponent:
           type: string
           description: Opponent of the game
+          example: "Texas Longhorns"
         crewedUsers:
           type: array
           items:
@@ -438,6 +880,7 @@ components:
         gameId:
           type: integer
           description: Id of the game
+          example: 1
         changes:
           type: array
           items:
@@ -451,6 +894,9 @@ components:
           items:
             type: string
           description: List of emails
+          example: 
+            - john.smith@example.com
+            - jane.doe@example.com
     GameDTO:
       type: object
       description: GameDTO schema
@@ -458,21 +904,27 @@ components:
         gameId:
           type: integer
           description: Id of the game
+          example: 1
         scheduleId:
           type: integer
           description: Id of the schedule
+          example: 1
         gameDate:
           type: string
           description: Date of the game
+          example: "2021-10-10"
         venue:
           type: string
           description: Location of the game
+          example: "Amon G. Carter Stadium"
         opponent:
           type: string
           description: Opponent of the game
+          example: "Texas Longhorns"
         isFinalized:
           type: boolean
           description: Whether the game is finalized
+          example: true
     GameScheduleDTO:
       type: object
       description: GameScheduleDTO schema
@@ -480,12 +932,15 @@ components:
         id:
           type: integer
           description: Id of the schedule
+          example: 1
         sport:
           type: string
           description: Sport of the schedule
+          example: Football
         season:
           type: string
           description: Season of the schedule
+          example: '2024-2025'
     UserDTO:
       type: object
       description: UserDTO schema
@@ -493,26 +948,35 @@ components:
         id:
           type: integer
           description: Id of the user
+          example: 1
         firstName:
           type: string
           description: First name of the user
+          example: John
         lastName:
           type: string
           description: Last name of the user
+          example: Doe
         email:
           type: string
           description: Email of the user
+          example:
         phoneNumber:
           type: string
           description: Phone number of the user
+          example: '1234567890'
         role:
           type: string
           description: Role of the user
+          example: ADMIN
         positions:
           type: array
           items:
             type: string
           description: List of positions
+          example:
+            - DIRECTOR
+            - PRODUCER
     UserSimpleDTO:
       type: object
       description: UserSimpleDTO schema
@@ -520,69 +984,36 @@ components:
         userId:
           type: integer
           description: Id of the user
+          example: 1
         fullName:
           type: string
           description: Full name of the user
+          example: John Doe
         email:
           type: string
           description: Email of the user
+          example: john.doe@example.com
         phoneNumber:  
           type: string
           description: Phone number of the user
-        
-    ApiResponseAddSuccess:
+          example: '1234567890'
+    Result:
       type: object
-      description: Add Success response schema
+      description: API response schema
       properties:
         flag:
           type: boolean
           description: Success or not
+          example: true
         code:
           type: integer
           description: Http status code
+          example: 200
         message:
           type: string
-          description: The add success message
-        data:
-          oneOf:
-            - $ref: '#/components/schemas/UserDTO'
-            - type: array
-              items:
-                $ref: '#/components/schemas/UserDTO'
-    
-    ApiResponseFindSuccess:
-      type: object
-      description: Find Success response schema
-      properties:
-        flag:
-          type: boolean
-          description: Success or not
-        code:
-          type: integer
-          description: Http status code
-        message:
-          type: string
-          description: The endpoint specific success message
+          description: The response message
+          example: Add Success
         data:
           type: object
-          description: Endpoint specific success details
-    ApiResponseBadRequest:
-      type: object
-      description: Bad request response schema
-      properties:
-        flag:
-          type: boolean
-          description: Success or not
-          example: false
-        code:
-          type: integer
-          description: Http status code
-          example: 400
-        message:
-          type: string
-          description: The long error message
-          example: Provided arguments are invalid, see data for details.
-        data:
-          oneOf:
-            - $ref: '#/components/schemas/UserDTO'
+          example: Endpoint specific data
     
