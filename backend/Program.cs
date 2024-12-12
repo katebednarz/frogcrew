@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Identity;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,11 +28,21 @@ if (string.IsNullOrEmpty(connectionString))
 builder.Services.AddDbContext<FrogcrewContext>(options =>
     options.UseSqlServer(connectionString));
 
+// Identity
+builder.Services.AddDbContext<AuthDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<AuthDbContext>()
+    .AddDefaultTokenProviders();
+
+
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.SuppressModelStateInvalidFilter = true;
 });
 
+// something something, idk really
 builder.Services.AddDistributedMemoryCache();
     
 // Configure JWT Authentication
@@ -93,6 +104,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Role Initialization
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await InitializeRolesAsync(services);
+}
+
 // Use CORS
 app.UseCors("AllowAll");
 
@@ -107,3 +125,18 @@ app.MapControllers();
 StartUpFile.RunStartupFile(app.Services);
 
 app.Run();
+
+async Task InitializeRolesAsync(IServiceProvider serviceProvider)
+{
+    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    
+    string[] roleNames = { "ADMIN", "STUDENT", "FREELANCER" };
+
+    foreach (var role in roleNames)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+}

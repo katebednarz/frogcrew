@@ -1,13 +1,13 @@
-﻿// using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-// using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
-// namespace backend.Models;
+namespace backend.Models;
 
-// public class AuthDbContext : IdentityDbContext<ApplicationUser>
-// {
-//     public AuthDbContext(DbContextOptions<AuthDbContext> options)
-//         : base(options)
-//     {
-//     }
-// }
+public class AuthDbContext : IdentityDbContext<ApplicationUser>
+{
+    public AuthDbContext(DbContextOptions<AuthDbContext> options)
+        : base(options)
+    {
+    }
+}
 
