@@ -114,6 +114,156 @@ paths:
                     fullName: Bob Marley
                     email: Bob.Marley@example.com
                     phoneNumber: '1231231234'
+  /crewMember/{userId}:
+    get:
+      tags:
+        - crew members
+        - NEW
+      summary: Find crew member by id
+      description: Find a specific crew member and return it.
+      parameters:
+        - in: path
+          name: userId
+          description: id of the crew member to return
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Crew member found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  userId: 1
+                  firstName: John
+                  lastName: Doe
+                  email: john.doe@example.com
+                  phoneNumber: '1234567890'
+                  role: ADMIN
+                  positions:
+                    - DIRECTOR
+                    - PRODUCER
+        '404':
+          description: user not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find user with id 1
+                data: null  
+    put:
+      tags:
+        - crew members
+        - NEW
+      summary: Update a crew member
+      description: Update an existing crew member and return the updated one.
+      parameters:
+        - in: path
+          name: userId
+          description: Id of the crew member
+          required: true
+          schema:
+            type: string
+            example: 1
+      requestBody:
+        required: true
+        description: Crew member that needs to be updated
+        content:
+          application/json:
+            example:
+              userId: 1
+              firstName: John
+              lastName: Doe
+              email: john.doe@example.com
+              phoneNumber: '1234567890'
+              role: ADMIN
+              positions:
+                - DIRECTOR
+                - PRODUCER
+                - CAMERA
+      responses:
+        '200':
+          description: Crew member updated and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  userId: 1
+                  firstName: John
+                  lastName: Doe
+                  email: john.doe@example.com
+                  phoneNumber: '1234567890'
+                  role: ADMIN
+                  positions:
+                    - DIRECTOR
+                    - PRODUCER
+                    - CAMERA
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  firstName: "First name is required"
+                  lastName: "Last name is required"
+                  email: "Email is required"
+                  phoneNumber: "Phone number is required"
+                  role: "Role is required"
+                  positions: "Positions is required"
+        '404':
+          description: user not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find user with id 1
+                data: null
+    delete:
+      tags:
+        - crew members
+        - NEW
+      summary: Delete a crew member
+      description: Delete an existing crew member.
+      parameters:
+        - in: path
+          name: userId
+          description: Id of the crew member
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Crew member deleted
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Delete Success
+                data: null
+        '404':
+          description: user not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find user with id 1
+                data: null
   /crewMember/{gameId}/{position}:
     get:
       tags:
@@ -960,7 +1110,7 @@ components:
         email:
           type: string
           description: Email of the user
-          example:
+          example: john.doe@example.com
         phoneNumber:
           type: string
           description: Phone number of the user
