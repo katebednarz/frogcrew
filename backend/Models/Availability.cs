@@ -8,7 +8,7 @@ public partial class Availability
 
     public int GameId { get; set; }
 
-    public bool Available { get; set; }
+    public int Available { get; set; }
 
     public string? Comments { get; set; }
 
@@ -22,7 +22,7 @@ public partial class Availability
 		{
 			UserId = UserId,
 			GameId = GameId,
-			Available = Available,
+			Available = Available == 1,
 			Comments = Comments
 		};
 	}

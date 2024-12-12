@@ -64,13 +64,13 @@ namespace backend.Controllers.Tests
         new() {
           UserId = 1,
           GameId = 1,
-          Available = true,
+          Available = 1,
           Comments = "Coming from another game, will be 30 mins late."
         },
         new() {
           UserId = 1,
           GameId = 2,
-          Available = false,
+          Available = 0,
           Comments = null
         }
       };
