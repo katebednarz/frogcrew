@@ -13,7 +13,9 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
-servers: []
+servers:
+  - url: http://localhost:8080
+    description: Local server
 tags:
   - name: crew members
     description: Endpoints related to crew members
@@ -32,8 +34,314 @@ tags:
   - name: auth
     description: Endpoints related to user authentication
 paths:
-  /tests:
+  /test:
     get:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Invite Success
+                data: 
+                  - john.smith@example.com
+                  - jane.doe@example.com
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Logs a user into the system.
+      description: Use HTTP basic authentication to log in users and then return JWT Token.
+      parameters:
+        - name: username
+          in: query
+          description: The username for login
+          required: true
+          schema:
+            type: string
+            example: username
+        - name: password
+          in: query
+          description: The password for login in (clear text)
+          required: true
+          schema:
+            type: string
+            example: password
+      responses:
+        '200':
+          description: User logged in
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Login Success
+                data:
+                  userId: 1
+                  role: ADMIN
+                  token: JWT token
+        '401':
+          description: Bad Credentials
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 401
+                message: username or password is incorrect
+                data: null
+components:
+  schemas:
+    AuthDTO:
+      type: object
+      description: AuthDTO schema
+      properties:
+        userId:
+          type: integer
+          description: Id of the user
+          example: 1
+        role:
+          type: string
+          description: Role of the user
+          example: ADMIN
+        token:
+          type: string
+          description: JWT token
+          example: JWT token
+    AvailabilityDTO:
+      type: object
+      description: AvailabilityDTO schema
+      properties:
+        userId:
+          type: integer
+          description: Id of the user
+          example: 1
+        gameId:
+          type: integer
+          description: Id of the game
+          example: 1
+        available:
+          type: boolean
+          description: Whether the user is available for the game
+          example: true
+        comments:
+          type: string
+          description: Comments about the user's availability
+          example: "I can work the game"
+    ChangesDTO:
+      type: object
+      description: ChangesDTO schema
+      properties:
+        action:
+          type: string
+          description: Action to be performed
+          example: ASSIGN
+        id:
+          type: integer
+          description: Id of the user
+          example: 1
+        position:
+          type: string
+          description: Position to be changed
+          example: DIRECTOR
+        fullName:
+          type: string
+          description: Full name of the user
+          example: John Doe
+    CrewedUserDTO:
+      type: object
+      description: CrewedUserDTO schema
+      properties:
+        userId:
+          type: integer
+          description: Id of the user
+          example: 1
+        gameId:
+          type: integer
+          description: Id of the game
+          example: 1
+        fullName:
+          type: string
+          description: Full name of the user
+          example: John Doe
+        Position:
+          type: string
+          description: Position of the user
+          example: DIRECTOR
+        ReportTime:
+          type: string
+          description: Time of the report
+          example: "12:00"
+    CrewListDTO:
+      type: object
+      description: CrewListDTO schema
+      properties:
+        gameId:
+          type: integer
+          description: Id of the game
+          example: 1
+        gameStart:
+          type: string
+          description: Start time of the game
+          example: "12:00"
+        gameDate:
+          type: string
+          description: Date of the game
+          example: "2021-10-10"
+        venue:
+          type: string
+          description: Location of the game
+          example: "Amon G. Carter Stadium"
+        opponent:
+          type: string
+          description: Opponent of the game
+          example: "Texas Longhorns"
+        crewedUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CrewedUserDTO'
+    CrewScheduleDTO:
+      type: object
+      description: CrewScheduleDTO schema
+      properties:
+        gameId:
+          type: integer
+          description: Id of the game
+          example: 1
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangesDTO'
+    EmailDTO:
+      type: object
+      description: EmailDTO schema
+      properties:
+        emails:
+          type: array
+          items:
+            type: string
+          description: List of emails
+          example: 
+            - john.smith@example.com
+            - jane.doe@example.com
+    GameDTO:
+      type: object
+      description: GameDTO schema
+      properties:
+        gameId:
+          type: integer
+          description: Id of the game
+          example: 1
+        scheduleId:
+          type: integer
+          description: Id of the schedule
+          example: 1
+        gameDate:
+          type: string
+          description: Date of the game
+          example: "2021-10-10"
+        venue:
+          type: string
+          description: Location of the game
+          example: "Amon G. Carter Stadium"
+        opponent:
+          type: string
+          description: Opponent of the game
+          example: "Texas Longhorns"
+        isFinalized:
+          type: boolean
+          description: Whether the game is finalized
+          example: true
+    GameScheduleDTO:
+      type: object
+      description: GameScheduleDTO schema
+      properties:
+        id:
+          type: integer
+          description: Id of the schedule
+          example: 1
+        sport:
+          type: string
+          description: Sport of the schedule
+          example: Football
+        season:
+          type: string
+          description: Season of the schedule
+          example: '2024-2025'
+    UserDTO:
+      type: object
+      description: UserDTO schema
+      properties:
+        id:
+          type: integer
+          description: Id of the user
+          example: 1
+        firstName:
+          type: string
+          description: First name of the user
+          example: John
+        lastName:
+          type: string
+          description: Last name of the user
+          example: Doe
+        email:
+          type: string
+          description: Email of the user
+          example: john.doe@example.com
+        phoneNumber:
+          type: string
+          description: Phone number of the user
+          example: '1234567890'
+        role:
+          type: string
+          description: Role of the user
+          example: ADMIN
+        positions:
+          type: array
+          items:
+            type: string
+          description: List of positions
+          example:
+            - DIRECTOR
+            - PRODUCER
+    UserSimpleDTO:
+      type: object
+      description: UserSimpleDTO schema
+      properties:
+        userId:
+          type: integer
+          description: Id of the user
+          example: 1
+        fullName:
+          type: string
+          description: Full name of the user
+          example: John Doe
+        email:
+          type: string
+          description: Email of the user
+          example: john.doe@example.com
+        phoneNumber:  
+          type: string
+          description: Phone number of the user
+          example: '1234567890'
+    Result:
+      type: object
+      description: API response schema
+      properties:
+        flag:
+          type: boolean
+          description: Success or not
+          example: true
+        code:
+          type: integer
+          description: Http status code
+          example: 200
+        message:
+          type: string
+          description: The response message
+          example: Add Success
+        data:
+          type: object
+          example: Endpoint specific data
+    

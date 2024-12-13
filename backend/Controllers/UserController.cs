@@ -225,6 +225,8 @@ namespace backend.Controllers
             * @param userId The ID of the crew member
             * @return The result of the operation
         */
+
+        //need to change to 'crewMember', will need to update frontend
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers()
         {
