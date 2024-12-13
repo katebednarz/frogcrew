@@ -32,7 +32,7 @@ tags:
   - name: auth
     description: Endpoints related to user authentication
 paths:
-  /test:
+  /tests:
     get:
       responses:
         '200':
