@@ -13,7 +13,9 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
-servers: []
+servers:
+  - url: http://localhost:8080
+    description: Local server
 tags:
   - name: crew members
     description: Endpoints related to crew members
