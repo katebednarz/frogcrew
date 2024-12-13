@@ -34,8 +34,832 @@ tags:
   - name: auth
     description: Endpoints related to user authentication
 paths:
-  /test:
+  /crewMember:
+    post:
+      tags:
+        - crew members
+      summary: Add a crew member
+      description: Add a new crew member and return the saved one.
+      requestBody:
+        required: true
+        description: Crew member that needs to be added
+        content:
+          application/json:
+            example:
+              firstName: John
+              lastName: Doe
+              email: john.doe@example.com
+              phoneNumber: '1234567890'
+              password: P@ssw0rd
+              role: ADMIN
+              positions:
+                - Director
+                - Producer
+      responses:
+        '200':
+          description: Crew member added and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Add Success
+                data:
+                  id: 1
+                  firstName: John
+                  lastName: Doe
+                  email: john.doe@example.com
+                  phoneNumber: '1234567890'
+                  role: ADMIN
+                  positions:
+                    - DIRECTOR
+                    - PRODUCER   
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  firstName: "First name is required"
+                  lastName: "Last name is required"
+                  email: "Email is required"
+                  phoneNumber: "Phone number is required"
+                  role: "Role is required"
+                  positions: "Positions is required"
     get:
+      tags:
+        - crew members
+      summary: Find crew members
+      description: Return a list of all crew members. (The endpoint in the backend is /users, plan to change it to /crewMembers)
+      responses:
+        '200':
+          description: Crew member found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  - userId: 1
+                    fullName: John Doe
+                    email: john.doe@example.com
+                    phoneNumber: '1234567890'
+                  - userId: 2
+                    fullName: Jane Smith
+                    email: Jane.Smith@example.com
+                    phoneNumber: '1112223333'
+                  - userId: 3
+                    fullName: Bob Marley
+                    email: Bob.Marley@example.com
+                    phoneNumber: '1231231234'
+  /crewMember/{userId}:
+    get:
+      tags:
+        - crew members
+        - NEW
+      summary: Find crew member by id
+      description: Find a specific crew member and return it.
+      parameters:
+        - in: path
+          name: userId
+          description: id of the crew member to return
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Crew member found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  userId: 1
+                  firstName: John
+                  lastName: Doe
+                  email: john.doe@example.com
+                  phoneNumber: '1234567890'
+                  role: ADMIN
+                  positions:
+                    - DIRECTOR
+                    - PRODUCER
+        '404':
+          description: user not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find user with id 1
+                data: null  
+    put:
+      tags:
+        - crew members
+        - NEW
+      summary: Update a crew member
+      description: Update an existing crew member and return the updated one.
+      parameters:
+        - in: path
+          name: userId
+          description: Id of the crew member
+          required: true
+          schema:
+            type: string
+            example: 1
+      requestBody:
+        required: true
+        description: Crew member that needs to be updated
+        content:
+          application/json:
+            example:
+              userId: 1
+              firstName: John
+              lastName: Doe
+              email: john.doe@example.com
+              phoneNumber: '1234567890'
+              role: ADMIN
+              positions:
+                - DIRECTOR
+                - PRODUCER
+                - CAMERA
+      responses:
+        '200':
+          description: Crew member updated and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  userId: 1
+                  firstName: John
+                  lastName: Doe
+                  email: john.doe@example.com
+                  phoneNumber: '1234567890'
+                  role: ADMIN
+                  positions:
+                    - DIRECTOR
+                    - PRODUCER
+                    - CAMERA
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  firstName: "First name is required"
+                  lastName: "Last name is required"
+                  email: "Email is required"
+                  phoneNumber: "Phone number is required"
+                  role: "Role is required"
+                  positions: "Positions is required"
+        '404':
+          description: user not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find user with id 1
+                data: null
+    delete:
+      tags:
+        - crew members
+        - NEW
+      summary: Delete a crew member
+      description: Delete an existing crew member.
+      parameters:
+        - in: path
+          name: userId
+          description: Id of the crew member
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Crew member deleted
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Delete Success
+                data: null
+        '404':
+          description: user not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find user with id 1
+                data: null
+  /crewMember/{gameId}/{position}:
+    get:
+      tags:
+        - crew members
+      summary: Find crew members by availability and position
+      description: Return a list of crew member who are qualified for the position and available for the game.
+      parameters:
+        - in: path
+          name: gameId
+          description: Id of the game
+          required: true
+          schema:
+            type: string
+            example: 1
+        - in: path
+          name: position
+          description: Position of the crew member
+          required: true
+          schema:
+            type: string
+            example: DIRECTOR
+      responses:
+        '200':
+          description: Crew members found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Crew Members Success
+                data:
+                  - userId: 1
+                    fullName: John Doe
+                  - userId: 2
+                    fullName: Jane Smith
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
+  /availability:
+    post:
+      tags:
+        - availability
+      summary: Add availability.
+      description: Add new availability and return the saved one.
+      requestBody:
+        required: true
+        description: Availability that needs to be added
+        content:
+          application/json:
+            example:
+              - userId: 1
+                gameId: 1
+                available: true
+                comments: "I can work"
+              - userId: 1
+                gameId: 2
+                available: false
+                comments: "I can't work"
+      responses:
+        '200':
+          description: Availability added and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Add Success
+                data:
+                  - userId: 1
+                    gameId: 1
+                    available: true
+                    comments: "I can work"
+                  - userId: 1
+                    gameId: 2
+                    available: false
+                    comments: "I can't work"
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  userId: "UserId is required"
+                  gameId: "GameId is required"
+                  available: "Available is required"
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
+  /gameSchedule:
+    post:
+      tags:
+        - game schedule
+      summary: Add game schedule
+      description: Add a new game schedule and return the saved one.
+      requestBody:
+        required: true
+        description: Game schedule that needs to be added
+        content:
+          application/json:
+            example:
+              sport: Football
+              season: '2024-2025'
+      responses:
+        '200':
+          description: Game schedule added and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Add Success
+                data:
+                  id: 1
+                  sport: Football
+                  season: '2024-2025'
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  sport: "Sport is required"
+                  season: "Season is required"
+  /gameSchedule/{scheduleId}:
+    get:
+      tags:
+        - game schedule
+      summary: Find game schedule by scheduleId
+      description: Find a specifc game schedule and return it.
+      parameters:
+        - in: path
+          name: scheduleId
+          description: id of the game schedule to return
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Game schedule found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  id: 1
+                  sport: Football
+                  season: '2024-2025'
+        '404':
+          description: schedule not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find schedule with id 1
+                data: null
+  /gameSchedule/{scheduleId}/games:
+    post:
+      tags:
+        - game schedule
+      summary: Add game to schedule
+      description: Add game to schedule and return saved one.
+      parameters:
+        - in: path
+          name: scheduleId
+          description: id of the game schedule to add game to
+          required: true
+          schema:
+            type: string
+            example: 1
+      requestBody:
+        required: true
+        description: Game that needs to be added
+        content:
+          application/json:
+            example:
+              gameDate: "2021-10-10"
+              venue: "Amon G. Carter Stadium"
+              opponent: "Texas Longhorns"
+              isFinalized: true
+      responses:
+        '200':
+          description: Games added and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Add Success
+                data:
+                  gameId: 1
+                  scheduleId: 1
+                  gameDate: "2021-10-10"
+                  venue: "Amon G. Carter Stadium"
+                  opponent: "Texas Longhorns"
+                  isFinalized: true
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  gameDate: "Game date is required"
+                  venue: "Venue is required"
+                  opponent: "Opponent is required"
+                  isFinalized: "Is finalized is required"
+        '404':
+          description: schedule not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find schedule with id 1
+                data: null
+    get:
+      tags:
+        - game schedule
+      summary: Find games by scheduleId
+      description: Return a list of games for a specific schedule.
+      parameters:
+        - in: path
+          name: scheduleId
+          description: id of the game schedule to add game to
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Games found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  - gameId: 1
+                    scheduleId: 1
+                    gameDate: "2021-10-10"
+                    venue: "Amon G. Carter Stadium"
+                    opponent: "Texas Longhorns"
+                    isFinalized: true
+                  - gameId: 2
+                    scheduleId: 1
+                    gameDate: "2021-10-17"
+                    venue: "Amon G. Carter Stadium"
+                    opponent: "Texas Longhorns"
+                    isFinalized: true
+        '404':
+          description: schedule not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find schedule with id 1
+                data: null
+  /gameSchedule/game/{gameId}:
+    get:
+      tags:
+        - game schedule
+      summary: Find game by gameId
+      description: Find a specific game and return it.
+      parameters:
+        - in: path
+          name: gameId
+          description: id of the game to return
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Game found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  gameId: 1
+                  scheduleId: 1
+                  gameDate: "2021-10-10"
+                  venue: "Amon G. Carter Stadium"
+                  opponent: "Texas Longhorns"
+                  isFinalized: true
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
+  /gameSchedule/season/{season}:
+    get:
+      tags:
+        - game schedule
+      summary: Find game schedules by season
+      description: Return a list of game schedules for a specified season.
+      parameters:
+        - in: path
+          name: season
+          description: Season of the game schedule
+          required: true
+          schema:
+            type: string
+            example: '2024-2025'
+      responses:
+        '200':
+          description: Game schedules found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  - id: 1
+                    sport: Football
+                    season: '2024-2025'
+                  - id: 2
+                    sport: Basketball
+                    season: '2024-2025'
+        '404':
+          description: schedules not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find any schedules for the '2024-2025' season
+                data: null
+  /crewSchedule:
+    post:
+      tags:
+        - crew schedule
+      summary: Add new crew schedule
+      description: add new crew schedule and return the saved one.
+      requestBody:
+        required: true
+        description: Crew schedule that needs to be added
+        content:
+          application/json:
+            example:
+              gameId: 1
+              changes:
+                - action: ASSIGN
+                  id: 1
+                  position: DIRECTOR
+                  fullName: John Doe
+                - action: ASSIGN
+                  id: 2
+                  position: PRODUCER
+                  fullName: Jane Smith
+      responses:
+        '200':
+          description: Crew schedule added and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Add Success
+                data:
+                  gameId: 1
+                  changes:
+                    - action: ASSIGN
+                      id: 1
+                      position: DIRECTOR
+                      fullName: John Doe
+                    - action: ASSIGN
+                      id: 2
+                      position: PRODUCER
+                      fullName: Jane Smith
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  gameId: "GameId is required"
+                  position: "Position is required"
+                  fullName: "Full name is required"
+                  changes: "Changes is required"
+  /crewSchedule/{gameId}:
+    get:
+      tags:
+        - crew schedule
+      summary: Find crew schedule by Id
+      description: Find a specific crew schedule and return it.
+      parameters:
+        - in: path
+          name: gameId
+          description: Id of the game
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Crew schedule found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  gameId: 1
+                  changes:
+                    - action: ASSIGN
+                      id: 1
+                      position: DIRECTOR
+                      fullName: John Doe
+                    - action: ASSIGN
+                      id: 2
+                      position: PRODUCER
+                      fullName: Jane Smith
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
+    put:
+      tags:
+        - crew schedule
+      summary: Update a crew schedule
+      description: Updates an existing crew schedule and return the updated one.
+      parameters:
+        - in: path
+          name: gameId
+          description: Id of the game 
+          required: true
+          schema:
+            type: string
+            example: 1
+      requestBody:
+        required: true
+        description: Crew schedule that needs to be updated
+        content:
+          application/json:
+            example:
+              gameId: 1
+              changes:
+                - action: ASSIGN
+                  id: 1
+                  position: DIRECTOR
+                  fullName: John Doe
+                - action: UNASSIGN
+                  id: 2
+                  position: PRODUCER
+                  fullName: Jane Smith
+      responses:
+        '200':
+          description: Crew schedule updated and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Update Success
+                data:
+                  gameId: 1
+                  changes:
+                    - action: ASSIGN
+                      id: 1
+                      position: DIRECTOR
+                      fullName: John Doe
+                    - action: UNASSIGN
+                      id: 2
+                      position: PRODUCER
+                      fullName: Jane Smith
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  gameId: "GameId is required"
+                  position: "Position is required"
+                  fullName: "Full name is required"
+                  changes: "Changes is required"
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
+  /crewList/{gameId}:
+    get:
+      tags:
+        - crew list
+      summary: Find a crew list by Id
+      description: Find a specific crew list and return it.
+      parameters:
+        - in: path
+          name: gameId
+          description: Id of the game
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Crew list found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  gameId: 1
+                  gameStart: "12:00"
+                  gameDate: "2021-10-10"
+                  venue: "Amon G. Carter Stadium"
+                  opponent: "Texas Longhorns"
+                  crewedUsers:
+                    - userId: 1
+                      gameId: 1
+                      fullName: John Doe
+                      Position: DIRECTOR
+                      ReportTime: "12:00"
+                    - userId: 2
+                      gameId: 1
+                      fullName: Jane Smith
+                      Position: PRODUCER
+                      ReportTime: "12:00"
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
+  /invite:
+    post:
+      tags:
+        - misc
+      summary: Invite Crew Member
+      description: Send invite to crew members.
+      requestBody:
+        required: true
+        description: Emails that need to be invited
+        content:
+          application/json:
+            example:
+              emails:
+                - john.smith@example.com
+                - jane.doe@example.com
       responses:
         '200':
           description: OK
