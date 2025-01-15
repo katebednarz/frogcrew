@@ -1,0 +1,80 @@
+---
+title: FrogCrew Class Diagram
+---
+classDiagram
+    class Availability {
+        int UserId
+        int GameId
+        int Available
+        string? Comments
+        +AvailabilityDTO ConvertToAvailabilityDTO()
+    }
+    Availability --> Game : virtual Game
+    Availability --> User : virtual User
+
+    class CrewedUser {
+        int UserId
+        int GameId
+        string CrewedPosition
+        TimeOnly? ArrivalTime
+        +CrewedUserDTO ConvertToCrewedUserDTO(FrogcrewContext _context)
+    }
+    CrewedUser --> Game : virtual Game
+    CrewedUser --> User : virtual User
+
+    class Game {
+        int Id
+        int ScheduleId
+        string? Opponent
+        DateOnly? GameDate
+        TimeOnly? GameStart
+        string? Venue
+        bool IsFinalized
+        +GameDTO ConvertToGameDTO()
+        +CrewListDTO ConvertToCrewListDTO(FrogcrewContext _context)
+    }
+    Game --> Schedule : virtual Schedule
+    Game --> Availability : ICollection
+    Game --> CrewedUser : ICollection
+
+    class Notification {
+        int Id
+        int? UserId
+        string? Title
+        string? Content
+        DateTime? Date
+    }
+    Notification --> User : virtual User
+
+    class Schedule {
+        int Id
+        string? Sport
+        string? Season
+        +GameScheduleDTO ConvertToGameScheduleDTO()
+    }
+    Schedule --> Game : ICollection
+
+    class User {
+        int Id
+        string Email
+        string Password
+        string? PhoneNumber
+        string? FirstName
+        string? LastName
+        string? Role
+        string? PayRate
+        +UserDTO ConvertToUserDTO()
+        +UserSimpleDTO ConvertToUserSimpleDTO()
+    }
+    User --> Availability : ICollection
+    User --> CrewedUser : ICollection
+    User --> Notification : ICollection
+    User --> UserQualifiedPosition : ICollection
+
+    class UserQualifiedPosition {
+        int UserId
+        string Position
+    }
+    UserQualifiedPosition --> User : virtual User
+
+    
