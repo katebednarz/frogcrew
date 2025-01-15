@@ -12,3 +12,9 @@
 ### UML Class Diagram
 
 🔗 [UML Class Diagram](https://www.mermaidchart.com/raw/1f4be78a-0597-4fc4-8986-1ceb8937250e?theme=dark&version=v0.1&format=svg)
+
+
+
+
+![Class Diagram](./backend/Docs/ClassDiagram.svg)
+<img src="./backend/Docs/ClassDiagram.svg">
