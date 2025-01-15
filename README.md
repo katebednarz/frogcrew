@@ -17,4 +17,3 @@
 
 
 ![Class Diagram](./backend/Docs/ClassDiagram.svg)
-<img src="./backend/Docs/ClassDiagram.svg">
