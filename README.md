@@ -10,10 +10,4 @@
 🔗 [API Documentation](https://app.swaggerhub.com/apis-docs/JAMESEDMONSON/frog-crew/1.0.0)
 
 ### UML Class Diagram
-
-🔗 [UML Class Diagram](./backend/Docs/ClassDiagram.svg)
-
-
-
-
 ![Class Diagram](./backend/Docs/ClassDiagram.svg)
