@@ -9,8 +9,8 @@ classDiagram
         string? Comments
         +AvailabilityDTO ConvertToAvailabilityDTO()
     }
-    Availability --> Game : virtual Game
-    Availability --> User : virtual User
+    Availability --> Game: virtual Game
+    Availability --> User: virtual User
 
     class CrewedUser {
         int UserId
@@ -19,8 +19,8 @@ classDiagram
         TimeOnly? ArrivalTime
         +CrewedUserDTO ConvertToCrewedUserDTO(FrogcrewContext _context)
     }
-    CrewedUser --> Game : virtual Game
-    CrewedUser --> User : virtual User
+    CrewedUser --> Game: virtual Game
+    CrewedUser --> User: virtual User
 
     class Game {
         int Id
@@ -33,9 +33,9 @@ classDiagram
         +GameDTO ConvertToGameDTO()
         +CrewListDTO ConvertToCrewListDTO(FrogcrewContext _context)
     }
-    Game --> Schedule : virtual Schedule
-    Game --> Availability : ICollection
-    Game --> CrewedUser : ICollection
+    Game --> Schedule: virtual Schedule
+    Game --> Availability: ICollection
+    Game --> CrewedUser: ICollection
 
     class Notification {
         int Id
@@ -44,7 +44,7 @@ classDiagram
         string? Content
         DateTime? Date
     }
-    Notification --> User : virtual User
+    Notification --> User: virtual User
 
     class Schedule {
         int Id
@@ -52,7 +52,7 @@ classDiagram
         string? Season
         +GameScheduleDTO ConvertToGameScheduleDTO()
     }
-    Schedule --> Game : ICollection
+    Schedule --> Game: ICollection
 
     class User {
         int Id
@@ -66,15 +66,15 @@ classDiagram
         +UserDTO ConvertToUserDTO()
         +UserSimpleDTO ConvertToUserSimpleDTO()
     }
-    User --> Availability : ICollection
-    User --> CrewedUser : ICollection
-    User --> Notification : ICollection
-    User --> UserQualifiedPosition : ICollection
+    User --> Availability: ICollection
+    User --> CrewedUser: ICollection
+    User --> Notification: ICollection
+    User --> UserQualifiedPosition: ICollection
 
     class UserQualifiedPosition {
         int UserId
         string Position
     }
-    UserQualifiedPosition --> User : virtual User
+    UserQualifiedPosition --> User: virtual User
 
     
