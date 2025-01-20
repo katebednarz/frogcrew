@@ -1,0 +1,80 @@
+---
+title: FrogCrew Class Diagram
+---
+classDiagram
+    class Availability {
+        int UserId
+        int GameId
+        int Available
+        String? Comments
+        +AvailabilityDTO Convert()
+    }
+    Availability --> Game: Game
+    Availability --> User: User
+
+    class CrewedUser {
+        int UserId
+        int GameId
+        String CrewedPosition
+        TimeOnly? ArrivalTime
+        +CrewedUserDTO Convert(DbContext)
+    }
+    CrewedUser --> Game: Game
+    CrewedUser --> User: User
+
+    class Game {
+        int Id
+        int ScheduleId
+        String? Opponent
+        DateOnly? GameDate
+        TimeOnly? GameStart
+        String? Venue
+        bool IsFinalized
+        +GameDTO Convert()
+        +CrewListDTO Convert(DbContext)
+    }
+    Game --> Schedule: Schedule
+    Game --> Availability: ICollection
+    Game --> CrewedUser: ICollection
+
+    class Notification {
+        int Id
+        int? UserId
+        String? Title
+        String? Content
+        DateTime? Date
+    }
+    Notification --> User: User
+
+    class Schedule {
+        int Id
+        String? Sport
+        String? Season
+        +GameScheduleDTO Convert()
+    }
+    Schedule --> Game: ICollection
+
+    class User {
+        int Id
+        String Email
+        String Password
+        String? PhoneNumber
+        String? FirstName
+        String? LastName
+        String? Role
+        String? PayRate
+        +UserDTO Convert()
+        +UserSimpleDTO Convert()
+    }
+    User --> Availability: ICollection
+    User --> CrewedUser: ICollection
+    User --> Notification: ICollection
+    User --> UserQualifiedPosition: ICollection
+
+    class UserQualifiedPosition {
+        int UserId
+        String Position
+    }
+    UserQualifiedPosition --> User: User
+
+    

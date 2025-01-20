@@ -212,32 +212,34 @@ public class UserController : Controller
         return tokenHandler.WriteToken(token);
     }
 
-    /*
-     * Finds a crew member by ID
-     *
-     * @param userId The ID of the crew member
-     * @return The result of the operation
-     */
-    [HttpGet("users")]
-    public async Task<IActionResult> GetUsers()
-    {
-        var users = await _context.Users.ToListAsync();
+        /*
+            * Finds a crew member by ID
+            * 
+            * @param userId The ID of the crew member
+            * @return The result of the operation
+        */
 
-        List<UserSimpleDTO> userDTOs = [];
-        foreach (var user in users)
+        //need to change to 'crewMember', will need to update frontend
+        [HttpGet("users")]
+        public async Task<IActionResult> GetUsers()
         {
-            var userDto = new UserSimpleDTO
+            var users = await _context.Users.ToListAsync();
+            
+            List<UserSimpleDTO> userDTOs = [];
+            foreach (var user in users)
             {
-                UserId = user.Id,
-                FullName = user.FirstName + " " + user.LastName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber
-            };
-
-            userDTOs.Add(userDto);
+               var userDto = new UserSimpleDTO {
+                    UserId = user.Id,
+                    FullName = user.FirstName + " " + user.LastName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber
+                };
+                
+                userDTOs.Add(userDto);
+            }
+            
+            var response = new Result(true, 200, "Found Users", userDTOs);
+            return Ok(response);
         }
-
-        var response = new Result(true, 200, "Found Users", userDTOs);
-        return Ok(response);
     }
 }
