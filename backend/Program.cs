@@ -32,7 +32,7 @@ builder.Services.AddDbContext<FrogcrewContext>(options =>
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddDefaultTokenProviders();
 
@@ -128,7 +128,7 @@ app.Run();
 
 async Task InitializeRolesAsync(IServiceProvider serviceProvider)
 {
-    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
     
     string[] roleNames = { "ADMIN", "STUDENT", "FREELANCER" };
 
@@ -136,7 +136,7 @@ async Task InitializeRolesAsync(IServiceProvider serviceProvider)
     {
         if (!await roleManager.RoleExistsAsync(role))
         {
-            await roleManager.CreateAsync(new IdentityRole(role));
+            await roleManager.CreateAsync(new ApplicationRole(role));
         }
     }
 }
