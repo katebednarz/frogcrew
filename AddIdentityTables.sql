@@ -20,7 +20,15 @@ CREATE TABLE [AspNetRoles] (
 );
 GO
 
-CREATE TABLE [AspNetUsers] (
+CREATE TABLE [Schedule] (
+    [id] int NOT NULL IDENTITY,
+    [sport] nvarchar(255) NULL,
+    [season] nvarchar(255) NULL,
+    CONSTRAINT [PRIMARY] PRIMARY KEY ([id])
+);
+GO
+
+CREATE TABLE [User] (
     [Id] int NOT NULL IDENTITY,
     [FirstName] nvarchar(50) NULL,
     [LastName] nvarchar(50) NULL,
@@ -39,7 +47,7 @@ CREATE TABLE [AspNetUsers] (
     [LockoutEnd] datetimeoffset NULL,
     [LockoutEnabled] bit NOT NULL,
     [AccessFailedCount] int NOT NULL,
-    CONSTRAINT [PK_AspNetUsers] PRIMARY KEY ([Id])
+    CONSTRAINT [PK_User] PRIMARY KEY ([Id])
 );
 GO
 
@@ -53,13 +61,26 @@ CREATE TABLE [AspNetRoleClaims] (
 );
 GO
 
+CREATE TABLE [Game] (
+    [id] int NOT NULL IDENTITY,
+    [scheduleId] int NOT NULL,
+    [opponent] nvarchar(255) NULL,
+    [gameDate] date NULL,
+    [gameStart] time NULL,
+    [venue] nvarchar(255) NULL,
+    [isFinalized] bit NOT NULL,
+    CONSTRAINT [PRIMARY] PRIMARY KEY ([id]),
+    CONSTRAINT [Game_ibfk_1] FOREIGN KEY ([scheduleId]) REFERENCES [Schedule] ([id]) ON DELETE CASCADE
+);
+GO
+
 CREATE TABLE [AspNetUserClaims] (
     [Id] int NOT NULL IDENTITY,
     [UserId] int NOT NULL,
     [ClaimType] nvarchar(max) NULL,
     [ClaimValue] nvarchar(max) NULL,
     CONSTRAINT [PK_AspNetUserClaims] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_AspNetUserClaims_AspNetUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE
+    CONSTRAINT [FK_AspNetUserClaims_User_UserId] FOREIGN KEY ([UserId]) REFERENCES [User] ([Id]) ON DELETE CASCADE
 );
 GO
 
@@ -69,7 +90,7 @@ CREATE TABLE [AspNetUserLogins] (
     [ProviderDisplayName] nvarchar(max) NULL,
     [UserId] int NOT NULL,
     CONSTRAINT [PK_AspNetUserLogins] PRIMARY KEY ([LoginProvider], [ProviderKey]),
-    CONSTRAINT [FK_AspNetUserLogins_AspNetUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE
+    CONSTRAINT [FK_AspNetUserLogins_User_UserId] FOREIGN KEY ([UserId]) REFERENCES [User] ([Id]) ON DELETE CASCADE
 );
 GO
 
@@ -78,7 +99,7 @@ CREATE TABLE [AspNetUserRoles] (
     [RoleId] int NOT NULL,
     CONSTRAINT [PK_AspNetUserRoles] PRIMARY KEY ([UserId], [RoleId]),
     CONSTRAINT [FK_AspNetUserRoles_AspNetRoles_RoleId] FOREIGN KEY ([RoleId]) REFERENCES [AspNetRoles] ([Id]) ON DELETE CASCADE,
-    CONSTRAINT [FK_AspNetUserRoles_AspNetUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE
+    CONSTRAINT [FK_AspNetUserRoles_User_UserId] FOREIGN KEY ([UserId]) REFERENCES [User] ([Id]) ON DELETE CASCADE
 );
 GO
 
@@ -88,7 +109,48 @@ CREATE TABLE [AspNetUserTokens] (
     [Name] nvarchar(450) NOT NULL,
     [Value] nvarchar(max) NULL,
     CONSTRAINT [PK_AspNetUserTokens] PRIMARY KEY ([UserId], [LoginProvider], [Name]),
-    CONSTRAINT [FK_AspNetUserTokens_AspNetUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE
+    CONSTRAINT [FK_AspNetUserTokens_User_UserId] FOREIGN KEY ([UserId]) REFERENCES [User] ([Id]) ON DELETE CASCADE
+);
+GO
+
+CREATE TABLE [Notification] (
+    [id] int NOT NULL IDENTITY,
+    [userId] int NULL,
+    [title] nvarchar(255) NULL,
+    [content] nvarchar(255) NULL,
+    [date] datetime NULL,
+    CONSTRAINT [PRIMARY] PRIMARY KEY ([id]),
+    CONSTRAINT [Notification_ibfk_1] FOREIGN KEY ([userId]) REFERENCES [User] ([Id]) ON DELETE CASCADE
+);
+GO
+
+CREATE TABLE [UserQualifiedPositions] (
+    [userId] int NOT NULL,
+    [position] nvarchar(450) NOT NULL,
+    CONSTRAINT [PRIMARY] PRIMARY KEY ([userId], [position]),
+    CONSTRAINT [UserQualifiedPositions_ibfk_1] FOREIGN KEY ([userId]) REFERENCES [User] ([Id])
+);
+GO
+
+CREATE TABLE [Availability] (
+    [userId] int NOT NULL,
+    [gameId] int NOT NULL,
+    [open] int NOT NULL,
+    [comment] nvarchar(255) NULL,
+    CONSTRAINT [PRIMARY] PRIMARY KEY ([userId], [gameId]),
+    CONSTRAINT [Availability_ibfk_1] FOREIGN KEY ([userId]) REFERENCES [User] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [Availability_ibfk_2] FOREIGN KEY ([gameId]) REFERENCES [Game] ([id]) ON DELETE CASCADE
+);
+GO
+
+CREATE TABLE [CrewedUser] (
+    [userId] int NOT NULL,
+    [gameId] int NOT NULL,
+    [crewedPosition] nvarchar(255) NOT NULL,
+    [arrivalTime] time NULL,
+    CONSTRAINT [PRIMARY] PRIMARY KEY ([userId], [gameId], [crewedPosition]),
+    CONSTRAINT [CrewedUser_ibfk_1] FOREIGN KEY ([userId]) REFERENCES [User] ([Id]),
+    CONSTRAINT [CrewedUser_ibfk_2] FOREIGN KEY ([gameId]) REFERENCES [Game] ([id])
 );
 GO
 
@@ -107,14 +169,26 @@ GO
 CREATE INDEX [IX_AspNetUserRoles_RoleId] ON [AspNetUserRoles] ([RoleId]);
 GO
 
-CREATE INDEX [EmailIndex] ON [AspNetUsers] ([NormalizedEmail]);
+CREATE INDEX [gameId] ON [Availability] ([gameId]);
 GO
 
-CREATE UNIQUE INDEX [UserNameIndex] ON [AspNetUsers] ([NormalizedUserName]) WHERE [NormalizedUserName] IS NOT NULL;
+CREATE INDEX [gameId] ON [CrewedUser] ([gameId]);
+GO
+
+CREATE INDEX [scheduleId] ON [Game] ([scheduleId]);
+GO
+
+CREATE INDEX [userId] ON [Notification] ([userId]);
+GO
+
+CREATE INDEX [EmailIndex] ON [User] ([NormalizedEmail]);
+GO
+
+CREATE UNIQUE INDEX [UserNameIndex] ON [User] ([NormalizedUserName]) WHERE [NormalizedUserName] IS NOT NULL;
 GO
 
 INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-VALUES (N'20250120190309_ASP INT', N'8.0.10');
+VALUES (N'20250121193435_Initial', N'8.0.10');
 GO
 
 COMMIT;

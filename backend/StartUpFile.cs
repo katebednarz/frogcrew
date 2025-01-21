@@ -15,7 +15,7 @@ public class StartUpFile() {
         foreach (var password in passwords)
         {
             var user = _context.Users.Find(userId);
-            user!.Password = PasswordHasher.HashPassword(password);
+            //user!.Password = PasswordHasher.HashPassword(password);
             userId++;
         }
         _context.SaveChanges();

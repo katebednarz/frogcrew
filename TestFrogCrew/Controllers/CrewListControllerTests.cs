@@ -80,7 +80,7 @@ namespace backend.Controllers.Tests
             }
         };
 
-      var users = new List<User>
+      var users = new List<ApplicationUser>
         {
             new() {
                 Id = 1,

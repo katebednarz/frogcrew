@@ -17,12 +17,19 @@ namespace backend.Controllers;
 [ApiController]
 public class UserController : Controller
 {
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly FrogcrewContext _context;
     private readonly IConfiguration _configuration;
-    private const string BasicAuthScheme = "Basic";
 
-    public UserController(FrogcrewContext context, IConfiguration configuration)
+    public UserController(
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        FrogcrewContext context, 
+        IConfiguration configuration)
     {
+        _userManager = userManager;
+        _signInManager = signInManager;
         _context = context;
         _configuration = configuration;
     }
@@ -43,38 +50,40 @@ public class UserController : Controller
                 .Select(e => e.ErrorMessage)
                 .ToList();
             var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
-
+        
             return new ObjectResult(errorResponse) { StatusCode = 400 };
         }
 
-        var newUser = new User
+        var user = new ApplicationUser
         {
+            UserName = request.Email, 
             Email = request.Email,
+            PhoneNumber = request.PhoneNumber,
             FirstName = request.FirstName,
             LastName = request.LastName,
-            PhoneNumber = request.PhoneNumber,
-            Role = request.Role,
-            Password = PasswordHasher.HashPassword("password")
         };
 
+        var result = await _userManager.CreateAsync(user, "Password!1");
 
-        _context.Add(newUser);
-        _context.SaveChanges();
-
+        var roleResult = await _userManager.AddToRoleAsync(user, request.Role);
+        if (!roleResult.Succeeded)
+            return new ObjectResult(new Result(false, 400, "Role not found", request.Role));
+        
+        if (!result.Succeeded)
+            return new BadRequestObjectResult(result.Errors);
+        
         foreach (var pos in request.Position)
         {
             var newPosition = new UserQualifiedPosition
             {
-                UserId = newUser.Id,
+                UserId = user.Id,
                 Position = pos
             };
             _context.Add(newPosition);
             _context.SaveChanges();
         }
-
-
-        var response = new Result(true, 200, "Add Success", newUser.ConvertToUserDTO());
-        return Ok(response);
+        
+        return new ObjectResult(new Result(true, 200, "Add Success", request));
     }
 
     /*
@@ -145,101 +154,87 @@ public class UserController : Controller
      * @return The result of the operation
      */
     [HttpPost("auth/login")]
-    public IActionResult Login()
+    public async Task<IActionResult> Login(String Email, String Password)
     {
-        // Check if Authorization header is present
-        if (!Request.Headers.TryGetValue("Authorization", out var value))
-            return Unauthorized(new Result(false, 401, "Missing Authorization Header"));
-
-        // Check if Authorization header is in the correct format
-        var authHeader = value.ToString();
-        if (!authHeader.StartsWith(BasicAuthScheme + " "))
-            return Unauthorized(new Result(false, 401, "Invalid Authorization Header"));
-
-        // Decode the Base64 encoded credentials
-        var encodedUsernamePassword = authHeader["Basic ".Length..].Trim();
-        var decodedUsernamePassword = Encoding.UTF8.GetString(Convert.FromBase64String(encodedUsernamePassword));
-        var credentials = decodedUsernamePassword.Split(':', 2);
-        if (credentials.Length != 2)
-            return Unauthorized(new Result(false, 401, "Invalid Authorization Header"));
-
-        var username = credentials[0];
-        var password = credentials[1];
-
-        // Validate user credentials
-        var user = _context.Users.FirstOrDefault(u => u.Email == username);
-        if (user == null || !PasswordHasher.VerifyPassword(password, user.Password))
-            return Unauthorized(new Result(false, 401, "Invalid email or password"));
-
-        // Generate JWT token
-        var token = GenerateJwtToken(user);
-
-        // Return the token
-        var AuthDTO = new AuthDTO
+        if (!ModelState.IsValid)
         {
-            UserId = user.Id,
-            Role = user.Role ?? string.Empty,
-            Token = token
-        };
-
-        return Ok(new Result(true, 200, "Login successful", AuthDTO));
-    }
-
-    /*
-     * Generates a JWT token for the user
-     *
-     * @param user The user to generate the token for
-     * @return The generated token
-     */
-    private string GenerateJwtToken(User user)
-    {
-        var secretKey = _configuration["JwtSecret"];
-        if (string.IsNullOrEmpty(secretKey)) throw new InvalidOperationException("JWT Secret Key is not configured.");
-        var key = Encoding.ASCII.GetBytes(secretKey);
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(new[]
-            {
-                new Claim("id", user.Id.ToString()),
-                new Claim(ClaimTypes.Role, user.Role ?? string.Empty)
-            }),
-            Expires = DateTime.UtcNow.AddHours(1),
-            SigningCredentials =
-                new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        };
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
-    }
-
-        /*
-            * Finds a crew member by ID
-            * 
-            * @param userId The ID of the crew member
-            * @return The result of the operation
-        */
-
-        //need to change to 'crewMember', will need to update frontend
-        [HttpGet("users")]
-        public async Task<IActionResult> GetUsers()
-        {
-            var users = await _context.Users.ToListAsync();
-            
-            List<UserSimpleDTO> userDTOs = [];
-            foreach (var user in users)
-            {
-               var userDto = new UserSimpleDTO {
-                    UserId = user.Id,
-                    FullName = user.FirstName + " " + user.LastName,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber
-                };
-                
-                userDTOs.Add(userDto);
-            }
-            
-            var response = new Result(true, 200, "Found Users", userDTOs);
-            return Ok(response);
+            var errors = ModelState
+                .SelectMany(kvp => kvp.Value.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+            var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
+        
+            return new ObjectResult(errorResponse) { StatusCode = 400 };
         }
+
+        var user = await _userManager.FindByEmailAsync(Email);
+        if (user == null)
+            return new ObjectResult(new Result(false, 404, "Invalid credentials"));
+        
+        var signInResult = await _signInManager.CheckPasswordSignInAsync(user, Password, false);
+        if (!signInResult.Succeeded)
+            return new ObjectResult(new Result(false, 404, "Invalid credentials"));
+        
+        var token = GenerateJwtToken(user);
+        
+        // var AuthDTO = new AuthDTO
+        // {
+        //     UserId = user.Id,
+        //     Role = user.Role ?? string.Empty,
+        //     Token = token
+        // };
+        
+        return Ok(new Result(true, 200, "Login successful", token));
     }
+    
+    private string GenerateJwtToken(ApplicationUser user)
+    {
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        };
+        
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSecret"]));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            claims: claims,
+            expires: DateTime.Now.AddMinutes(120),
+            signingCredentials: creds);
+        
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+    
+    /*
+        * Finds a crew member by ID
+        * 
+        * @param userId The ID of the crew member
+        * @return The result of the operation
+    */
+
+    //need to change to 'crewMember', will need to update frontend
+    [HttpGet("users")]
+    public async Task<IActionResult> GetUsers()
+    {
+        var users = await _context.Users.ToListAsync();
+        
+        List<UserSimpleDTO> userDTOs = [];
+        foreach (var user in users)
+        {
+           var userDto = new UserSimpleDTO {
+                UserId = user.Id,
+                FullName = user.FirstName + " " + user.LastName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber
+            };
+            
+            userDTOs.Add(userDto);
+        }
+        
+        var response = new Result(true, 200, "Found Users", userDTOs);
+        return Ok(response);
+    }
+}
 

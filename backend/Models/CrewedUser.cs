@@ -16,7 +16,7 @@ public partial class CrewedUser
 
     public virtual Game Game { get; set; } = null!;
 
-    public virtual User User { get; set; } = null!;
+    public virtual ApplicationUser User { get; set; } = null!;
 
     public CrewedUserDTO ConvertToCrewedUserDTO(FrogcrewContext _context)
     {

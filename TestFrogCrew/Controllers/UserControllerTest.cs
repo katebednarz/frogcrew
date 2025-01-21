@@ -5,6 +5,8 @@ using backend.Models;
 using backend.DTO;
 using backend.Auth;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Moq.EntityFrameworkCore;
 
@@ -17,11 +19,37 @@ namespace backend.Controllers.Tests
     private IConfiguration? _config;
     private Mock<ISession>? _mockSession;
     private UserController? _controller;
+    private Mock<UserManager<ApplicationUser>> _userManagerMock;
+    private Mock<IHttpContextAccessor> _httpContextAccessorMock;
+    private Mock<IUserClaimsPrincipalFactory<ApplicationUser>> _userClaimsPrincipalFactoryMock;
+    private SignInManager<ApplicationUser> _signInManager;
 
     [SetUp]
     public void Setup()
     {
       _mockContext = new Mock<FrogcrewContext>();
+      _userManagerMock = new Mock<UserManager<ApplicationUser>>(
+        new Mock<IUserStore<ApplicationUser>>().Object,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      );
+      _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+      _userClaimsPrincipalFactoryMock = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
+      _signInManager = new SignInManager<ApplicationUser>(
+        _userManagerMock.Object,
+        _httpContextAccessorMock.Object,
+        _userClaimsPrincipalFactoryMock.Object,
+        null,
+        null,
+        null,
+        null
+      );
       _config = new ConfigurationBuilder()
           .SetBasePath(AppContext.BaseDirectory)
           .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -33,7 +61,7 @@ namespace backend.Controllers.Tests
         Session = _mockSession.Object
       };
 
-      _controller = new UserController(_mockContext.Object, _config)
+      _controller = new UserController(_userManagerMock.Object,_signInManager,_mockContext.Object, _config)
       {
         ControllerContext = new ControllerContext
         {
@@ -62,24 +90,20 @@ namespace backend.Controllers.Tests
         Role = "STUDENT",
         Position = ["DIRECTOR", "PRODUCER"]
       };
+      
+      _userManagerMock.Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+        .ReturnsAsync(IdentityResult.Success);
 
-      var mockUser = new User
-      {
-        Id = 1,
-        Email = request.Email,
-        FirstName = request.FirstName,
-        LastName = request.LastName,
-        PhoneNumber = request.PhoneNumber,
-        Role = request.Role,
-        Password = PasswordHasher.HashPassword("password")
-      };
-
-      _mockContext?.Setup(c => c.Add(It.IsAny<User>())).Callback<User>(user => user.Id = mockUser.Id);
-      _mockContext?.Setup(c => c.SaveChanges()).Returns(1);
+      _userManagerMock.Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), request.Role))
+        .ReturnsAsync(IdentityResult.Success);
+      
+      var dbSetMock = new Mock<DbSet<UserQualifiedPosition>>();
+      _mockContext.Setup(db => db.Set<UserQualifiedPosition>()).Returns(dbSetMock.Object);
 
       //Act
       var result = await _controller!.CreateCrewMember(request) as ObjectResult;
       var response = result?.Value as Result;
+      
       //Assert
       Assert.Multiple(() =>
       {
@@ -102,8 +126,8 @@ namespace backend.Controllers.Tests
       });
 
       //Verify Database Saves
-      _mockContext?.Verify(c => c.Add(It.IsAny<User>()), Times.Once);
-      _mockContext?.Verify(c => c.SaveChanges(), Times.Exactly(3)); // 1 for user, 2 for positions
+      _userManagerMock.Verify(um => um.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Once);
+      _mockContext?.Verify(c => c.SaveChanges(), Times.Exactly(2)); //2 for positions
     }
 
     [Test()]
@@ -212,96 +236,5 @@ namespace backend.Controllers.Tests
       CollectionAssert.AreEquivalent(expectedErrors, response?.Data as List<string>);
     }
 
-    [Test()]
-    public void LoginTestSuccess()
-    {
-      // Arrange
-      var authHeader = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes("user@example.com:correctpassword"));
-      _controller!.ControllerContext.HttpContext.Request.Headers.Authorization = authHeader;
-
-      _mockContext?.Setup(c => c.Users).ReturnsDbSet(new List<User>
-        {
-            new() { Id = 1, Email = "user@example.com", Password = PasswordHasher.HashPassword("correctpassword"), Role = "Admin" }
-        });
-
-      // Act
-      var result = _controller.Login();
-
-      // Assert
-      Assert.That(result, Is.InstanceOf<OkObjectResult>());
-      var okResult = result as OkObjectResult;
-      var response = okResult?.Value as Result;
-      Assert.Multiple(() =>
-      {
-        Assert.That(response?.Flag, Is.True);
-        Assert.That(response?.Code, Is.EqualTo(200));
-        Assert.That(response?.Message, Is.EqualTo("Login successful"));
-        Assert.That(response?.Data, Is.Not.Null); // Token
-      });
-    }
-
-    [Test()]
-    public void LoginTestBadCredentials()
-    {
-      // Arrange
-      var authHeader = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes("user@example.com:wrongpassword"));
-      _controller!.ControllerContext.HttpContext.Request.Headers.Authorization = authHeader;
-
-      _mockContext?.Setup(c => c.Users).ReturnsDbSet(new List<User>
-        {
-            new() { Email = "user@example.com", Password = PasswordHasher.HashPassword("correctpassword") }
-        });
-
-      // Act
-      var result = _controller.Login();
-
-      // Assert
-      Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
-      var unauthorizedResult = result as UnauthorizedObjectResult;
-      Assert.Multiple(() =>
-      {
-        Assert.That(unauthorizedResult?.StatusCode, Is.EqualTo(401));
-        Assert.That(((Result)unauthorizedResult?.Value!).Message, Is.EqualTo("Invalid email or password"));
-      });
-    }
-
-    [Test()]
-    public void LoginTestNoAuthorizationHeader()
-    {
-      // Arrange
-      _controller?.ControllerContext.HttpContext.Request.Headers.Clear();
-
-      // Act
-      var result = _controller!.Login();
-
-      // Assert
-      Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
-      var unauthorizedResult = result as UnauthorizedObjectResult;
-      Assert.Multiple(() =>
-      {
-        Assert.That(unauthorizedResult?.StatusCode, Is.EqualTo(401));
-        Assert.That(((Result)unauthorizedResult?.Value!).Message, Is.EqualTo("Missing Authorization Header"));
-      });
-    }
-
-    [Test()]
-    public void LoginTestInvalidAuthorizationHeader()
-    {
-      // Arrange
-      _controller!.ControllerContext.HttpContext.Request.Headers.Authorization = "Bearer invalid_token";
-
-      // Act
-      var result = _controller.Login();
-
-      // Assert
-      Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
-      var unauthorizedResult = result as UnauthorizedObjectResult;
-      Assert.Multiple(() =>
-      {
-        Assert.That(unauthorizedResult?.StatusCode, Is.EqualTo(401));
-        Assert.That(((Result)unauthorizedResult?.Value!).Message, Is.EqualTo("Invalid Authorization Header"));
-      });
-
-    }
   }
 }

@@ -29,11 +29,11 @@ builder.Services.AddDbContext<FrogcrewContext>(options =>
     options.UseSqlServer(connectionString));
 
 // Identity
-builder.Services.AddDbContext<AuthDbContext>(options =>
-    options.UseSqlServer(connectionString));
+// builder.Services.AddDbContext<AuthDbContext>(options =>
+//     options.UseSqlServer(connectionString));
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
-    .AddEntityFrameworkStores<AuthDbContext>()
+    .AddEntityFrameworkStores<FrogcrewContext>()
     .AddDefaultTokenProviders();
 
 
@@ -104,13 +104,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Role Initialization
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    await InitializeRolesAsync(services);
-}
-
 // Use CORS
 app.UseCors("AllowAll");
 
@@ -125,18 +118,3 @@ app.MapControllers();
 StartUpFile.RunStartupFile(app.Services);
 
 app.Run();
-
-async Task InitializeRolesAsync(IServiceProvider serviceProvider)
-{
-    var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-    
-    string[] roleNames = { "ADMIN", "STUDENT", "FREELANCER" };
-
-    foreach (var role in roleNames)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-        {
-            await roleManager.CreateAsync(new ApplicationRole(role));
-        }
-    }
-}

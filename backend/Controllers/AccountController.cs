@@ -21,6 +21,7 @@ public class AccountController : ControllerBase
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly FrogcrewContext _context;
     private readonly IConfiguration _configuration;
+    
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
@@ -66,16 +67,16 @@ public class AccountController : ControllerBase
         if (!result.Succeeded)
             return new BadRequestObjectResult(result.Errors);
         
-        // foreach (var pos in request.Position)
-        // {
-        //     var newPosition = new UserQualifiedPosition
-        //     {
-        //         UserId = user.Id,
-        //         Position = pos
-        //     };
-        //     _context.Add(newPosition);
-        //     _context.SaveChanges();
-        // }
+        foreach (var pos in request.Position)
+        {
+            var newPosition = new UserQualifiedPosition
+            {
+                UserId = user.Id,
+                Position = pos
+            };
+            _context.Add(newPosition);
+            _context.SaveChanges();
+        }
         
         return new ObjectResult(new Result(true, 200, "Resistered successfully.", request));
     }
