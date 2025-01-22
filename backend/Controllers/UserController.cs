@@ -68,9 +68,9 @@ public class UserController : Controller
         var roleResult = await _userManager.AddToRoleAsync(user, request.Role);
         if (!roleResult.Succeeded)
             return new ObjectResult(new Result(false, 400, "Role not found", request.Role));
-        
+
         if (!result.Succeeded)
-            return new BadRequestObjectResult(result.Errors);
+            return BadRequest(new Result(true, 200, "Add Success", result.Errors));
         
         foreach (var pos in request.Position)
         {
@@ -83,7 +83,7 @@ public class UserController : Controller
             _context.SaveChanges();
         }
         
-        return new ObjectResult(new Result(true, 200, "Add Success", request));
+        return Ok(new Result(true, 200, "Add Success", request));
     }
 
     /*
@@ -156,35 +156,24 @@ public class UserController : Controller
     [HttpPost("auth/login")]
     public async Task<IActionResult> Login(String Email, String Password)
     {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState
-                .SelectMany(kvp => kvp.Value.Errors)
-                .Select(e => e.ErrorMessage)
-                .ToList();
-            var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
-        
-            return new ObjectResult(errorResponse) { StatusCode = 400 };
-        }
-
         var user = await _userManager.FindByEmailAsync(Email);
         if (user == null)
-            return new ObjectResult(new Result(false, 404, "Invalid credentials"));
+            return new ObjectResult(new Result(false, 401, "username or password is incorrect")) {StatusCode = 401};
         
         var signInResult = await _signInManager.CheckPasswordSignInAsync(user, Password, false);
         if (!signInResult.Succeeded)
-            return new ObjectResult(new Result(false, 404, "Invalid credentials"));
+            return new ObjectResult(new Result(false, 401, "username or password is incorrect")) {StatusCode = 401};
         
         var token = GenerateJwtToken(user);
         
-        // var AuthDTO = new AuthDTO
-        // {
-        //     UserId = user.Id,
-        //     Role = user.Role ?? string.Empty,
-        //     Token = token
-        // };
+        var authDTO = new AuthDTO
+        {
+            UserId = user.Id,
+            Role = _userManager.GetRolesAsync(user).Result.First(),
+            Token = token
+        };
         
-        return Ok(new Result(true, 200, "Login successful", token));
+        return Ok(new Result(true, 200, "Login successful", authDTO));
     }
     
     private string GenerateJwtToken(ApplicationUser user)

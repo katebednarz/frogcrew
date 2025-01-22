@@ -181,7 +181,7 @@ GO
 
 -- User Values
 INSERT INTO [User] (FirstName, LastName, PayRate, UserName, NormalizedUserName, Email, NormalizedEmail, EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp, PhoneNumber, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnd, LockoutEnabled, AccessFailedCount) VALUES
-    ('Kate','Bednarz',null,'kate.bednarz@tcu.edu','KATE.BEDNARZ@TCU.EDU','kate.bednarz@tcu.edu','KATE.BEDNARZ@TCU.EDU',0,'AQAAAAIAAYagAAAAEB4ENT4XTLogUHTairPIvQ5cclWtwIIPxmBpNf8P4TSGMkY7GHTJqZq1QBgW328HVw==','GXVIZJY7LUAZVWWUUCZBGWN5UQWC3WIO','57d2b946-1889-4a59-a819-5ce3716b5831','8067817554',0,0,null,1,0),
+    ('Kate','Bednarz',null,'kate.bednarz@tcu.edu','KATE.BEDNARZ@TCU.EDU','kate.bednarz@tcu.edu','KATE.BEDNARZ@TCU.EDU',0,'AQAAAAIAAYagAAAAEB4ENT4XTLogUHTairPIvQ5cclWtwIIPxmBpNf8P4TSGMkY7GHTJqZq1QBgW328HVw==','GXVIZJY7LUAZVWWUUCZBGWN5UQWC3WIO','57d2b946-1889-4a59-a819-5ce3716b5831','1234512345',0,0,null,1,0),
     ('Dave','Park',250,'dave.park@tcu.edu','DAVE.PARK@TCU.EDU','dave.park@tcu.edu','DAVE.PARK@TCU.EDU',0,'AQAAAAIAAYagAAAAEAml3Yg61kzSQ+3LbxQhtEdFOG9Cp3sVXIZ+7xhI1ATyxYvYbPWP+N+u+gMZRLbqZg==','Q5P45UEJUUNJCJCB63EKISHL32L2PM7I','65f00c08-6f90-4e4d-956c-f3aadc72c7b8','1234567890',0,0,null,1,0),
     ('Aliya','Suri',null,'aliya.suri@tcu.edu','ALIYA.SURI@TCU.EDU','aliya.suri@tcu.edu','ALIYA.SURI@TCU.EDU',0,'AQAAAAIAAYagAAAAECrLmLFEaCNQ+QpJEszAw2hTF4QLXA1EKhvoehBZiAYJ7/W+4wBOZsziSvTivqoSkg==','NYSH3MURGPGRAMISHNCR7EZCJDJEPU5V','c7d729fb-454a-44b0-aa32-0280f55c38d1','1112223333',0,0,null,1,0),
     ('Michala','Rogers',null,'michala.rogers@tcu.edu','MICHALA.ROGERS@TCU.EDU','michala.rogers@tcu.edu','MICHALA.ROGERS@TCU.EDU',0,'AQAAAAIAAYagAAAAEGio/sQhVyYelYxUuY1JlPCgA5s4GAplUXAor85ppcCz7Su67T4fQEmgLOJ90tJkbw==','SWHDYYUFD2DZ4U7EM7KSLWUEN74FE7YQ','315646f4-6822-482d-a779-6561d894a573','1231231234',0,0,null,1,0),
@@ -355,7 +355,7 @@ INSERT INTO Availability VALUES
 INSERT INTO Notification (userId, title, content, date) VALUES
     (1, 'Game Scheduled', 'You have been scheduled to work the game', '2024-11-10 14:00:00');
 
-- AspNetRoles Values
+-- AspNetRoles Values
 INSERT INTO AspNetRoles (Name, NormalizedName, ConcurrencyStamp) VALUES
     ('ADMIN','ADMIN',null),
     ('STUDENT','STUDENT',null),

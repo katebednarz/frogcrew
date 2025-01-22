@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Moq.EntityFrameworkCore;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace backend.Controllers.Tests
 {
@@ -20,9 +21,7 @@ namespace backend.Controllers.Tests
     private Mock<ISession>? _mockSession;
     private UserController? _controller;
     private Mock<UserManager<ApplicationUser>> _userManagerMock;
-    private Mock<IHttpContextAccessor> _httpContextAccessorMock;
-    private Mock<IUserClaimsPrincipalFactory<ApplicationUser>> _userClaimsPrincipalFactoryMock;
-    private SignInManager<ApplicationUser> _signInManager;
+    private Mock<SignInManager<ApplicationUser>> _signInManagerMock;
 
     [SetUp]
     public void Setup()
@@ -39,9 +38,9 @@ namespace backend.Controllers.Tests
         null,
         null
       );
-      _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
-      _userClaimsPrincipalFactoryMock = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
-      _signInManager = new SignInManager<ApplicationUser>(
+      var _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+      var _userClaimsPrincipalFactoryMock = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
+      _signInManagerMock = new Mock<SignInManager<ApplicationUser>>(
         _userManagerMock.Object,
         _httpContextAccessorMock.Object,
         _userClaimsPrincipalFactoryMock.Object,
@@ -61,7 +60,7 @@ namespace backend.Controllers.Tests
         Session = _mockSession.Object
       };
 
-      _controller = new UserController(_userManagerMock.Object,_signInManager,_mockContext.Object, _config)
+      _controller = new UserController(_userManagerMock.Object, _signInManagerMock.Object, _mockContext.Object, _config)
       {
         ControllerContext = new ControllerContext
         {
@@ -90,20 +89,20 @@ namespace backend.Controllers.Tests
         Role = "STUDENT",
         Position = ["DIRECTOR", "PRODUCER"]
       };
-      
+
       _userManagerMock.Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
         .ReturnsAsync(IdentityResult.Success);
 
       _userManagerMock.Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), request.Role))
         .ReturnsAsync(IdentityResult.Success);
-      
+
       var dbSetMock = new Mock<DbSet<UserQualifiedPosition>>();
       _mockContext.Setup(db => db.Set<UserQualifiedPosition>()).Returns(dbSetMock.Object);
 
       //Act
       var result = await _controller!.CreateCrewMember(request) as ObjectResult;
       var response = result?.Value as Result;
-      
+
       //Assert
       Assert.Multiple(() =>
       {
@@ -236,5 +235,106 @@ namespace backend.Controllers.Tests
       CollectionAssert.AreEquivalent(expectedErrors, response?.Data as List<string>);
     }
 
+    [Test]
+    public async Task LoginSuccessTest()
+    {
+      // Arrange
+      var email = "test@example.com";
+      var password = "Password!1";
+      var user = new ApplicationUser
+      {
+        Id = 1,
+        UserName = email,
+        Email = email,
+        FirstName = "John",
+        LastName = "Doe",
+      };
+
+      _userManagerMock.Setup(um => um.FindByEmailAsync(email)).ReturnsAsync(user);
+      _signInManagerMock.Setup(sm => sm.CheckPasswordSignInAsync(user, password, false)).ReturnsAsync(SignInResult.Success);
+      _userManagerMock.Setup(um => um.GetRolesAsync(user)).ReturnsAsync(new List<string> { "STUDENT" });
+
+      // Act
+      var result = await _controller!.Login(email, password) as ObjectResult;
+      var response = result?.Value as Result;
+
+      // Assert
+      Assert.Multiple(() =>
+      {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(response?.Flag, Is.True); // Verify Flag
+        Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
+        Assert.That(response?.Message, Is.EqualTo("Login successful")); // Verify Message
+      });
+
+      var authDTO = response?.Data as AuthDTO;
+      Assert.That(authDTO, Is.Not.Null);
+      Assert.Multiple(() =>
+      {
+        Assert.That(authDTO?.UserId, Is.EqualTo(user.Id));
+        Assert.That(authDTO?.Role, Is.EqualTo("STUDENT"));
+        Assert.That(authDTO?.Token, Is.Not.Null.And.Not.Empty);
+      });
+    }
+
+  [Test]
+  public async Task LoginBadCredentialTest()
+  {
+    // Arrange
+    var email = "wrong.email@example.com";
+    var password = "WrongPassword123!";
+
+    _userManagerMock.Setup(um => um.FindByEmailAsync(email)).ReturnsAsync((ApplicationUser)null);
+
+    // Act
+    var result = await _controller!.Login(email, password) as ObjectResult;
+    var response = result?.Value as Result;
+
+    //Assert
+    Assert.IsInstanceOf<Result>(response);
+    Assert.That(response?.Code, Is.EqualTo(401));
+    Assert.That(response?.Message, Is.EqualTo("username or password is incorrect"));
   }
-}
+
+  [Test]
+    public async Task GetUsersTestSuccess()
+    {
+      // Arrange
+      var users = new List<ApplicationUser>
+        {
+        new ApplicationUser { Id = 1, FirstName = "John", LastName = "Doe", Email = "john.doe@example.com", PhoneNumber = "1234567890" },
+        new ApplicationUser { Id = 2, FirstName = "Jane", LastName = "Smith", Email = "jane.smith@example.com", PhoneNumber = "0987654321" }
+        };
+
+      _mockContext?.Setup(c => c.Users).ReturnsDbSet(users);
+
+      // Act
+      var result = await _controller!.GetUsers() as ObjectResult;
+      var response = result?.Value as Result;
+
+      // Assert
+      Assert.Multiple(() =>
+      {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(response?.Flag, Is.True); // Verify Flag
+        Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
+        Assert.That(response?.Message, Is.EqualTo("Found Users")); // Verify Message
+      });
+
+      var userDTOs = response?.Data as List<UserSimpleDTO>;
+      Assert.That(userDTOs, Is.Not.Null);
+      Assert.That(userDTOs?.Count, Is.EqualTo(users.Count));
+      for (int i = 0; i < users.Count; i++)
+      {
+        Assert.Multiple(() =>
+        {
+          Assert.That(userDTOs?[i].UserId, Is.EqualTo(users[i].Id));
+          Assert.That(userDTOs?[i].FullName, Is.EqualTo($"{users[i].FirstName} {users[i].LastName}"));
+          Assert.That(userDTOs?[i].Email, Is.EqualTo(users[i].Email));
+          Assert.That(userDTOs?[i].PhoneNumber, Is.EqualTo(users[i].PhoneNumber));
+        });
+      }
+    }
+  }
+
+} 
