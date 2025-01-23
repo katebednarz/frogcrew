@@ -27,10 +27,12 @@ tags:
     description: Endpoints related to crew schedules
   - name: crew list
     description: Endpoints related to crew list
-  - name: misc
-    description: Endpoints related to miscellaneous activities
+  - name: scheduledGames
+    description: Endpoints related to crew member's scheduled games
   - name: reports
     description: Endpoints related to reports
+  - name: misc
+    description: Endpoints related to miscellaneous activities
   - name: auth
     description: Endpoints related to user authentication
 paths:
@@ -120,7 +122,7 @@ paths:
     get:
       tags:
         - crew members
-        - NEW
+        - NYI
       summary: Find crew member by id
       description: Find a specific crew member and return it.
       parameters:
@@ -162,7 +164,7 @@ paths:
     put:
       tags:
         - crew members
-        - NEW
+        - NYI
       summary: Update a crew member
       description: Update an existing crew member and return the updated one.
       parameters:
@@ -236,7 +238,7 @@ paths:
     delete:
       tags:
         - crew members
-        - NEW
+        - NYI
       summary: Delete a crew member
       description: Delete an existing crew member.
       parameters:
@@ -369,6 +371,99 @@ paths:
                 code: 404
                 message: Could not find game with id 1
                 data: null
+    put:
+      tags:
+        - availability
+        - NYI
+      summary: Update availability
+      description: Update an existing availability and return the updated one.
+      requestBody:
+        required: true
+        description: Availability that needs to be updated
+        content:
+          application/json:
+            example:
+              userId: 1
+              gameId: 1
+              available: true
+              comments: "I can work"
+      responses:
+        '200':
+          description: Availability updated and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Update Success
+                data:
+                  userId: 1
+                  gameId: 1
+                  available: true
+                  comments: "I can work"
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  userId: "UserId is required"
+                  gameId: "GameId is required"
+                  available: "Available is required"
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
+  /availability/{userId}:
+    get:
+      tags:
+        - availability
+        - NYI
+      summary: Find availability by userId
+      description: Return a list of games that a crew member is available to work.
+      parameters:
+        - in: path
+          name: userId
+          description: id of the user
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Availability found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  - userId: 1
+                    gameId: 1
+                    available: true
+                    comments: "Will be 20 minutes late"
+                  - userId: 1
+                    gameId: 3
+                    available: true
+                    comments: null
+        '404':
+          description: user not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find user with id 1
+                data: null
   /gameSchedule:
     post:
       tags:
@@ -434,6 +529,62 @@ paths:
                   id: 1
                   sport: Football
                   season: '2024-2025'
+        '404':
+          description: schedule not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find schedule with id 1
+                data: null
+    put:
+      tags:
+        - game schedule
+        - NYI
+      summary: Update game schedule
+      description: Update an existing game schedule and return the updated one.
+      parameters:
+        - in: path
+          name: scheduleId
+          description: Id of the game schedule
+          required: true
+          schema:
+            type: string
+            example: 1
+      requestBody:
+        required: true
+        description: Game schedule that needs to be updated
+        content:
+          application/json:
+            example:
+              id: 1
+              sport: Football
+              season: '2024-2025'
+      responses:
+        '200':
+          description: Game schedule updated and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Update Success
+                data:
+                  id: 1
+                  sport: Football
+                  season: '2024-2025'
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  sport: "Sport is required"
+                  season: "Season is required"
         '404':
           description: schedule not found
           content:
@@ -579,6 +730,70 @@ paths:
                   venue: "Amon G. Carter Stadium"
                   opponent: "Texas Longhorns"
                   isFinalized: true
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
+    put:
+      tags:
+        - game schedule
+        - NYI
+      summary: Update a game
+      description: Update an existing game and return the updated one.
+      parameters:
+        - in: path
+          name: gameId
+          description: Id of the game
+          required: true
+          schema:
+            type: string
+            example: 1
+      requestBody:
+        required: true
+        description: Game that needs to be updated
+        content:
+          application/json:
+            example:
+              gameId: 1
+              scheduleId: 1
+              gameDate: "2021-10-10"
+              venue: "Amon G. Carter Stadium"
+              opponent: "Texas Longhorns"
+              isFinalized: false
+      responses:
+        '200':
+          description: Game updated and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Update Success
+                data:
+                  gameId: 1
+                  scheduleId: 1
+                  gameDate: "2021-10-10"
+                  venue: "Amon G. Carter Stadium"
+                  opponent: "Texas Longhorns"
+                  isFinalized: false
+        '400':
+          description: bad input parameter
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 400
+                message: Provided arguments are invalid, see data for details.
+                data:
+                  gameDate: "Game date is required"
+                  venue: "Venue is required"
+                  opponent: "Opponent is required"
+                  isFinalized: "Is finalized is required"
         '404':
           description: game not found
           content:
@@ -845,6 +1060,211 @@ paths:
                 code: 404
                 message: Could not find game with id 1
                 data: null
+  /crewList/export/{gameId}:
+    get:
+      tags:
+        - crew list
+        - NYI
+      summary: Export crew list
+      description: Export a crew list to a file.
+      parameters:
+        - in: path
+          name: gameId
+          description: Id of the game
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Crew list exported
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Export Success
+                data: 
+                  Note: The data will be a file
+                  note2: once i do more research on how to export a file i will modify this
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
+  /scheduledGames/{userId}:
+    get:
+      tags:
+        - scheduledGames
+        - NYI
+      summary: Find scheduled games by userId
+      description: Return a list of games that a crew member is scheduled to work.
+      parameters:
+        - in: path
+          name: userId
+          description: id of the user
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Scheduled games found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  - gameId: 1
+                    gameDate: "2021-10-10"
+                    venue: "Amon G. Carter Stadium"
+                    opponent: "Texas Longhorns"
+                    isFinalized: true
+                  - gameId: 2
+                    gameDate: "2021-10-17"
+                    venue: "Amon G. Carter Stadium"
+                    opponent: "Texas Longhorns"
+                    isFinalized: true
+        '404':
+          description: user not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find user with id 1
+                data: null
+  /scheduledGames/{userId}/drop/{gameId}:
+    post:
+      tags:
+        - scheduledGames
+        - NYI
+      summary: Add shift to trade board
+      description: Add a scheduled game to the trade board.
+      parameters:
+        - in: path
+          name: userId
+          description: id of the user
+          required: true
+          schema:
+            type: string
+            example: 1
+        - in: path
+          name: gameId
+          description: id of the game
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Scheduled game dropped
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Drop Success
+                data:
+                  userId: 1
+                  gameId: 1
+                  status: available 
+        '404':
+          description: user or game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find user with id 1 or game with id 1
+                data: null
+  /scheduledGames/{userId}/pickup/{gameId}:
+    put:
+      tags:
+        - scheduledGames
+        - NYI
+      summary: Request to pickup a game
+      description: Request to pickup a game from the trade board.
+      parameters:
+        - in: path
+          name: userId
+          description: id of the user
+          required: true
+          schema:
+            type: string
+            example: 1
+        - in: path
+          name: gameId
+          description: id of the game
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Game pickup requested
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Request Success
+                data:
+                  userId: 1
+                  gameId: 1
+                  status: awaiting approval
+        '404':
+          description: user or game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find user with id 1 or game with id 1
+                data: null
+  /scheduledGames/{gameId}:
+    put:
+      tags:
+        - scheduledGames
+        - NYI
+      summary: Approve shift exchange
+      description: Admin approve a shift exchange.
+      parameters:
+        - in: path
+          name: gameId
+          description: Id of the game 
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Shift exchange approved
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Approve Success
+                data:
+                  gameId: 1
+                  userId: 1
+                  status: approved
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
   /invite:
     post:
       tags:
@@ -872,6 +1292,187 @@ paths:
                 data: 
                   - john.smith@example.com
                   - jane.doe@example.com
+  /notifications/{userId}:
+    get:
+      tags:
+        - misc
+        - NYI
+      summary: Find notifications by userId
+      description: Return a list of notifications for a specific user.
+      parameters:
+        - in: path
+          name: userId
+          description: id of the user
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Notifications found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  - notificationId: 1
+                    userId: 1
+                    message: "You have been assigned to game 1"
+                    dateTime: "2021-10-01T12:00:00Z"
+                  - notificationId: 2
+                    userId: 1
+                    message: "You have been unassigned from game 2"
+                    dateTime: "2021-10-02T12:00:00Z"
+        '404':
+          description: user not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find user with id 1
+                data: null
+  /notifications/{notificationId}:
+    delete:
+      tags:
+        - misc
+        - NYI
+      summary: Delete a notification
+      description: Delete an existing notification.
+      parameters:
+        - in: path
+          name: notificationId
+          description: Id of the notification
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Notification deleted
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Delete Success
+                data: null
+        '404':
+          description: notification not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find notification with id 1
+                data: null
+  /report/crewMember/{userId}:
+    get:
+      tags:
+        - report
+        - NYI
+      summary: Generate crew member report
+      description: Generate a report for a specific crew member.
+      parameters:
+        - in: path
+          name: userId
+          description: id of the user
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Report Generated and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  note: haven't yet researched reports
+        '404':
+          description: user not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find user with id 1
+                data: null
+  /report/financial/{gameId}:
+    get:
+      tags:
+        - report
+        - NYI
+      summary: Generate financial report
+      description: Generate a financial report for a specific game.
+      parameters:
+        - in: path
+          name: gameId
+          description: id of the game
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Report Generated and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  note: haven't yet researched reports
+        '404':
+          description: game not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find game with id 1
+                data: null
+  /report/position/{position}:
+    get:
+      tags:
+        - report
+        - NYI
+      summary: Generate position report
+      description: Generate a report for a specific position.
+      parameters:
+        - in: path
+          name: position
+          description: Position of the crew member
+          required: true
+          schema:
+            type: string
+            example: DIRECTOR
+      responses:
+        '200':
+          description: Report Generated and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  note: haven't yet researched reports
+        '404':
+          description: position not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find position DIRECTOR
+                data: null
   /auth/login:
     post:
       tags:
@@ -915,6 +1516,89 @@ paths:
                 code: 401
                 message: username or password is incorrect
                 data: null
+  /auth/forget-password/{email}:
+    post:
+      tags:
+        - auth
+        - NYI
+      summary: Send reset password link to email
+      description: Send reset password link to email.
+      parameters:
+        - in: path
+          name: email
+          description: Email of user to reset password
+          required: true
+          schema:
+            type: string
+            example: j.smith@abc.edu
+      responses:
+        '200':
+          description: Password reset email sent successfully
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Password reset email sent successfully
+                data: null
+        '404':
+          description: Email does not exist
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: "Could not find email with this property: j.smith@abc.edu :("
+                data: null 
+  /auth/reset-password:
+    patch:
+      tags:
+        - auth
+        - NYI
+      summary: Change user password
+      description: Change the password of a user.
+      requestBody:
+        required: true
+        description: The password info
+        content:
+          application/json:
+            example:
+              email: "654321"
+              token: "7578047b-7cf1-4e4c-ba44-e1bc30b3b867"
+              newPassword: "Abc12345"
+      responses:
+        '200':
+          description: User password changed successfully
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Password reset successfully
+                data: null
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              examples:
+                InvalidResetPasswordToken:
+                  value:
+                    flag: false
+                    code: 400
+                    message: "Invalid reset password token for email: j.smith@abc.edu"
+                    data: null
+                ResetPasswordTokenExpiration:
+                  value:
+                    flag: false
+                    code: 400
+                    message: "Reset password token has expired for email: j.smith@abc.edu"
+                    data: null
+                NewPasswordNotConfirmingToPolicy:
+                  value:
+                    flag: false
+                    code: 400
+                    message: Password must contain at least one letter and one number, and at least 6 characters.
+                    data: null
 components:
   schemas:
     AuthDTO:
