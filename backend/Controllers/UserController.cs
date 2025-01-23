@@ -64,13 +64,18 @@ public class UserController : Controller
         };
 
         var result = await _userManager.CreateAsync(user, "Password!1");
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors.Select(e => e.Description).ToList();
+            return BadRequest(new Result(false, 400, "User creation failed", errors));
+        }
 
         var roleResult = await _userManager.AddToRoleAsync(user, request.Role);
         if (!roleResult.Succeeded)
+        {
+            await _userManager.DeleteAsync(user);
             return new ObjectResult(new Result(false, 400, "Role not found", request.Role));
-
-        if (!result.Succeeded)
-            return BadRequest(new Result(true, 200, "Add Success", result.Errors));
+        }
         
         foreach (var pos in request.Position)
         {
