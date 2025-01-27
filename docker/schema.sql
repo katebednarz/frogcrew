@@ -160,8 +160,8 @@ GO
 
 -- Invitations Table
 CREATE TABLE Invitations (
-    [InviteToken] nvarchar(450) NOT NULL,
-    CONSTRAINT [PK_Invitations] PRIMARY KEY ([InviteToken])
+    [Token] nvarchar(450) NOT NULL,
+    CONSTRAINT [PK_Invitations] PRIMARY KEY ([Token])
 );
 
 -- Indexes

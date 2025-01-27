@@ -172,6 +172,7 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
         {
             entity.HasKey(e => e.Token);
             entity.Property(e => e.Token)
+                .HasColumnName("Token")
                 .HasMaxLength(450)
                 .IsRequired();
         });
