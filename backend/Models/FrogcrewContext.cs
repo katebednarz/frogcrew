@@ -170,13 +170,10 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
 
         modelBuilder.Entity<Invitation>(entity =>
         {
-            entity.HasKey(e => e.Token).HasName("PRIMARY");
-
-            entity.ToTable("Invitation");
-
+            entity.HasKey(e => e.Token);
             entity.Property(e => e.Token)
-                .HasColumnName("InviteToken")
-                .HasMaxLength(450);
+                .HasMaxLength(450)
+                .IsRequired();
         });
 
         // modelBuilder.Entity<User>(entity =>
