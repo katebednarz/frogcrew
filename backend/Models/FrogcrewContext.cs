@@ -26,6 +26,8 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
 
     public virtual DbSet<Schedule> Schedules { get; set; } = null!;
 
+    public virtual DbSet<Invitation> Invitations { get; set; } = null;
+
     //public virtual DbSet<User> Users { get; set; } = null!;
     
     //public virtual DbSet<ApplicationUser> Users { get; set; } = null!;

@@ -124,13 +124,16 @@ public class UserController : Controller
      */
     private static void SendInviteEmail(string email)
     {
+        // generate unique invite token
+        var inviteToken = Guid.NewGuid().ToString();
+        var inviteLink = $"http://localhost:5173/register?token={inviteToken}";
+
         // email setup
         var fromAddress = new MailAddress("frog.crew.invitation@gmail.com", "FrogCrew");
         var toAddress = new MailAddress(email);
         const string fromPassword = "icbu ddnf yuhi lssz"; // gmail app key
         const string subject = "Invitation to Join FrogCrew";
-        const string body =
-            "You have been invited to join our crew! Please click the link below to accept the invitation:\n\nhttp://localhost:5173/register";
+        string body = "You have been invited to join our crew! Please click the link below to accept the invitation:\n\n" + inviteLink;
 
         // configure SMTP client
         var smtp = new SmtpClient
