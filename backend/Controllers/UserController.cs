@@ -122,11 +122,14 @@ public class UserController : Controller
      *
      * @param email The email to send the invite to
      */
-    private static void SendInviteEmail(string email)
+    private void SendInviteEmail(string email)
     {
         // generate unique invite token
-        var inviteToken = Guid.NewGuid().ToString();
-        var inviteLink = $"http://localhost:5173/register?token={inviteToken}";
+        var invitation = new Invitation();
+        var inviteLink = $"http://localhost:5173/register?token={invitation.Token}";
+
+        _context.AddAsync(invitation);
+		_context.SaveChangesAsync();
 
         // email setup
         var fromAddress = new MailAddress("frog.crew.invitation@gmail.com", "FrogCrew");

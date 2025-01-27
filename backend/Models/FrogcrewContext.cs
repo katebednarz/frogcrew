@@ -26,7 +26,7 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
 
     public virtual DbSet<Schedule> Schedules { get; set; } = null!;
 
-    public virtual DbSet<Invitation> Invitations { get; set; } = null;
+    public virtual DbSet<Invitation> Invitations { get; set; } = null!;
 
     //public virtual DbSet<User> Users { get; set; } = null!;
     
@@ -166,6 +166,17 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
             entity.Property(e => e.Sport)
                 .HasMaxLength(255)
                 .HasColumnName("sport");
+        });
+
+        modelBuilder.Entity<Invitation>(entity =>
+        {
+            entity.HasKey(e => e.Token).HasName("PRIMARY");
+
+            entity.ToTable("Invitation");
+
+            entity.Property(e => e.Token)
+                .HasColumnName("InviteToken")
+                .HasMaxLength(450);
         });
 
         // modelBuilder.Entity<User>(entity =>

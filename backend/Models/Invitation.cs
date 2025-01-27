@@ -5,5 +5,9 @@ namespace backend.Models;
 
 public partial class Invitation
 {
-    public required string Token { get; set; }
+    public string Token { get; set; }
+
+    public Invitation(){
+        Token = Guid.NewGuid().ToString();;
+    }
 }
