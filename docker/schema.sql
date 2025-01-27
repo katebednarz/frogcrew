@@ -164,6 +164,16 @@ CREATE TABLE Invitations (
     CONSTRAINT [PK_Invitations] PRIMARY KEY ([InviteToken])
 );
 
+-- Trade Board Table
+CREATE TABLE TradeBoard (
+    [DropperID] int NOT NULL,
+    [GameId] int NOT NULL,
+    [Position] nvarchar(255) NOT NULL,
+    [Status] nvarchar(255) NOT NULL,
+    [ReceiverID] int NULL,
+    CONSTRAINT [PK_TradeBoard] PRIMARY KEY ([DropperID], [GameId]),
+)
+
 -- Indexes
 
 CREATE INDEX [IX_AspNetRoleClaims_RoleId] ON [AspNetRoleClaims] ([RoleId]);
