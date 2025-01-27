@@ -91,10 +91,28 @@ public class UserController : Controller
         return Ok(new Result(true, 200, "Add Success", request));
     }
 
+    // validates invite token
+    [HttpGet("invite/{token}")]
+    public async Task<IActionResult> ValidateInvitation(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+        {
+            return BadRequest(new Result(false, 400, "Token is required", null));
+        }
+
+        var invitation = await _context.Invitations.FirstOrDefaultAsync(i => i.Token == token);
+        if (invitation == null)
+        {
+            return NotFound(new Result(false, 404, "Invitation not valid", null));
+        }
+
+        return Ok(new Result(true, 200, "Invitation valid", new { token }));
+    }
+
     /*
-     * Adds a crew member
+     * Invite a crew member
      *
-     * @param request The crew member to add
+     * @param request The emails to send inviations to
      * @return The result of the operation
      */
     [HttpPost("invite")]
@@ -122,15 +140,21 @@ public class UserController : Controller
      *
      * @param email The email to send the invite to
      */
-    private static void SendInviteEmail(string email)
+    private void SendInviteEmail(string email)
     {
+        // generate unique invite token
+        var invitation = new Invitation();
+        var inviteLink = $"http://localhost:5173/register?token={invitation.Token}";
+
+        _context.AddAsync(invitation);
+		_context.SaveChangesAsync();
+
         // email setup
         var fromAddress = new MailAddress("frog.crew.invitation@gmail.com", "FrogCrew");
         var toAddress = new MailAddress(email);
         const string fromPassword = "icbu ddnf yuhi lssz"; // gmail app key
         const string subject = "Invitation to Join FrogCrew";
-        const string body =
-            "You have been invited to join our crew! Please click the link below to accept the invitation:\n\nhttp://localhost:5173/register";
+        string body = "You have been invited to join our crew! Please click the link below to accept the invitation:\n\n" + inviteLink;
 
         // configure SMTP client
         var smtp = new SmtpClient
