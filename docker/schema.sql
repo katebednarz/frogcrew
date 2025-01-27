@@ -158,6 +158,14 @@ CREATE TABLE [AspNetUserTokens] (
 );
 GO
 
+-- Invitations Table
+CREATE TABLE Invitations (
+    [InviteToken] nvarchar(450) NOT NULL,
+    CONSTRAINT [PK_Invitations] PRIMARY KEY ([InviteToken])
+);
+
+-- Indexes
+
 CREATE INDEX [IX_AspNetRoleClaims_RoleId] ON [AspNetRoleClaims] ([RoleId]);
 GO
 
@@ -177,6 +185,9 @@ CREATE INDEX [EmailIndex] ON [User] ([NormalizedEmail]);
 GO
 
 CREATE UNIQUE INDEX [UserNameIndex] ON [User] ([NormalizedUserName]) WHERE [NormalizedUserName] IS NOT NULL;
+GO
+
+CREATE INDEX [UserQualifiedPositionsIndex] ON [UserQualifiedPositions] ([userId]);
 GO
 
 -- User Values
