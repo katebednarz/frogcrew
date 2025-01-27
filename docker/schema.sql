@@ -29,12 +29,20 @@ CREATE TABLE [User] (
 );
 GO
 
+-- Position Table
+CREATE TABLE Position (
+    [PositionId] INT IDENTITY(1,1) PRIMARY KEY,
+    [Position] nvarchar(255) NOT NULL,
+);
+
 -- User Qualified Positions
 CREATE TABLE UserQualifiedPositions (
     userId INT,
-    position NVARCHAR(255),
+    position INT,
     PRIMARY KEY (userId, position),
-    FOREIGN KEY (userId) REFERENCES [User](id)
+    FOREIGN KEY (userId) REFERENCES [User](id),
+    FOREIGN KEY (position) REFERENCES Position(PositionId)
+
 );
 GO
 
@@ -54,7 +62,7 @@ CREATE TABLE Game (
     gameDate DATE,
     gameStart TIME,
     venue NVARCHAR(255),
-    isFinalized BIT
+    isFinalized BIT,
     FOREIGN KEY (scheduleId) REFERENCES Schedule(id)
 );
 GO
@@ -63,11 +71,12 @@ GO
 CREATE TABLE CrewedUser (
     userId INT,
     gameId INT,
-    crewedPosition VARCHAR(255),
+    crewedPosition INT,
     arrivalTime TIME,
     PRIMARY KEY (userId, gameId, crewedPosition),
     FOREIGN KEY (userId) REFERENCES [User](id),
-    FOREIGN KEY (gameId) REFERENCES Game(id)
+    FOREIGN KEY (gameId) REFERENCES Game(id),
+    FOREIGN KEY (crewedPosition) REFERENCES Position(PositionId)
 );
 GO
 
@@ -211,27 +220,47 @@ INSERT INTO [User] (FirstName, LastName, PayRate, UserName, NormalizedUserName, 
     ('Manny','Burciaga',280,'manuel.burciaga@tcu.edu','MANUEL.BURCIAGA@TCU.EDU','manuel.burciaga@tcu.edu','MANUEL.BURCIAGA@TCU.EDU',0,'AQAAAAIAAYagAAAAENlDIZ1dT6Ril7CE6IsrU+fRcO9meA9n3SsWaZS8yW4KFuv56pv/RtngmYM4mwT15A==','YQFMZNUSFLP5RINJWKP4DE7PMGGSHTCD','a02dcd8e-1523-4b24-bdaf-0f4f2a5a9eec','9876543210',0,0,null,1,0),
     ('Mike','Martin',null,'m.martin@tcu.edu','M.MARTIN@TCU.EDU','m.martin@tcu.edu','M.MARTIN@TCU.EDU',0,'AQAAAAIAAYagAAAAELchPSUc5T7AMrm2j7v31sXaKlSgL5rP9WbtJ+cCwgkVeoTfay8dsaer5zZLfis7yw==','4ZRQUMRFJR5UPEMKU4ZJ4COU44A5ONEX','cb3ffecd-392a-4caf-9355-8f67e06974c5','9876543210',0,0,null,1,0);
 
+-- Position Values
+INSERT INTO [Position] (Position) VALUES
+        ('PRODUCER'),
+        ('ASSISTANT PRODUCER'),
+        ('DIRECTOR'),
+        ('ASSISTANT DIRECTOR'),
+        ('TECHNICAL DIRECTOR'),
+        ('GRAPHICS OPERATOR'),
+        ('BUG OPERATOR'),
+        ('EVS REPLAY-LEAD'),
+        ('VIDEO OPERATOR'),
+        ('EIC'),
+        ('ENG 2'),
+        ('AUDIO A1'),
+        ('AUDIO ASSISTANT A2'),
+        ('CAMERA-FIXED'),
+        ('CAMERA-HANDHELD'),
+        ('CAMERA-STEADICAM'),
+        ('UTILITY'),
+        ('TIME OUT COORDINATOR');
+
 -- UserQualifiedPositions Values
 INSERT INTO UserQualifiedPositions VALUES
-    (1,'PRODUCER'),
-    (2,'ASSISTANT PRODUCER'),
-    (3,'DIRECTOR'),
-    (4,'ASSISTANT DIRECTOR'),
-    (5,'TECHNICAL DIRECTOR'),
-    (6,'GRAPHICS OPERATOR'),
-    (7,'BUG OPERATOR'),
-    (1,'EVS REPLAY-LEAD'),
-    (2,'EVS REPLAY-R/O'),
-    (3,'VIDEO OPERATOR'),
-    (4,'EIC'),
-    (5,'ENG 2'),
-    (6,'AUDIO A1'),
-    (7,'AUDIO ASSISTANT A2'),
-    (1,'CAMERA-FIXED'),
-    (2,'CAMERA-HANDHELD'),
-    (3,'CAMERA-STEADICAM'),
-    (4,'UTILITY'),
-    (5,'TIME OUT COORDINATOR');
+    (1,1),
+    (2,2),
+    (3,3),
+    (4,4),
+    (5,5),
+    (6,6),
+    (7,7),
+    (1,8),
+    (3,9),
+    (4,10),
+    (5,11),
+    (6,12),
+    (7,13),
+    (1,14),
+    (2,15),
+    (3,16),
+    (4,17),
+    (5,18);
 
 -- Schedule Values
 INSERT INTO Schedule (sport,season) VALUES
@@ -354,13 +383,13 @@ INSERT INTO Game (scheduleId, opponent, gameDate, gameStart, venue, isFinalized)
 
 -- CrewedUser Values
 INSERT INTO CrewedUser VALUES
-    (1, 1, 'PRODUCER', null),
-    (2, 1, 'TECHNICAL DIR', null),
-    (3, 1, 'REPLAY EVS 1', null),
-    (4, 1, 'VIDEO', null),
-    (5, 1, 'CAMERA 1', null),
-    (6, 1, 'CAMERA 2', null),
-    (7, 1, 'CAMERA 3', null);
+    (1, 1, 1, null),
+    (2, 1, 2, null),
+    (3, 1, 3, null),
+    (4, 1, 4, null),
+    (5, 1, 5, null),
+    (6, 1, 6, null),
+    (7, 1, 7, null);
 
 -- Availability Values
 INSERT INTO Availability VALUES
