@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Identity;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,11 +28,21 @@ if (string.IsNullOrEmpty(connectionString))
 builder.Services.AddDbContext<FrogcrewContext>(options =>
     options.UseSqlServer(connectionString));
 
+// Identity
+// builder.Services.AddDbContext<AuthDbContext>(options =>
+//     options.UseSqlServer(connectionString));
+
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
+    .AddEntityFrameworkStores<FrogcrewContext>()
+    .AddDefaultTokenProviders();
+
+
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.SuppressModelStateInvalidFilter = true;
 });
 
+// something something, idk really
 builder.Services.AddDistributedMemoryCache();
     
 // Configure JWT Authentication

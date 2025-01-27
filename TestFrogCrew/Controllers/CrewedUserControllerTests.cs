@@ -22,7 +22,7 @@ namespace backend.Controllers.Tests
     public class CrewedUserControllerTests
     {
         private Mock<FrogcrewContext>? _mockContext;
-        private Mock<DbSet<User>>? _mockUsersDbSet;
+        private Mock<DbSet<ApplicationUser>>? _mockUsersDbSet;
         private CrewedUserController? _controller;
 
 
@@ -30,7 +30,7 @@ namespace backend.Controllers.Tests
         public void Setup()
         {
             _mockContext = new Mock<FrogcrewContext>();
-            _mockUsersDbSet = new Mock<DbSet<User>>();
+            _mockUsersDbSet = new Mock<DbSet<ApplicationUser>>();
             _controller = new CrewedUserController(_mockContext.Object);
         }
 
@@ -47,7 +47,7 @@ namespace backend.Controllers.Tests
             int gameId = 1;
             string position = "PRODUCER";
 
-            var users = new List<User>
+            var users = new List<ApplicationUser>
         {
             new() {
                 Id = 1,
@@ -90,13 +90,13 @@ namespace backend.Controllers.Tests
             }
         }.AsQueryable();
 
-            var asyncUsers = new TestAsyncEnumerable<User>(users);
-            _mockUsersDbSet?.As<IAsyncEnumerable<User>>().Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
+            var asyncUsers = new TestAsyncEnumerable<ApplicationUser>(users);
+            _mockUsersDbSet?.As<IAsyncEnumerable<ApplicationUser>>().Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
                 .Returns(asyncUsers.GetAsyncEnumerator);
-            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.Provider).Returns(asyncUsers.AsQueryable().Provider);
-            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.Expression).Returns(asyncUsers.AsQueryable().Expression);
-            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.ElementType).Returns(asyncUsers.AsQueryable().ElementType);
-            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.GetEnumerator()).Returns(asyncUsers.AsQueryable().GetEnumerator);
+            _mockUsersDbSet?.As<IQueryable<ApplicationUser>>().Setup(m => m.Provider).Returns(asyncUsers.AsQueryable().Provider);
+            _mockUsersDbSet?.As<IQueryable<ApplicationUser>>().Setup(m => m.Expression).Returns(asyncUsers.AsQueryable().Expression);
+            _mockUsersDbSet?.As<IQueryable<ApplicationUser>>().Setup(m => m.ElementType).Returns(asyncUsers.AsQueryable().ElementType);
+            _mockUsersDbSet?.As<IQueryable<ApplicationUser>>().Setup(m => m.GetEnumerator()).Returns(asyncUsers.AsQueryable().GetEnumerator);
 
             _mockContext?.Setup(c => c.Users).Returns(_mockUsersDbSet!.Object);
 
@@ -132,15 +132,15 @@ namespace backend.Controllers.Tests
             int gameId = 1;
             string position = "Manager";
 
-            var users = new List<User>().AsQueryable(); // No users in the database
+            var users = new List<ApplicationUser>().AsQueryable(); // No users in the database
 
-            var asyncUsers = new TestAsyncEnumerable<User>(users);
-            _mockUsersDbSet?.As<IAsyncEnumerable<User>>().Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
+            var asyncUsers = new TestAsyncEnumerable<ApplicationUser>(users);
+            _mockUsersDbSet?.As<IAsyncEnumerable<ApplicationUser>>().Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
                 .Returns(asyncUsers.GetAsyncEnumerator);
-            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.Provider).Returns(asyncUsers.AsQueryable().Provider);
-            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.Expression).Returns(asyncUsers.AsQueryable().Expression);
-            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.ElementType).Returns(asyncUsers.AsQueryable().ElementType);
-            _mockUsersDbSet?.As<IQueryable<User>>().Setup(m => m.GetEnumerator()).Returns(asyncUsers.AsQueryable().GetEnumerator);
+            _mockUsersDbSet?.As<IQueryable<ApplicationUser>>().Setup(m => m.Provider).Returns(asyncUsers.AsQueryable().Provider);
+            _mockUsersDbSet?.As<IQueryable<ApplicationUser>>().Setup(m => m.Expression).Returns(asyncUsers.AsQueryable().Expression);
+            _mockUsersDbSet?.As<IQueryable<ApplicationUser>>().Setup(m => m.ElementType).Returns(asyncUsers.AsQueryable().ElementType);
+            _mockUsersDbSet?.As<IQueryable<ApplicationUser>>().Setup(m => m.GetEnumerator()).Returns(asyncUsers.AsQueryable().GetEnumerator);
 
             _mockContext?.Setup(c => c.Users).Returns(_mockUsersDbSet!.Object);
 

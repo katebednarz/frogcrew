@@ -21,5 +21,6 @@ services:
       - mssql
     volumes:
       - ./schema.sql:/schema.sql
+      - ./AddIdentityTables.sql:/AddIdentityTables.sql
     command: /bin/bash -c "sleep 20 && /opt/mssql-tools/bin/sqlcmd -S mssql -U SA -P Your_strong!Passw0rd -i /schema.sql"
 

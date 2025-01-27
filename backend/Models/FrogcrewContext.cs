@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace backend.Models;
 
-public partial class FrogcrewContext : DbContext
+public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,ApplicationRole,int>
 {
     public FrogcrewContext()
     {
@@ -25,12 +26,21 @@ public partial class FrogcrewContext : DbContext
 
     public virtual DbSet<Schedule> Schedules { get; set; } = null!;
 
-    public virtual DbSet<User> Users { get; set; } = null!;
+    //public virtual DbSet<User> Users { get; set; } = null!;
+    
+    //public virtual DbSet<ApplicationUser> Users { get; set; } = null!;
+
 
     public virtual DbSet<UserQualifiedPosition> UserQualifiedPositions { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        
+        base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.Entity<ApplicationUser>()
+            .ToTable("User");
+        
         modelBuilder.Entity<Availability>(entity =>
         {
             entity.HasKey(e => new { e.UserId, e.GameId }).HasName("PRIMARY");
@@ -156,35 +166,35 @@ public partial class FrogcrewContext : DbContext
                 .HasColumnName("sport");
         });
 
-        modelBuilder.Entity<User>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
-
-            entity.ToTable("User");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Email)
-                .HasMaxLength(255)
-                .HasColumnName("email");
-            entity.Property(e => e.FirstName)
-                .HasMaxLength(255)
-                .HasColumnName("firstName");
-            entity.Property(e => e.LastName)
-                .HasMaxLength(255)
-                .HasColumnName("lastName");
-            entity.Property(e => e.Password)
-                .HasMaxLength(255)
-                .HasColumnName("password");
-            entity.Property(e => e.PayRate)
-                .HasMaxLength(100)
-                .HasColumnName("payRate");
-            entity.Property(e => e.PhoneNumber)
-                .HasMaxLength(10)
-                .HasColumnName("phoneNumber");
-            entity.Property(e => e.Role)
-                .HasMaxLength(100)
-                .HasColumnName("role");
-        });
+        // modelBuilder.Entity<User>(entity =>
+        // {
+        //     entity.HasKey(e => e.Id).HasName("PRIMARY");
+        //
+        //     entity.ToTable("User");
+        //
+        //     entity.Property(e => e.Id).HasColumnName("id");
+        //     entity.Property(e => e.Email)
+        //         .HasMaxLength(255)
+        //         .HasColumnName("email");
+        //     entity.Property(e => e.FirstName)
+        //         .HasMaxLength(255)
+        //         .HasColumnName("firstName");
+        //     entity.Property(e => e.LastName)
+        //         .HasMaxLength(255)
+        //         .HasColumnName("lastName");
+        //     entity.Property(e => e.Password)
+        //         .HasMaxLength(255)
+        //         .HasColumnName("password");
+        //     entity.Property(e => e.PayRate)
+        //         .HasMaxLength(100)
+        //         .HasColumnName("payRate");
+        //     entity.Property(e => e.PhoneNumber)
+        //         .HasMaxLength(10)
+        //         .HasColumnName("phoneNumber");
+        //     entity.Property(e => e.Role)
+        //         .HasMaxLength(100)
+        //         .HasColumnName("role");
+        // });
 
         modelBuilder.Entity<UserQualifiedPosition>(entity =>
         {
