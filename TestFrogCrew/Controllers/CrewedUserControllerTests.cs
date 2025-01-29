@@ -64,7 +64,7 @@ namespace backend.Controllers.Tests
                 },
                 UserQualifiedPositions = new List<UserQualifiedPosition>
                 {
-                    new() { Position = 1 }
+                    new() { PositionId = 1 }
                 }
             },
             new() {
@@ -77,7 +77,7 @@ namespace backend.Controllers.Tests
                 },
                 UserQualifiedPositions = new List<UserQualifiedPosition>
                 {
-                    new() { Position = 2 }
+                    new() { PositionId = 2 }
                 }
             },
             new() {
@@ -90,7 +90,7 @@ namespace backend.Controllers.Tests
                 },
                 UserQualifiedPositions = new List<UserQualifiedPosition>
                 {
-                    new() { Position = 1 }
+                    new() { PositionId = 1 }
                 }
             }
         }.AsQueryable();

@@ -31,13 +31,15 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
     public virtual DbSet<Position> Positions { get; set; }
     
     public virtual DbSet<TradeBoard> TradeBoards { get; set; }
+    
+    public virtual DbSet<UserQualifiedPosition> UserQualifiedPositions { get; set; } = null!;
 
     //public virtual DbSet<User> Users { get; set; } = null!;
     
     //public virtual DbSet<ApplicationUser> Users { get; set; } = null!;
 
 
-    public virtual DbSet<UserQualifiedPosition> UserQualifiedPositions { get; set; } = null!;
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -53,7 +55,7 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
 
             entity.ToTable("Availability");
 
-            entity.HasIndex(e => e.GameId, "gameId");
+            entity.HasIndex(e => e.GameId, "AvailabilityIndex");
 
             entity.Property(e => e.UserId).HasColumnName("userId");
             entity.Property(e => e.GameId).HasColumnName("gameId");
@@ -73,19 +75,24 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
 
         modelBuilder.Entity<CrewedUser>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.GameId, e.CrewedPosition }).HasName("PRIMARY");
+            entity.HasKey(e => new { e.UserId, e.GameId, e.PositionId }).HasName("PRIMARY");
 
             entity.ToTable("CrewedUser");
 
-            entity.HasIndex(e => e.GameId, "gameId");
+            entity.HasIndex(e => e.GameId, "CrewedUserIndex");
 
             entity.Property(e => e.UserId).HasColumnName("userId");
             entity.Property(e => e.GameId).HasColumnName("gameId");
+            entity.Property(e => e.PositionId).HasColumnName("positionId");
             entity.Property(e => e.ArrivalTime)
                 .HasColumnType("time")
                 .HasColumnName("arrivalTime")
                 .HasConversion(new TimeOnlyConverter());
-            entity.Property(e => e.CrewedPosition).HasColumnName("crewedPosition");
+            
+            entity.HasOne(d => d.CrewedPositionNavigation).WithMany(p => p.CrewedUsers)
+                .HasForeignKey(d => d.PositionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("CrewedUser_ibfk_3");
 
             entity.HasOne(d => d.Game).WithMany(p => p.CrewedUsers)
                 .HasForeignKey(d => d.GameId)
@@ -104,7 +111,7 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
 
             entity.ToTable("Game");
 
-            entity.HasIndex(e => e.ScheduleId, "scheduleId");
+            entity.HasIndex(e => e.ScheduleId, "GameIndex");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.GameDate)
@@ -129,13 +136,22 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
                 .HasConstraintName("Game_ibfk_1");
         });
 
+        modelBuilder.Entity<Invitation>(entity =>
+        {
+            entity.HasKey(e => e.Token);
+            entity.Property(e => e.Token)
+                .HasColumnName("Token")
+                .HasMaxLength(450)
+                .IsRequired();
+        });
+        
         modelBuilder.Entity<Notification>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
             entity.ToTable("Notification");
 
-            entity.HasIndex(e => e.UserId, "userId");
+            entity.HasIndex(e => e.UserId, "NotificationIndex");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Content)
@@ -155,6 +171,17 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
                 .HasConstraintName("Notification_ibfk_1");
         });
 
+        modelBuilder.Entity<Position>(entity =>
+        {
+            entity.HasKey(e => e.PositionId).HasName("PRIMARY");
+
+            entity.ToTable("PositionId");
+
+            entity.Property(e => e.PositionName)
+                .HasMaxLength(255)
+                .HasColumnName("PositionName");
+        });
+        
         modelBuilder.Entity<Schedule>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
@@ -170,39 +197,6 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
                 .HasColumnName("sport");
         });
 
-        modelBuilder.Entity<Invitation>(entity =>
-        {
-            entity.HasKey(e => e.Token);
-            entity.Property(e => e.Token)
-                .HasColumnName("Token")
-                .HasMaxLength(450)
-                .IsRequired();
-        });
-
-        modelBuilder.Entity<UserQualifiedPosition>(entity =>
-        {
-            entity.HasKey(e => new { e.UserId, e.Position }).HasName("PRIMARY");
-
-            entity.Property(e => e.UserId).HasColumnName("userId");
-            entity.Property(e => e.Position).HasColumnName("position");
-
-            entity.HasOne(d => d.User).WithMany(p => p.UserQualifiedPositions)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("UserQualifiedPositions_ibfk_1");
-        });
-        
-        modelBuilder.Entity<Position>(entity =>
-        {
-            entity.HasKey(e => e.PositionId).HasName("PK__Position__60BB9A79FEE3E84F");
-
-            entity.ToTable("Position");
-
-            entity.Property(e => e.PositionName)
-                .HasMaxLength(255)
-                .HasColumnName("Position");
-        });
-        
         modelBuilder.Entity<TradeBoard>(entity =>
         {
             entity.HasKey(e => new { e.DropperId, e.GameId });
@@ -210,10 +204,36 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
             entity.ToTable("TradeBoard");
 
             entity.Property(e => e.DropperId).HasColumnName("DropperID");
-            entity.Property(e => e.Position).HasColumnName("Position");
+            entity.Property(e => e.Position).HasColumnName("PositionId");
             entity.Property(e => e.ReceiverId).HasColumnName("ReceiverID");
             entity.Property(e => e.Status).HasMaxLength(255);
         });
+
+        modelBuilder.Entity<UserQualifiedPosition>(entity =>
+        {
+            entity.HasKey(e => new { e.UserId, e.PositionId }).HasName("PRIMARY");
+
+            entity.ToTable("UserQualifiedPosition");
+
+            entity.HasIndex(e => e.PositionId, "UserQualifiedPositionIndex");
+
+            entity.Property(e => e.UserId).HasColumnName("userId");
+            entity.Property(e => e.PositionId).HasColumnName("positionId");
+
+            entity.HasOne(d => d.Position).WithMany(p => p.UserQualifiedPositions)
+                .HasForeignKey(d => d.PositionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("UserQualifiedPosition_ibfk_2");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserQualifiedPositions)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("UserQualifiedPosition_ibfk_1");
+        });
+        
+        
+        
+        
 
         OnModelCreatingPartial(modelBuilder);
     }

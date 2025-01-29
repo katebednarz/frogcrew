@@ -85,7 +85,7 @@ public class UserController : Controller
             var newPosition = new UserQualifiedPosition
             {
                 UserId = user.Id,
-                Position = (int)_dbHelper.GetPositionIdByName(pos)
+                PositionId = (int)_dbHelper.GetPositionIdByName(pos)
             };
             _context.Add(newPosition);
             _context.SaveChanges();

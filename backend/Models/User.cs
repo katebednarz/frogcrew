@@ -40,7 +40,7 @@
 // 			Email = Email,
 // 			PhoneNumber = PhoneNumber,
 // 			Role = Role,
-// 			Position = PositionToList()
+// 			PositionId = PositionToList()
 // 		};
 // 	}
 //
@@ -49,7 +49,7 @@
 // 		List<string> list = [];
 // 		foreach (var pos in UserQualifiedPositions)
 // 		{
-// 			list.Add(pos.Position);
+// 			list.Add(pos.PositionId);
 // 		}
 // 		return list;
 // 	}

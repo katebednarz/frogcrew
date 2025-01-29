@@ -34,7 +34,7 @@ namespace backend.Controllers
             
             var availableQualifiedUsers = await _context.Users
             .Where(u => u.Availabilities.Any(a => a.GameId == gameId && a.Available == 1)
-                     && u.UserQualifiedPositions.Any(qp => qp.Position == positionId))
+                     && u.UserQualifiedPositions.Any(qp => qp.PositionId == positionId))
             .Select(u => new UserSimpleDTO
             {
                 UserId = u.Id,
