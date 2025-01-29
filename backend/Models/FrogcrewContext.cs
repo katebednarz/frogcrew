@@ -27,6 +27,10 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
     public virtual DbSet<Schedule> Schedules { get; set; } = null!;
 
     public virtual DbSet<Invitation> Invitations { get; set; } = null!;
+    
+    public virtual DbSet<Position> Positions { get; set; }
+    
+    public virtual DbSet<TradeBoard> TradeBoards { get; set; }
 
     //public virtual DbSet<User> Users { get; set; } = null!;
     
@@ -81,9 +85,7 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
                 .HasColumnType("time")
                 .HasColumnName("arrivalTime")
                 .HasConversion(new TimeOnlyConverter());
-            entity.Property(e => e.CrewedPosition)
-                .HasMaxLength(255)
-                .HasColumnName("crewedPosition");
+            entity.Property(e => e.CrewedPosition).HasColumnName("crewedPosition");
 
             entity.HasOne(d => d.Game).WithMany(p => p.CrewedUsers)
                 .HasForeignKey(d => d.GameId)
@@ -177,36 +179,6 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
                 .IsRequired();
         });
 
-        // modelBuilder.Entity<User>(entity =>
-        // {
-        //     entity.HasKey(e => e.Id).HasName("PRIMARY");
-        //
-        //     entity.ToTable("User");
-        //
-        //     entity.Property(e => e.Id).HasColumnName("id");
-        //     entity.Property(e => e.Email)
-        //         .HasMaxLength(255)
-        //         .HasColumnName("email");
-        //     entity.Property(e => e.FirstName)
-        //         .HasMaxLength(255)
-        //         .HasColumnName("firstName");
-        //     entity.Property(e => e.LastName)
-        //         .HasMaxLength(255)
-        //         .HasColumnName("lastName");
-        //     entity.Property(e => e.Password)
-        //         .HasMaxLength(255)
-        //         .HasColumnName("password");
-        //     entity.Property(e => e.PayRate)
-        //         .HasMaxLength(100)
-        //         .HasColumnName("payRate");
-        //     entity.Property(e => e.PhoneNumber)
-        //         .HasMaxLength(10)
-        //         .HasColumnName("phoneNumber");
-        //     entity.Property(e => e.Role)
-        //         .HasMaxLength(100)
-        //         .HasColumnName("role");
-        // });
-
         modelBuilder.Entity<UserQualifiedPosition>(entity =>
         {
             entity.HasKey(e => new { e.UserId, e.Position }).HasName("PRIMARY");
@@ -218,6 +190,29 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("UserQualifiedPositions_ibfk_1");
+        });
+        
+        modelBuilder.Entity<Position>(entity =>
+        {
+            entity.HasKey(e => e.PositionId).HasName("PK__Position__60BB9A79FEE3E84F");
+
+            entity.ToTable("Position");
+
+            entity.Property(e => e.PositionName)
+                .HasMaxLength(255)
+                .HasColumnName("Position");
+        });
+        
+        modelBuilder.Entity<TradeBoard>(entity =>
+        {
+            entity.HasKey(e => new { e.DropperId, e.GameId });
+
+            entity.ToTable("TradeBoard");
+
+            entity.Property(e => e.DropperId).HasColumnName("DropperID");
+            entity.Property(e => e.Position).HasColumnName("Position");
+            entity.Property(e => e.ReceiverId).HasColumnName("ReceiverID");
+            entity.Property(e => e.Status).HasMaxLength(255);
         });
 
         OnModelCreatingPartial(modelBuilder);

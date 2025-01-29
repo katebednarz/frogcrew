@@ -32,7 +32,7 @@ GO
 -- Position Table
 CREATE TABLE Position (
     [PositionId] INT IDENTITY(1,1) PRIMARY KEY,
-    [Position] nvarchar(255) NOT NULL,
+    [PositionName] nvarchar(255) NOT NULL,
 );
 
 -- User Qualified Positions
@@ -177,7 +177,7 @@ CREATE TABLE Invitations (
 CREATE TABLE TradeBoard (
     [DropperID] int NOT NULL,
     [GameId] int NOT NULL,
-    [Position] nvarchar(255) NOT NULL,
+    [Position] int NOT NULL,
     [Status] nvarchar(255) NOT NULL,
     [ReceiverID] int NULL,
     CONSTRAINT [PK_TradeBoard] PRIMARY KEY ([DropperID], [GameId]),
@@ -208,6 +208,19 @@ GO
 
 CREATE INDEX [UserQualifiedPositionsIndex] ON [UserQualifiedPositions] ([userId]);
 GO
+
+CREATE INDEX [GameIndex] ON [Game] ([scheduleId]);
+Go
+
+CREATE INDEX [CrewedUserIndex] ON [CrewedUser] ([gameId]);
+Go
+
+CREATE INDEX [AvailabilityIndex] ON [Availability] ([gameId]);
+Go
+
+CREATE INDEX [NotificationIndex] ON [Notification] ([userId]);
+Go
+
 
 -- User Values
 INSERT INTO [User] (FirstName, LastName, PayRate, UserName, NormalizedUserName, Email, NormalizedEmail, EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp, PhoneNumber, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnd, LockoutEnabled, AccessFailedCount) VALUES

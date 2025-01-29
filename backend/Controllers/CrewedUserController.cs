@@ -1,5 +1,6 @@
 using backend.DTO;
 using backend.Models;
+using backend.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +12,12 @@ namespace backend.Controllers
     {
 
         private readonly FrogcrewContext _context;
-
+        private readonly DatabaseHelper _dbHelper;
+        
         public CrewedUserController(FrogcrewContext context)
         {
         _context = context;
+        _dbHelper = new DatabaseHelper(context);
         }
 
         /*
@@ -24,10 +27,14 @@ namespace backend.Controllers
             * @return The result of the operation
         */
         [HttpGet("crewMember/{gameId}/{position}")]
-        public async Task<IActionResult> FindCrewMemberByGameAndPosition(int gameId, string position) {
+        public async Task<IActionResult> FindCrewMemberByGameAndPosition(int gameId, string position)
+        {
+
+            var positionId = _dbHelper.GetPositionIdByName(position);
+            
             var availableQualifiedUsers = await _context.Users
             .Where(u => u.Availabilities.Any(a => a.GameId == gameId && a.Available == 1)
-                     && u.UserQualifiedPositions.Any(qp => qp.Position == position))
+                     && u.UserQualifiedPositions.Any(qp => qp.Position == positionId))
             .Select(u => new UserSimpleDTO
             {
                 UserId = u.Id,

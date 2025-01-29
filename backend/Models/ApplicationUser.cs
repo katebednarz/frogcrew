@@ -27,7 +27,7 @@ public class ApplicationUser : IdentityUser<int>
     public virtual ICollection<UserQualifiedPosition> UserQualifiedPositions { get; set; } = new List<UserQualifiedPosition>();
     
     // Conversion methods (optional):
-    public UserDTO ToUserDTO()
+    public UserDTO ToUserDTO(FrogcrewContext _context)
     {
         return new UserDTO
         {
@@ -37,9 +37,19 @@ public class ApplicationUser : IdentityUser<int>
             Email = this.Email,
             PhoneNumber = this.PhoneNumber,
             Role = "this.Role",
-            Position = this.UserQualifiedPositions.Select(x => x.Position).ToList()
+            Position = PositionToList(_context)
         };
     }
+    
+    private List<string> PositionToList(FrogcrewContext _context)
+	{
+		List<string> list = [];
+		foreach (var pos in UserQualifiedPositions)
+		{
+			list.Add(_context.Positions.FirstOrDefault(p => p.PositionId == pos.Position)?.PositionName);
+		}
+		return list;
+	}
 
     public UserSimpleDTO ToUserSimpleDTO()
     {

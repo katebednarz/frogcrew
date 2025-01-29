@@ -7,7 +7,7 @@ public partial class UserQualifiedPosition
 {
     public int UserId { get; set; }
 
-    public string Position { get; set; } = null!;
+    public int Position { get; set; }
 
     public virtual ApplicationUser User { get; set; } = null!;
 }
