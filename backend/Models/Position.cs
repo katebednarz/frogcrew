@@ -11,5 +11,7 @@ public partial class Position
 
     public virtual ICollection<CrewedUser> CrewedUsers { get; set; } = new List<CrewedUser>();
 
-    public virtual ICollection<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
+    //public virtual ICollection<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
+
+    public ICollection<UserQualifiedPosition> UserQualifiedPositions { get; set; } = new List<UserQualifiedPosition>();
 }

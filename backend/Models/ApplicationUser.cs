@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using backend.DTO;
+using backend.Utils;
 
 namespace backend.Models;
 
@@ -43,10 +44,11 @@ public class ApplicationUser : IdentityUser<int>
     
     private List<string> PositionToList(FrogcrewContext _context)
 	{
+        var dbHelper = new DatabaseHelper(_context);
 		List<string> list = [];
 		foreach (var pos in UserQualifiedPositions)
 		{
-			list.Add(_context.Positions.FirstOrDefault(p => p.PositionId == pos.Position)?.PositionName);
+			list.Add(dbHelper.GetPositionNameById(pos.PositionId));
 		}
 		return list;
 	}

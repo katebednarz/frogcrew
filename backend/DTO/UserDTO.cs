@@ -16,7 +16,7 @@ public class UserDTO
     public required string? PhoneNumber { get; set; }
     [Required(ErrorMessage = "Role is required.")]
     public required string? Role { get; set; }
-    [Required(ErrorMessage = "Position is required.")]
+    [Required(ErrorMessage = "PositionId is required.")]
     public required List<String>? Position { get; set; }
 
     

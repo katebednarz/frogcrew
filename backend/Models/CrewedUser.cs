@@ -10,9 +10,11 @@ public partial class CrewedUser
 
     public int GameId { get; set; }
 
-    public required int CrewedPosition { get; set; }
+    public int PositionId { get; set; }
 
     public TimeOnly? ArrivalTime { get; set; }
+    
+    public virtual Position CrewedPositionNavigation { get; set; } = null!;
 
     public virtual Game Game { get; set; } = null!;
 
@@ -21,7 +23,7 @@ public partial class CrewedUser
     public CrewedUserDTO ConvertToCrewedUserDTO(FrogcrewContext _context)
     {
         var user = _context.Users.FirstOrDefault(u => u.Id == UserId);
-        var positionName = _context.Positions.FirstOrDefault(p => p.PositionId == CrewedPosition)?.PositionName;
+        var positionName = _context.Positions.FirstOrDefault(p => p.PositionId == PositionId)?.PositionName;
         return new CrewedUserDTO
         {
             UserId = UserId,

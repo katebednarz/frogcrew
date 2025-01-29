@@ -75,13 +75,13 @@ namespace backend.Controllers.Tests
             new() {
                 UserId = 1,
                 GameId = gameId,
-                CrewedPosition = 1,
+                PositionId = 1,
                 ArrivalTime = TimeOnly.Parse("6:30"),
             },
             new() {
                 UserId = 2,
                 GameId = gameId,
-                CrewedPosition = 1,
+                PositionId = 1,
                 ArrivalTime = TimeOnly.Parse("6:30"),
             }
         };

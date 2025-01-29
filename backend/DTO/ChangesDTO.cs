@@ -7,7 +7,7 @@ namespace backend.DTO
         public string? Action { get; set; }
         [Required(ErrorMessage = "User ID is required.")]
         public int Id { get; set; }
-        [Required(ErrorMessage = "Position is required.")]
+        [Required(ErrorMessage = "PositionId is required.")]
         public string? Position { get; set; }
         public string? FullName { get; set; }
     }

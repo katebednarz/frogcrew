@@ -38,10 +38,10 @@ CREATE TABLE Position (
 -- User Qualified Positions
 CREATE TABLE UserQualifiedPositions (
     userId INT,
-    position INT,
-    PRIMARY KEY (userId, position),
+    positionId INT,
+    PRIMARY KEY (userId, positionId),
     FOREIGN KEY (userId) REFERENCES [User](id),
-    FOREIGN KEY (position) REFERENCES Position(PositionId)
+    FOREIGN KEY (positionId) REFERENCES Position(PositionId)
 
 );
 GO
@@ -71,12 +71,12 @@ GO
 CREATE TABLE CrewedUser (
     userId INT,
     gameId INT,
-    crewedPosition INT,
+    positionId INT,
     arrivalTime TIME,
-    PRIMARY KEY (userId, gameId, crewedPosition),
+    PRIMARY KEY (userId, gameId, positionId),
     FOREIGN KEY (userId) REFERENCES [User](id),
     FOREIGN KEY (gameId) REFERENCES Game(id),
-    FOREIGN KEY (crewedPosition) REFERENCES Position(PositionId)
+    FOREIGN KEY (positionId) REFERENCES Position(PositionId)
 );
 GO
 
@@ -234,7 +234,7 @@ INSERT INTO [User] (FirstName, LastName, PayRate, UserName, NormalizedUserName, 
     ('Mike','Martin',null,'m.martin@tcu.edu','M.MARTIN@TCU.EDU','m.martin@tcu.edu','M.MARTIN@TCU.EDU',0,'AQAAAAIAAYagAAAAELchPSUc5T7AMrm2j7v31sXaKlSgL5rP9WbtJ+cCwgkVeoTfay8dsaer5zZLfis7yw==','4ZRQUMRFJR5UPEMKU4ZJ4COU44A5ONEX','cb3ffecd-392a-4caf-9355-8f67e06974c5','9876543210',0,0,null,1,0);
 
 -- Position Values
-INSERT INTO [Position] (Position) VALUES
+INSERT INTO [Position] (PositionName) VALUES
         ('PRODUCER'),
         ('ASSISTANT PRODUCER'),
         ('DIRECTOR'),
