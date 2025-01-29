@@ -118,15 +118,76 @@ namespace backend.Controllers.Tests
         }
 
         [Test()]
-        public void CreateGameScheduleGamesTestSuccess()
+        public async Task CreateGameScheduleGamesTestSuccess()
         {
-            Assert.Pass();
+            // Arrange
+            var scheduleId = 1;
+            var gameSchedule = new Schedule { Id = scheduleId, Sport = "Men's Basketball", Season = "2024" };
+            
+            var games = new List<GameDTO>
+            {
+                new() { GameDate = DateOnly.FromDateTime(DateTime.UtcNow), Venue = "Stadium A", Opponent = "Team X" },
+                new() { GameDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)), Venue = "Stadium B", Opponent = "Team Y" }
+            };
+
+            _mockContext?.Setup(c => c.Schedules.FindAsync(scheduleId)).ReturnsAsync(gameSchedule);
+            _mockContext?.Setup(c => c.Games.Add(It.IsAny<Game>()));
+            _mockContext?.Setup(c => c.SaveChanges()).Returns(1);
+
+            // Act
+            var result = await _controller!.CreateGameScheduleGames(scheduleId, games) as ObjectResult;
+            var response = result?.Value as Result;
+
+            // Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.Null);
+                Assert.That(response?.Flag, Is.True);
+                Assert.That(response?.Code, Is.EqualTo(200));
+                Assert.That(response?.Message, Is.EqualTo("Add Success"));
+            });
+
+            var responseData = response?.Data as List<GameDTO>;
+            Assert.Multiple(() =>
+            {
+                Assert.That(responseData, Is.Not.Null);
+                Assert.That(responseData?.Count, Is.EqualTo(2));
+                Assert.That(responseData?[0].ScheduleId, Is.EqualTo(scheduleId));
+                Assert.That(responseData?[1].ScheduleId, Is.EqualTo(scheduleId));
+            });
+
+            _mockContext?.Verify(c => c.Games.Add(It.IsAny<Game>()), Times.Exactly(2));
+            _mockContext?.Verify(c => c.SaveChanges(), Times.Exactly(2));
         }
 
         [Test()]
-        public void CreateGameScheduleGamesTestBadRequest()
+        public async Task CreateGameScheduleGamesTestBadRequest()
         {
-            Assert.Pass();
+            // Arrange
+            var scheduleId = 99; // Non-existent schedule ID
+            var games = new List<GameDTO>
+            {
+                new() { GameDate = DateOnly.FromDateTime(DateTime.UtcNow), Venue = "Stadium A", Opponent = "Team X" }
+            };
+
+            _mockContext?.Setup(c => c.Schedules.FindAsync(scheduleId)).ReturnsAsync((Schedule?)null);
+
+            // Act
+            var result = await _controller!.CreateGameScheduleGames(scheduleId, games) as ObjectResult;
+            var response = result?.Value as Result;
+
+            // Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.Null);
+                Assert.That(response?.Flag, Is.False); // Verify Flag
+                Assert.That(response?.Code, Is.EqualTo(404)); // Verify Code
+                Assert.That(response?.Message, Is.EqualTo($"Could not find schedule with ID {scheduleId}.")); // Verify Message
+            });
+
+            // Ensure no games were added or saved
+            _mockContext?.Verify(c => c.Games.Add(It.IsAny<Game>()), Times.Never);
+            _mockContext?.Verify(c => c.SaveChanges(), Times.Never);
         }
 
         [Test()]
@@ -136,15 +197,63 @@ namespace backend.Controllers.Tests
         }
 
         [Test()]
-        public void FindScheduleByIdTestSuccess()
+        public async Task FindScheduleByIdTestSuccess()
         {
-            Assert.Pass();
+            // Arrange
+            var scheduleId = 1;
+            var schedule = new Schedule
+            {
+                Id = scheduleId,
+                Sport = "Men's Soccer",
+                Season = "2024"
+            };
+
+            _mockContext?.Setup(c => c.Schedules.FindAsync(scheduleId))
+                        .ReturnsAsync(schedule);
+
+            // Act
+            var result = await _controller!.FindScheduleById(scheduleId) as ObjectResult;
+            var response = result?.Value as Result;
+
+            // Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.Null);
+                Assert.That(response?.Flag, Is.True); // verify flag
+                Assert.That(response?.Code, Is.EqualTo(200)); // verify code
+                Assert.That(response?.Message, Is.EqualTo("Find Success")); // verify message
+            });
+
+            var gameScheduleDTO = response?.Data as GameScheduleDTO;
+            Assert.Multiple(() =>
+            {
+                Assert.That(gameScheduleDTO, Is.Not.Null);
+                Assert.That(gameScheduleDTO?.Id, Is.EqualTo(scheduleId));
+                Assert.That(gameScheduleDTO?.Sport, Is.EqualTo("Men's Soccer"));
+                Assert.That(gameScheduleDTO?.Season, Is.EqualTo("2024"));
+            });
         }
 
-        [Test]
-        public void FindScheduleByIdTestNotFound()
+        [Test()]
+        public async Task FindScheduleByIdTestNotFound()
         {
-            Assert.Pass();
+            // Arrange
+            var scheduleId = 99; // an ID that doesn't exist
+            _mockContext?.Setup(c => c.Schedules.FindAsync(scheduleId))
+                        .ReturnsAsync((Schedule?)null);
+
+            // Act
+            var result = await _controller!.FindScheduleById(scheduleId) as ObjectResult;
+            var response = result?.Value as Result;
+
+            // Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.Null);
+                Assert.That(response?.Flag, Is.False); // verify flag
+                Assert.That(response?.Code, Is.EqualTo(404)); // verify code
+                Assert.That(response?.Message, Is.EqualTo($"Could not find schedule with Id {scheduleId}.")); // verify message
+            });
         }
 
         [Test()]
