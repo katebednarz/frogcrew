@@ -44,7 +44,7 @@ public class UserController : Controller
      * @return The result of the operation
      */
     [HttpPost("crewMember")]
-    public async Task<IActionResult> CreateCrewMember([FromBody] UserDTO request)
+    public async Task<IActionResult> CreateCrewMember([FromBody] UserDTO request, String token)
     {
         if (!ModelState.IsValid)
         {
@@ -65,8 +65,12 @@ public class UserController : Controller
             FirstName = request.FirstName,
             LastName = request.LastName,
         };
-
-        var result = await _userManager.CreateAsync(user, "Password!1");
+        if (request.Password == null)
+        {
+            request.Password = "Password!1";
+        }
+        var result = await _userManager.CreateAsync(user, request.Password);
+        
         if (!result.Succeeded)
         {
             var errors = result.Errors.Select(e => e.Description).ToList();
@@ -90,7 +94,8 @@ public class UserController : Controller
             _context.Add(newPosition);
             _context.SaveChanges();
         }
-        
+
+        _context.Invitations.Remove(_dbHelper.GetInvitationByToken(token));
         return Ok(new Result(true, 200, "Add Success", request));
     }
 

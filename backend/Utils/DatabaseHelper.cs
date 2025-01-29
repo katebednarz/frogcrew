@@ -21,5 +21,7 @@ public class DatabaseHelper
         .Select(p => p.PositionName)
         .FirstOrDefault();
     
+    public Invitation? GetInvitationByToken(string token) => _context.Invitations
+        .FirstOrDefault(i => i.Token == token);
     
 }
