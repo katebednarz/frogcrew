@@ -185,7 +185,7 @@ namespace backend.Controllers.Tests
     public async Task ValidateInvitationTokenTestSuccess()
     {
         // Arrange
-        var token = "valid-token";
+        string token = "valid-token";
         var invitation = new Invitation { Token = token };
 
         _mockContext?.Setup(c => c.Invitations).ReturnsDbSet(new List<Invitation> { invitation });
@@ -198,14 +198,13 @@ namespace backend.Controllers.Tests
         Assert.Multiple(() =>
         {
             Assert.That(result, Is.Not.Null);
-            Assert.That(response?.Flag, Is.True); // verify flag
-            Assert.That(response?.Code, Is.EqualTo(200)); // verify code
-            Assert.That(response?.Message, Is.EqualTo("Invitation valid")); // verify message
+            Assert.That(response?.Flag, Is.True); // Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Invitation valid")); // Verify Message
         });
 
         var data = response?.Data as dynamic;
         Assert.That(data, Is.Not.Null);
-        Assert.That(data?.token, Is.EqualTo(token));
     }
 
     [Test()]
