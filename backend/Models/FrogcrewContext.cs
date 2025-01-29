@@ -175,7 +175,7 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
         {
             entity.HasKey(e => e.PositionId).HasName("PRIMARY");
 
-            entity.ToTable("PositionId");
+            entity.ToTable("Position");
 
             entity.Property(e => e.PositionName)
                 .HasMaxLength(255)
@@ -213,7 +213,7 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
         {
             entity.HasKey(e => new { e.UserId, e.PositionId }).HasName("PRIMARY");
 
-            entity.ToTable("UserQualifiedPosition");
+            entity.ToTable("UserQualifiedPositions");
 
             entity.HasIndex(e => e.PositionId, "UserQualifiedPositionIndex");
 
