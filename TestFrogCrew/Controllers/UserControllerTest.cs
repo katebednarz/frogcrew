@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using backend.Models;
 using backend.DTO;
 using backend.Auth;
+using backend.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -22,11 +23,13 @@ namespace backend.Controllers.Tests
     private UserController? _controller;
     private Mock<UserManager<ApplicationUser>> _userManagerMock;
     private Mock<SignInManager<ApplicationUser>> _signInManagerMock;
+    private DatabaseHelper? _dbHelper;
 
     [SetUp]
     public void Setup()
     {
       _mockContext = new Mock<FrogcrewContext>();
+      _dbHelper = new DatabaseHelper(_mockContext.Object);
       _userManagerMock = new Mock<UserManager<ApplicationUser>>(
         new Mock<IUserStore<ApplicationUser>>().Object,
         null,
@@ -80,6 +83,24 @@ namespace backend.Controllers.Tests
     public async Task CreateCrewMemberTestSuccess()
     {
       // Arrange
+      int positionId = 1;
+      string positionName = "DIRECTOR";
+      
+      _mockContext?.Setup(c => c.Positions)
+        .ReturnsDbSet(new List<Position>
+        {
+          new()
+          {
+            PositionId = 1, 
+            PositionName = "DIRECTOR"
+          },
+          new()
+          {
+            PositionId = 2, 
+            PositionName = "PRODUCER"
+          }
+        });
+      
       var request = new UserDTO
       {
         Email = "test@example.com",

@@ -47,7 +47,7 @@ public partial class Game
             CrewedMembers = CrewedUsersToDTOList(_context)
         };
     }
-
+    
     private List<CrewedUserDTO> CrewedUsersToDTOList(FrogcrewContext _context) {
         var CrewedUserDTOList = new List<CrewedUserDTO>();
         var CrewedUserList = _context.CrewedUsers.Where(c => c.GameId == Id).ToList(); 
@@ -55,7 +55,7 @@ public partial class Game
         {
             CrewedUserDTOList.Add(CrewedUser.ConvertToCrewedUserDTO(_context));
         }
-
+    
         return CrewedUserDTOList;
     }
 }

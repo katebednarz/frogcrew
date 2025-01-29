@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using backend.Auth;
+using backend.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,7 @@ public class UserController : Controller
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly FrogcrewContext _context;
     private readonly IConfiguration _configuration;
+    private readonly DatabaseHelper _dbHelper;
 
     public UserController(
         UserManager<ApplicationUser> userManager,
@@ -32,6 +34,7 @@ public class UserController : Controller
         _signInManager = signInManager;
         _context = context;
         _configuration = configuration;
+        _dbHelper = new DatabaseHelper(context);
     }
 
     /*
@@ -82,7 +85,7 @@ public class UserController : Controller
             var newPosition = new UserQualifiedPosition
             {
                 UserId = user.Id,
-                Position = pos
+                Position = (int)_dbHelper.GetPositionIdByName(pos)
             };
             _context.Add(newPosition);
             _context.SaveChanges();

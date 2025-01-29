@@ -96,11 +96,12 @@ namespace backend.Controllers
                 }
 
                 // build new model and add to DbContext
+                var positionId = _context.Positions.FirstOrDefault(p => p.PositionName == changes.Position)?.PositionId;
                 var newCrewedUser = new CrewedUser
                 {
                     UserId = changes.Id,
                     GameId = request.gameId,
-                    CrewedPosition = changes.Position,
+                    CrewedPosition = (int)positionId,
                     ArrivalTime = new TimeOnly(arrivalTime.Hour, arrivalTime.Second, arrivalTime.Millisecond)
                 };
                 await _context.AddAsync(newCrewedUser);
@@ -185,7 +186,7 @@ namespace backend.Controllers
 
                 if (change.Action.ToLower() == "assign")
                 {
-                    crewedUser.CrewedPosition = change.Position;
+                    crewedUser.CrewedPosition = (int)_context.Positions.FirstOrDefault(p => p.PositionName == change.Position)?.PositionId;
                     // NEED TO HANDLE CHANGE IN ARRIVAL TIME!
                 }
                 else if (change.Action.ToLower() == "unassign")
@@ -242,7 +243,7 @@ namespace backend.Controllers
                 ChangesDTO changesDTO = new()
                 {
                     Id = user.Id,
-                    Position = crewedUser.CrewedPosition,
+                    Position = _context.Positions.FirstOrDefault(p => p.PositionId == crewedUser.CrewedPosition)?.PositionName,
                     FullName = $"{user.FirstName} {user?.LastName}",
                 };
 

@@ -13,7 +13,9 @@ using System.Collections.Generic;
 using System.Linq;
 using backend.Models;
 using backend.DTO;
+using backend.Utils;
 using Microsoft.EntityFrameworkCore;
+using Moq.EntityFrameworkCore;
 
 namespace backend.Controllers.Tests
 {
@@ -22,6 +24,7 @@ namespace backend.Controllers.Tests
   {
     private Mock<FrogcrewContext>? _mockContext;
     private CrewListController? _controller;
+    private DatabaseHelper? _dbHelper;
 
 
     [SetUp]
@@ -29,6 +32,7 @@ namespace backend.Controllers.Tests
     {
       _mockContext = new Mock<FrogcrewContext>();
       _controller = new CrewListController(_mockContext.Object);
+      _dbHelper = new DatabaseHelper(_mockContext.Object);
     }
 
     [TearDown]
@@ -55,6 +59,8 @@ namespace backend.Controllers.Tests
     {
       // Arrange
       var gameId = 1;
+      int positionId = 1;
+      string positionName = "DIRECTOR";
       var game = new Game
       {
         Id = gameId,
@@ -69,13 +75,13 @@ namespace backend.Controllers.Tests
             new() {
                 UserId = 1,
                 GameId = gameId,
-                CrewedPosition = "DIRECTOR",
+                CrewedPosition = 1,
                 ArrivalTime = TimeOnly.Parse("6:30"),
             },
             new() {
                 UserId = 2,
                 GameId = gameId,
-                CrewedPosition = "DIRECTOR",
+                CrewedPosition = 1,
                 ArrivalTime = TimeOnly.Parse("6:30"),
             }
         };
@@ -102,6 +108,9 @@ namespace backend.Controllers.Tests
       _mockContext?.Setup(c => c.CrewedUsers).Returns(mockCrewedUserSet.Object);
       _mockContext?.Setup(c => c.Users).Returns(mockUserSet.Object);
 
+      _mockContext?.Setup(c => c.Positions)
+        .ReturnsDbSet(new List<Position> { new() { PositionId = positionId, PositionName = positionName } });
+      
       // Act
       var result = await _controller!.FindCrewListById(gameId) as ObjectResult;
       var response = result?.Value as Result;

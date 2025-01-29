@@ -13,8 +13,10 @@ using System.Collections.Generic;
 using System.Linq;
 using backend.Models;
 using backend.DTO;
+using backend.Utils;
 using Microsoft.EntityFrameworkCore;
 using misc;
+using Moq.EntityFrameworkCore;
 
 namespace backend.Controllers.Tests
 {
@@ -24,6 +26,7 @@ namespace backend.Controllers.Tests
         private Mock<FrogcrewContext>? _mockContext;
         private Mock<DbSet<ApplicationUser>>? _mockUsersDbSet;
         private CrewedUserController? _controller;
+        private DatabaseHelper? _dbHelper;
 
 
         [SetUp]
@@ -32,6 +35,7 @@ namespace backend.Controllers.Tests
             _mockContext = new Mock<FrogcrewContext>();
             _mockUsersDbSet = new Mock<DbSet<ApplicationUser>>();
             _controller = new CrewedUserController(_mockContext.Object);
+            _dbHelper = new DatabaseHelper(_mockContext.Object);
         }
 
         [TearDown]
@@ -45,7 +49,8 @@ namespace backend.Controllers.Tests
         {
             // Arrange
             int gameId = 1;
-            string position = "PRODUCER";
+            int positionId = 1;
+            string positionName = "PRODUCER";
 
             var users = new List<ApplicationUser>
         {
@@ -59,7 +64,7 @@ namespace backend.Controllers.Tests
                 },
                 UserQualifiedPositions = new List<UserQualifiedPosition>
                 {
-                    new() { Position = "PRODUCER" }
+                    new() { Position = 1 }
                 }
             },
             new() {
@@ -72,7 +77,7 @@ namespace backend.Controllers.Tests
                 },
                 UserQualifiedPositions = new List<UserQualifiedPosition>
                 {
-                    new() { Position = "DIRECTOR" }
+                    new() { Position = 2 }
                 }
             },
             new() {
@@ -85,7 +90,7 @@ namespace backend.Controllers.Tests
                 },
                 UserQualifiedPositions = new List<UserQualifiedPosition>
                 {
-                    new() { Position = "PRODUCER" }
+                    new() { Position = 1 }
                 }
             }
         }.AsQueryable();
@@ -100,8 +105,11 @@ namespace backend.Controllers.Tests
 
             _mockContext?.Setup(c => c.Users).Returns(_mockUsersDbSet!.Object);
 
+            _mockContext?.Setup(c => c.Positions)
+                .ReturnsDbSet(new List<Position> { new() { PositionId = positionId, PositionName = positionName } });
+            
             // Act
-            var result = await _controller!.FindCrewMemberByGameAndPosition(gameId, position) as ObjectResult;
+            var result = await _controller!.FindCrewMemberByGameAndPosition(gameId, positionName) as ObjectResult;
             var response = result?.Value as Result;
 
             // Assert
@@ -130,7 +138,8 @@ namespace backend.Controllers.Tests
         {
             // Arrange
             int gameId = 1;
-            string position = "Manager";
+            int positionId = 1;
+            string positionName = "PRODUCER";
 
             var users = new List<ApplicationUser>().AsQueryable(); // No users in the database
 
@@ -143,9 +152,12 @@ namespace backend.Controllers.Tests
             _mockUsersDbSet?.As<IQueryable<ApplicationUser>>().Setup(m => m.GetEnumerator()).Returns(asyncUsers.AsQueryable().GetEnumerator);
 
             _mockContext?.Setup(c => c.Users).Returns(_mockUsersDbSet!.Object);
+            
+            _mockContext?.Setup(c => c.Positions)
+                .ReturnsDbSet(new List<Position> { new() { PositionId = positionId, PositionName = positionName } });
 
             // Act
-            var result = await _controller!.FindCrewMemberByGameAndPosition(gameId, position) as ObjectResult;
+            var result = await _controller!.FindCrewMemberByGameAndPosition(gameId, positionName) as ObjectResult;
             var response = result?.Value as Result;
 
             // Assert
@@ -154,7 +166,7 @@ namespace backend.Controllers.Tests
                 Assert.That(result, Is.Not.Null);
                 Assert.That(response?.Flag, Is.False); //Verify Flag
                 Assert.That(response?.Code, Is.EqualTo(404)); //Verify Code
-                Assert.That(response?.Message, Is.EqualTo($"No matching crew members available for {position}")); //Verify Message
+                Assert.That(response?.Message, Is.EqualTo($"No matching crew members available for {positionName}")); //Verify Message
             });
 
         }
