@@ -100,6 +100,9 @@ namespace backend.Controllers.Tests
             PositionName = "PRODUCER"
           }
         });
+
+      _mockContext?.Setup(c => c.Invitations)
+        .ReturnsDbSet(new List<Invitation> { new Invitation {Token = "token"} });
       
       var request = new UserDTO
       {
@@ -121,7 +124,7 @@ namespace backend.Controllers.Tests
       _mockContext.Setup(db => db.Set<UserQualifiedPosition>()).Returns(dbSetMock.Object);
 
       //Act
-      var result = await _controller!.CreateCrewMember(request) as ObjectResult;
+      var result = await _controller!.CreateCrewMember(request,"token") as ObjectResult;
       var response = result?.Value as Result;
 
       //Assert
@@ -171,7 +174,7 @@ namespace backend.Controllers.Tests
       _controller?.ModelState.AddModelError("position", "position is required.");
 
       // Act
-      var result = await _controller!.CreateCrewMember(request) as ObjectResult;
+      var result = await _controller!.CreateCrewMember(request,"token") as ObjectResult;
       var response = result?.Value as Result;
 
       // Expected data
