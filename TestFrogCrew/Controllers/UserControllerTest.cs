@@ -182,6 +182,52 @@ namespace backend.Controllers.Tests
     }
 
     [Test()]
+    public async Task ValidateInvitationTokenTestSuccess()
+    {
+        // Arrange
+        string token = "valid-token";
+        var invitation = new Invitation { Token = token };
+
+        _mockContext?.Setup(c => c.Invitations).ReturnsDbSet(new List<Invitation> { invitation });
+
+        // Act
+        var result = await _controller!.ValidateInvitation(token) as ObjectResult;
+        var response = result?.Value as Result;
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.True); // Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Invitation valid")); // Verify Message
+        });
+
+        var data = response?.Data as dynamic;
+        Assert.That(data, Is.Not.Null);
+    }
+
+    [Test()]
+    public async Task ValidateInvitationTokenTestBadRequest()
+    {
+        // Arrange
+        string token = null; // simulating missing token
+
+        // Act
+        var result = await _controller!.ValidateInvitation(token) as ObjectResult;
+        var response = result?.Value as Result;
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.False); // verify flag
+            Assert.That(response?.Code, Is.EqualTo(400)); // verify code
+            Assert.That(response?.Message, Is.EqualTo("Token is required")); // verify message
+        });
+    }
+
+    [Test()]
     public async Task InviteCrewMemberTestSuccess()
     {
       // Arrange
