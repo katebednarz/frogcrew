@@ -25,6 +25,8 @@ public partial class Game
     public virtual ICollection<CrewedUser> CrewedUsers { get; set; } = new List<CrewedUser>();
 
     public virtual Schedule? Schedule { get; set; }
+    
+    public virtual ICollection<TradeBoard> GamesOnTradeBoard { get; set; } = new List<TradeBoard>();
 
     public GameDTO ConvertToGameDTO() {
         return new GameDTO {

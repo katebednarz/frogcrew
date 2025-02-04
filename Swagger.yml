@@ -1140,28 +1140,21 @@ paths:
                 code: 404
                 message: Could not find user with id 1
                 data: null
-  /scheduledGames/{userId}/drop/{gameId}:
+  /scheduledGames/drop:
     post:
       tags:
         - scheduledGames
-        - NYI
       summary: Add shift to trade board
       description: Add a scheduled game to the trade board.
-      parameters:
-        - in: path
-          name: userId
-          description: id of the user
-          required: true
-          schema:
-            type: string
-            example: 1
-        - in: path
-          name: gameId
-          description: id of the game
-          required: true
-          schema:
-            type: string
-            example: 1
+      requestBody:
+        required: true
+        description: relevant information for dropping a shift a game
+        content:
+          application/json:
+            example:
+              userId: 1
+              gameId: 1
+              positionId: 1
       responses:
         '200':
           description: Scheduled game dropped
@@ -1172,36 +1165,53 @@ paths:
                 code: 200
                 message: Drop Success
                 data:
+                  tradeId: 1
                   userId: 1
                   gameId: 1
-                  status: available 
+                  position: DIRECTOR
+                  status: AVAILABLE 
+                  receiverId: null
         '404':
           description: user or game not found
           content:
             application/json:
-              example:
-                flag: false
-                code: 404
-                message: Could not find user with id 1 or game with id 1
-                data: null
-  /scheduledGames/{userId}/pickup/{gameId}:
+              examples:
+                UserNotFound:
+                  value:
+                    flag: false
+                    code: 404
+                    message: Could not find user with id 1
+                    data: null
+                GameNotFound:
+                  value:
+                    flag: false
+                    code: 404
+                    message: Could not find game with id 1
+                    data: null
+                ShiftNotFound:
+                  value:
+                    flag: false
+                    code: 404
+                    message: Could not find shift
+                    data: null
+
+  /scheduledGames/pickup/{tradeId}/{userId}:
     put:
       tags:
         - scheduledGames
-        - NYI
       summary: Request to pickup a game
       description: Request to pickup a game from the trade board.
       parameters:
         - in: path
-          name: userId
-          description: id of the user
+          name: tradeId
+          description: id of the trade board entry
           required: true
           schema:
             type: string
             example: 1
         - in: path
-          name: gameId
-          description: id of the game
+          name: userId
+          description: id of the user picking up the shift
           required: true
           schema:
             type: string
@@ -1216,36 +1226,48 @@ paths:
                 code: 200
                 message: Request Success
                 data:
-                  userId: 1
+                  tradeId: 1
+                  dropperId: 1
                   gameId: 1
+                  position: DIRECTOR
                   status: awaiting approval
-        '404':
-          description: user or game not found
+                  receiverId: 2
+        '400':
+          description: bad input parameter
           content:
             application/json:
               example:
                 flag: false
-                code: 404
-                message: Could not find user with id 1 or game with id 1
+                code: 400
+                message: User is not qualified for this position
                 data: null
-  /scheduledGames/{userId}/approve/{gameId}:
+        '404':
+          description: user or game not found
+          content:
+            application/json:
+              examples:
+                UserNotFound:
+                  value:
+                    flag: false
+                    code: 404
+                    message: Could not find user with id 1
+                    data: null
+                TradeNotFound:
+                  value:
+                    flag: false
+                    code: 404
+                    message: Could not find trade with id 1
+                    data: null
+  /scheduledGames/approve/{tradeId}:
     put:
       tags:
         - scheduledGames
-        - NYI
       summary: Approve shift swap
       description: Approve a request to swap shift on tradeboard.
       parameters:
         - in: path
-          name: userId
-          description: id of the user dropping the shift
-          required: true
-          schema:
-            type: string
-            example: 1
-        - in: path
-          name: gameId
-          description: id of the game
+          name: tradeId
+          description: id of the trade board entry
           required: true
           schema:
             type: string
@@ -1260,9 +1282,12 @@ paths:
                 code: 200
                 message: Approval Success
                 data:
+                  tradeId: 1
                   userId: 1
                   gameId: 1
+                  position: DIRECTOR
                   status: approved
+                  receiverId: 2
         '404':
           description: user or game not found
           content:
@@ -1270,7 +1295,7 @@ paths:
               example:
                 flag: false
                 code: 404
-                message: Could not find user with id 1 or game with id 1
+                message: Could not find trade with id 1
                 data: null
   /invite:
     post:
