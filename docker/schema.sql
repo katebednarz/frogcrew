@@ -172,17 +172,23 @@ CREATE TABLE Invitations (
     [Token] nvarchar(450) NOT NULL,
     CONSTRAINT [PK_Invitations] PRIMARY KEY ([Token])
 );
+Go
 
 -- Trade Board Table
 CREATE TABLE TradeBoard (
+    [TradeId] INT IDENTITY(1,1) PRIMARY KEY,
     [DropperID] int NOT NULL,
     [GameId] int NOT NULL,
     [Position] int NOT NULL,
     [Status] nvarchar(255) NOT NULL,
     [ReceiverID] int NULL,
-    CONSTRAINT [PK_TradeBoard] PRIMARY KEY ([DropperID], [GameId]),
-)
-
+    FOREIGN KEY (DropperID) REFERENCES [User](id),
+    FOREIGN KEY (GameId) REFERENCES [Game](id),
+    FOREIGN KEY (Position) REFERENCES [Position](PositionId),
+    FOREIGN KEY (ReceiverID) REFERENCES [User](id),
+    CONSTRAINT UQ_TradeBoard_Dropper_Game_Position UNIQUE (DropperID, GameId, Position)
+);
+Go
 -- Indexes
 
 CREATE INDEX [IX_AspNetRoleClaims_RoleId] ON [AspNetRoleClaims] ([RoleId]);

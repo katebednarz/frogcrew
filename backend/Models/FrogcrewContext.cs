@@ -196,17 +196,39 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
                 .HasMaxLength(255)
                 .HasColumnName("sport");
         });
-
+        
         modelBuilder.Entity<TradeBoard>(entity =>
         {
-            entity.HasKey(e => new { e.DropperId, e.GameId });
+            entity.HasKey(e => e.TradeId).HasName("PK__TradeBoa__3028BB5B4AF229B7");
 
             entity.ToTable("TradeBoard");
 
             entity.Property(e => e.DropperId).HasColumnName("DropperID");
-            entity.Property(e => e.Position).HasColumnName("PositionId");
             entity.Property(e => e.ReceiverId).HasColumnName("ReceiverID");
             entity.Property(e => e.Status).HasMaxLength(255);
+
+            entity.HasIndex(e => new { e.DropperId, e.GameId, e.Position })
+                .IsUnique()
+                .HasDatabaseName("UQ_TradeBoard_Dropper_Game_Position");
+            
+            entity.HasOne(d => d.Dropper).WithMany(p => p.TradeBoardDroppers)
+                .HasForeignKey(d => d.DropperId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__TradeBoar__Dropp__4F7CD00D");
+
+            entity.HasOne(d => d.Game).WithMany(p => p.GamesOnTradeBoard)
+                .HasForeignKey(d => d.GameId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__TradeBoar__GameI__5070F446");
+
+            entity.HasOne(d => d.PositionNavigation).WithMany(p => p.TradeBoards)
+                .HasForeignKey(d => d.Position)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__TradeBoar__Posit__5165187F");
+
+            entity.HasOne(d => d.Receiver).WithMany(p => p.TradeBoardReceivers)
+                .HasForeignKey(d => d.ReceiverId)
+                .HasConstraintName("FK__TradeBoar__Recei__52593CB8");
         });
 
         modelBuilder.Entity<UserQualifiedPosition>(entity =>

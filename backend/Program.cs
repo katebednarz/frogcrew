@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using backend.Models;
 using backend;
+using backend.Utils;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -94,6 +95,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddScoped<DatabaseHelper>();
     
 var app = builder.Build();
 
