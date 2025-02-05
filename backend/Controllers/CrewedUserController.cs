@@ -13,7 +13,7 @@ namespace backend.Controllers
 
         private readonly FrogcrewContext _context;
         private readonly DatabaseHelper _dbHelper;
-        
+
         public CrewedUserController(FrogcrewContext context)
         {
             _context = context;
@@ -31,7 +31,7 @@ namespace backend.Controllers
         {
 
             var positionId = _dbHelper.GetPositionIdByName(position);
-            
+
             var availableQualifiedUsers = await _context.Users
                 .Where(u => u.Availabilities.Any(a => a.GameId == gameId && a.Available == 1)
                             && u.UserQualifiedPositions.Any(qp => qp.PositionId == positionId))
@@ -50,19 +50,13 @@ namespace backend.Controllers
             return Ok(new Result(true, 200, "Find Success", availableQualifiedUsers));
         }
 
-        
-        
-        
-        
-        
-        
         /*
          * Update crew members attached to game and return action.
          *
          * @param request ID# of Game and list of new crew members to add
          * @return Result of new data generated
          */
-        
+
         /*
          * gameId will be passed as a parameter instead of in the body
          *
@@ -77,20 +71,39 @@ namespace backend.Controllers
          *              }
          *          ]
          */
-        
-        [HttpPost("crewedUser/{gameId:int}")]
-        public async Task<IActionResult> UpdateCrewedUsers(int gameId, [FromBody] List<CrewedUserDTO> crewedUsers)
+
+        [HttpPost("CrewedUser/{gameId:int}")]
+        public async Task<IActionResult> CreateCrewedUsers(int gameId, [FromBody] List<CrewedUserDTO>? crewedUsers)
         {
+            // Basic model binding tests.
+            if (crewedUsers == null)
+                return BadRequest("Request body is empty");
+            if (gameId == 0)
+                return BadRequest("GameId is 0");
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .SelectMany(kvp => kvp.Value!.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.",
+                    errors);
+
+                return new ObjectResult(errorResponse) { StatusCode = 400 };
+            }
+
+            // First check if Game exists.
             var game = await _context.Games.FindAsync(gameId);
             if (game == null)
                 return NotFound(new Result(false, 404, $"Game with ID {gameId} not found.", null!));
-            
+
             // Pull game start time from Game; if not, provide default.
             TimeOnly? startTime = new TimeOnly(12, 0, 0, 0);
             if (game.GameStart != null)
             {
                 startTime = game.GameStart;
             }
+
             // Set up for out return object on success.
             var returnDto = new CrewedUserDTO
             {
@@ -108,8 +121,9 @@ namespace backend.Controllers
                     "SOUND" or "CAMERA" => startTime.Value.AddHours(-1),
                     _ => startTime.Value
                 };
-                
-                var position = _context.Positions.FirstOrDefault(p => p.PositionName == crewedUser.Position)?.PositionId;
+
+                var position = _context.Positions.FirstOrDefault(p => p.PositionName == crewedUser.Position)
+                    ?.PositionId;
                 if (position == null)
                     return NotFound(new Result(false, 404, $"Position {crewedUser.Position} not found.", null!));
 
@@ -130,12 +144,17 @@ namespace backend.Controllers
                     GameId = gameId,
                     Position = crewedUser.Position,
                 };
-                
+
                 // Append updates to CrewedUser table.
                 await _context.AddAsync(newCrewedUser);
             }
             
-            var response = new Result(true, 200, "Crewed users created.", returnDto);
+            // Save changes to the database
+            var changes = await _context.SaveChangesAsync();
+            if (changes <= 0)
+                return StatusCode(500, new Result(false, 500, "No database changes saved. Something went wrong.", null));
+            
+            var response = new Result(true, 200, $"{changes} Crewed users created successfully.", returnDto);
             return Ok(response);
         }
     }

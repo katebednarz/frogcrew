@@ -12,7 +12,7 @@ public partial class CrewedUser
 
     public int PositionId { get; set; }
 
-    public TimeOnly ArrivalTime { get; set; } = new TimeOnly(0, 0, 0);
+    public TimeOnly ArrivalTime { get; set; }
     
     public virtual Position CrewedPositionNavigation { get; set; } = null!;
 
@@ -25,8 +25,8 @@ public partial class CrewedUser
         var positionName = _context.Positions.FirstOrDefault(p => p.PositionId == PositionId)!.PositionName;
         return new CrewedUserDTO
         {
-            UserId = this.UserId,
-            GameId = this.GameId,
+            UserId = UserId,
+            GameId = GameId,
             Position = positionName,
         };
     }
