@@ -12,7 +12,7 @@ public partial class CrewedUser
 
     public int PositionId { get; set; }
 
-    public TimeOnly? ArrivalTime { get; set; }
+    public TimeOnly ArrivalTime { get; set; } = new TimeOnly(0, 0, 0);
     
     public virtual Position CrewedPositionNavigation { get; set; } = null!;
 
@@ -28,7 +28,7 @@ public partial class CrewedUser
             UserId = this.UserId,
             GameId = this.GameId,
             Position = positionName!,
-            ArrivalTime = this.ArrivalTime.ToString()!
+            ArrivalTime = this.ArrivalTime.ToString()
         };
     }
 }
