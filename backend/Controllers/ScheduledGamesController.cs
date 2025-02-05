@@ -55,7 +55,8 @@ public class ScheduledGamesController : Controller
         var trade = await _context.TradeBoards.FindAsync(tradeId);
         if (trade is null) return new ObjectResult(new Result(false, 404, $"Could not find trade with id {tradeId}")) { StatusCode = 404 };
         var user = await _context.Users.FindAsync(userId);
-        if (user is null) return new ObjectResult(new Result(false, 404, $"Could not find game with id {userId}")) {StatusCode = 404};
+        if (user is null) return new ObjectResult(new Result(false, 404, $"Could not find user with id {userId}")) {StatusCode = 404};
+        //rework
         if (!(user.UserQualifiedPositions.Any(x => x.PositionId == trade.Position)))
             return new ObjectResult(new Result(false, 400, "User is not qualified for this position"));
         

@@ -156,19 +156,125 @@ public class ScheduledGamesControllerTest
     [Test]
     public async Task DropShiftGameNotFound()
     {
-        Assert.Pass();
+        // Arrange
+        var gameId = 1;
+        
+        var tradeInfo = new TradeRequestInfo()
+        {
+            UserId = 1,
+            GameId = gameId,
+            PositionId = 1,
+        };
+        
+        var tradeBoards = new List<TradeBoard>();
+        var mockTradeBoardSet = CreateMockDbSet(tradeBoards);
+        _mockContext?.Setup(c => c.TradeBoards).Returns(mockTradeBoardSet.Object);
+        _mockContext?.Setup(c => c.Games.FindAsync(gameId)).ReturnsAsync(null as Game);
+        
+        // Act
+        var result = await _controller!.DropShift(tradeInfo) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.False); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(404)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Could not find game with id 1")); //Verify Message
+            
+        });
     }
     
     [Test]
     public async Task DropShiftUserNotFound()
     {
-        Assert.Pass();
+        // Arrange
+        var gameId = 1;
+        var userId = 1;
+        var game = new Game
+        {
+            Id = gameId,
+            GameStart = TimeOnly.Parse("6:30"),
+            GameDate = DateOnly.Parse("2024-11-09"),
+            Venue = "Amon G Carter",
+            Opponent = "OSU"
+        };
+        
+        var tradeInfo = new TradeRequestInfo()
+        {
+            UserId = userId,
+            GameId = gameId,
+            PositionId = 1,
+        };
+        var tradeBoards = new List<TradeBoard>();
+        var mockTradeBoardSet = CreateMockDbSet(tradeBoards);
+        _mockContext?.Setup(c => c.TradeBoards).Returns(mockTradeBoardSet.Object);
+        _mockContext?.Setup(c => c.Games.FindAsync(gameId)).ReturnsAsync(game);
+        _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync(null as ApplicationUser);
+        
+        // Act
+        var result = await _controller!.DropShift(tradeInfo) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.False); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(404)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Could not find user with id 1")); //Verify Message
+            
+        });
     }
     
     [Test]
     public async Task DropShiftShiftNotFound()
     {
-        Assert.Pass();
+        // Arrange
+        var gameId = 1;
+        var userId = 1;
+        var game = new Game
+        {
+            Id = gameId,
+            GameStart = TimeOnly.Parse("6:30"),
+            GameDate = DateOnly.Parse("2024-11-09"),
+            Venue = "Amon G Carter",
+            Opponent = "OSU"
+        };
+        var user = new ApplicationUser
+        {
+            Id = userId,
+            FirstName = "Billy",
+            LastName = "Bob",
+        };
+        
+        var tradeInfo = new TradeRequestInfo()
+        {
+            UserId = userId,
+            GameId = gameId,
+            PositionId = 1,
+        };
+        var tradeBoards = new List<TradeBoard>();
+        var mockTradeBoardSet = CreateMockDbSet(tradeBoards);
+        _mockContext?.Setup(c => c.TradeBoards).Returns(mockTradeBoardSet.Object);
+        _mockContext?.Setup(c => c.Games.FindAsync(gameId)).ReturnsAsync(game);
+        _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync(user);
+        _mockContext?.Setup(c => c.CrewedUsers.FindAsync()).ReturnsAsync(null as CrewedUser);
+        
+        // Act
+        var result = await _controller!.DropShift(tradeInfo) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.False); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(404)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Could not find shift")); //Verify Message
+            
+        });
     }
     
     [Test]
@@ -180,19 +286,95 @@ public class ScheduledGamesControllerTest
     [Test]
     public async Task PickupShiftTradeNotFound()
     {
-        Assert.Pass();
+        // Arrange 
+        var tradeBoards = new List<TradeBoard>();
+        var mockTradeBoardSet = CreateMockDbSet(tradeBoards);
+        _mockContext?.Setup(c => c.TradeBoards).Returns(mockTradeBoardSet.Object);
+        
+        // Act
+        var result = await _controller!.PickupShift(1,2) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.False); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(404)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Could not find trade with id 1")); //Verify Message
+            
+        });
     }
     
     [Test]
     public async Task PickupShiftUserNotFound()
     {
-        Assert.Pass();
+        // Arrange 
+        var tradeBoards = new List<TradeBoard>
+        {
+            new()
+            {
+                TradeId = 1,
+                DropperId = 1,
+                GameId = 1,
+                Position = 1,
+                Status = "AVAILABLE",
+                ReceiverId = null,
+            }
+        };
+        var mockTradeBoardSet = CreateMockDbSet(tradeBoards);
+        _mockContext?.Setup(c => c.TradeBoards).Returns(mockTradeBoardSet.Object);
+        _mockContext?.Setup(c => c.Users.FindAsync(1)).ReturnsAsync(null as ApplicationUser);
+        _mockContext?.Setup(c => c.TradeBoards.FindAsync(1)).ReturnsAsync(tradeBoards.FirstOrDefault(u => u.TradeId == 1));
+         
+        // Act
+        var result = await _controller.PickupShift(1,1) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.False); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(404)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Could not find user with id 1")); //Verify Message
+            
+        });
     }
     
+    //REDO
     [Test]
     public async Task PickupShiftUserNotQualified()
     {
-        Assert.Pass();
+        // Arrange 
+        var tradeBoards = new List<TradeBoard>
+        {
+            new()
+            {
+                DropperId = 1,
+                GameId = 1,
+                Position = 1,
+                Status = "AVAILABLE",
+                ReceiverId = null,
+            }
+        };
+        var mockTradeBoardSet = CreateMockDbSet(tradeBoards);
+        _mockContext?.Setup(c => c.TradeBoards).Returns(mockTradeBoardSet.Object);
+        _mockContext?.Setup(c => c.Users.FindAsync(1)).ReturnsAsync(null as ApplicationUser);
+        
+        // Act
+        var result = await _controller!.PickupShift(1,2) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.False); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(404)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Could not find trade with id 1")); //Verify Message
+            
+        });
     }
     
     [Test]
