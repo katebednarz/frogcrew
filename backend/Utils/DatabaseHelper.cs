@@ -30,4 +30,7 @@ public class DatabaseHelper
     
     public TradeBoard? GetTradeBoardEntry(TradeRequestInfo request) => _context.TradeBoards
         .FirstOrDefault(p => p.GameId == request.GameId && p.DropperId == request.UserId && p.Position == request.PositionId);
+    
+    public List<CrewedUser> GetCrewedUsersByGame(int gameId) => _context.CrewedUsers
+        .Where(p => p.GameId == gameId).ToList();
 }
