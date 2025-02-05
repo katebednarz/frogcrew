@@ -85,34 +85,28 @@ namespace backend.Controllers
             if (game == null)
                 return NotFound(new Result(false, 404, $"Game with ID {gameId} not found.", null!));
             
-            // If no arrival time has been specified, we will set a default date here.
-            DateTime arrivalTime = new(2024, 1, 1, 0, 0, 0);
-            if (game is { GameDate: not null, GameStart: not null })
+            // Pull game start time from Game; if not, provide default.
+            TimeOnly? startTime = new TimeOnly(12, 0, 0, 0);
+            if (game.GameStart != null)
             {
-                var gameStart = game.GameStart.Value;
-                var gameDate = game.GameDate.Value.ToDateTime(TimeOnly.MinValue);
-                arrivalTime = gameDate.AddHours(gameStart.Hour)
-                    .AddMinutes(gameStart.Minute)
-                    .AddSeconds(gameStart.Second)
-                    .AddMilliseconds(gameStart.Millisecond);
+                startTime = game.GameStart;
             }
-
             // Set up for out return object on success.
             var returnDto = new CrewedUserDTO
             {
-                Position = null!,
-                ArrivalTime = null
+                GameId = gameId,
+                Position = "",
             };
 
             // Update arrival times of each CrewedUser based on position.
             foreach (var crewedUser in crewedUsers)
             {
-                arrivalTime = crewedUser.Position switch
+                TimeOnly? arrivalTime = crewedUser.Position switch
                 {
-                    "DIRECTOR" => arrivalTime.AddHours(-4),
-                    "PRODUCER" => arrivalTime.AddHours(-2),
-                    "SOUND" or "CAMERA" => arrivalTime.AddHours(-1),
-                    _ => arrivalTime
+                    "DIRECTOR" => startTime.Value.AddHours(-4),
+                    "PRODUCER" => startTime.Value.AddHours(-2),
+                    "SOUND" or "CAMERA" => startTime.Value.AddHours(-1),
+                    _ => startTime.Value
                 };
                 
                 var position = _context.Positions.FirstOrDefault(p => p.PositionName == crewedUser.Position)?.PositionId;
@@ -124,8 +118,10 @@ namespace backend.Controllers
                     UserId = crewedUser.UserId,
                     GameId = gameId,
                     PositionId = (int)position,
-                    ArrivalTime = new TimeOnly(arrivalTime.Hour, arrivalTime.Minute, arrivalTime.Second,
-                        arrivalTime.Millisecond)
+                    ArrivalTime = new TimeOnly(arrivalTime.Value.Hour,
+                        arrivalTime.Value.Minute,
+                        arrivalTime.Value.Second,
+                        arrivalTime.Value.Millisecond)
                 };
 
                 returnDto = new CrewedUserDTO
@@ -133,7 +129,6 @@ namespace backend.Controllers
                     UserId = crewedUser.UserId,
                     GameId = gameId,
                     Position = crewedUser.Position,
-                    ArrivalTime = newCrewedUser.ArrivalTime.ToString()
                 };
                 
                 // Append updates to CrewedUser table.

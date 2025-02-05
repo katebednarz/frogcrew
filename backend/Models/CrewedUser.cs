@@ -22,13 +22,12 @@ public partial class CrewedUser
 
     public CrewedUserDTO ConvertToCrewedUserDTO(FrogcrewContext _context)
     {
-        var positionName = _context.Positions.FirstOrDefault(p => p.PositionId == PositionId)?.PositionName;
+        var positionName = _context.Positions.FirstOrDefault(p => p.PositionId == PositionId)!.PositionName;
         return new CrewedUserDTO
         {
             UserId = this.UserId,
             GameId = this.GameId,
-            Position = positionName!,
-            ArrivalTime = this.ArrivalTime.ToString()
+            Position = positionName,
         };
     }
 }
