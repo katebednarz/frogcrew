@@ -25,7 +25,85 @@ public class DtoConverters
             Status = tradeBoard.Status,
             ReceiverId = tradeBoard.ReceiverId
         };
+    }
+    
+    public UserSimpleDTO UserToUserSimpleDto(ApplicationUser user)
+    {
+        return new UserSimpleDTO
+        {
+            UserId = user.Id,
+            FullName = $"{user.FirstName} {user.LastName}",
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+        };
+    }
 
+    public AvailabilityDTO AvailabilityToDto(Availability availability)
+    {
+        return new AvailabilityDTO
+        {
+            UserId = availability.UserId,
+            GameId = availability.GameId,
+            Available = availability.Available == 1,
+            Comments = availability.Comments
+        };
+    }
+
+    public CrewedUserDTO CrewedUserToDto(CrewedUser crewedUser)
+    {
+        return new CrewedUserDTO
+        {
+            UserId = crewedUser.UserId,
+            GameId = crewedUser.GameId,
+            Position = _dbHelper.GetPositionNameById(crewedUser.PositionId)!,
+        };
+    }
+
+    public GameDTO GameToGameDto(Game game)
+    {
+        return new GameDTO
+        {
+            GameId = game.Id,
+            ScheduleId = game.ScheduleId,
+            GameDate = game.GameDate,
+            Venue = game.Venue,
+            Opponent = game.Opponent,
+            IsFinalized = game.IsFinalized,
+        };
+    }
+
+    public CrewListDTO GameToCrewListDto(Game game)
+    {
+        return new CrewListDTO
+        {
+            GameId = game.Id,
+            GameStart = game.GameStart,
+            GameDate = game.GameDate,
+            Venue = game.Venue,
+            Opponent = game.Opponent,
+            CrewedMembers = CrewedUsersToDtoList(game.Id)
+        };
+    }
+
+    private List<CrewedUserDTO> CrewedUsersToDtoList(int gameId)
+    {
+        var crewedUserDtoList = new List<CrewedUserDTO>();
+        var crewedUserList = _dbHelper.GetCrewedUsersByGame(gameId);
+        foreach (var cu in crewedUserList)
+        {
+            crewedUserDtoList.Add(CrewedUserToDto(cu));
+        }
+        return crewedUserDtoList;
+    }
+
+    public GameScheduleDTO ScheduleToGameScheduleDto(Schedule schedule)
+    {
+        return new GameScheduleDTO
+        {
+            Id = schedule.Id,
+            Sport = schedule.Sport,
+            Season = schedule.Season,
+        };
     }
     
 }
