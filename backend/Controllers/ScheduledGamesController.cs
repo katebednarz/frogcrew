@@ -2,6 +2,7 @@ using backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using backend.Utils;
 using backend.DTO;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
 
@@ -56,8 +57,11 @@ public class ScheduledGamesController : Controller
         if (trade is null) return new ObjectResult(new Result(false, 404, $"Could not find trade with id {tradeId}")) { StatusCode = 404 };
         var user = await _context.Users.FindAsync(userId);
         if (user is null) return new ObjectResult(new Result(false, 404, $"Could not find user with id {userId}")) {StatusCode = 404};
-        //rework
-        if (!(user.UserQualifiedPositions.Any(x => x.PositionId == trade.Position)))
+        var usersQualifiedPosition = await _context.UserQualifiedPositions
+            .Where(u => u.UserId == userId)
+            .Select(u => u.PositionId)
+            .ToListAsync(); // Materialize the query
+        if (!usersQualifiedPosition.Contains(trade.Position)) 
             return new ObjectResult(new Result(false, 400, "User is not qualified for this position"));
         
         trade.ReceiverId = userId;
@@ -89,5 +93,18 @@ public class ScheduledGamesController : Controller
         await _context.SaveChangesAsync(); 
         
         return Ok(new Result(true, 200, "Approval Success", _converters.TradeBoardToDto(trade)));
+    }
+
+    [HttpGet("tradeboard")]
+    public async Task<IActionResult> GetTradeBoard()
+    {
+        List<TradeBoard> entries = await _context.TradeBoards.Where(u => u.Status == "AVAILABLE").ToListAsync();
+        List<TradeBoardDTO> dtos = new List<TradeBoardDTO>();
+        foreach (var entry in entries)
+        {
+            dtos.Add(_converters.TradeBoardToDto(entry));
+        }
+
+        return Ok(new Result(true, 200, "Find Success", dtos));
     }
 }

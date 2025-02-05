@@ -1095,7 +1095,7 @@ paths:
                 flag: false
                 code: 404
                 message: Could not find game with id 1
-                data: null
+                data: null    
   /scheduledGames/{userId}:
     get:
       tags:
@@ -1140,6 +1140,34 @@ paths:
                 code: 404
                 message: Could not find user with id 1
                 data: null
+  /scheduledGames/tradeboard:
+    get:
+      tags:
+        - scheduledGames
+      summary: Return all tradeboard entries
+      description: Return a list of all entries on the tradeboard that are available
+      responses:
+        '200':
+          description: trade board entries found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  - tradeId: 1
+                    dropperId: 1
+                    gameId: 1
+                    position: DIRECTOR
+                    status: AVAILABLE 
+                    receiverId: null
+                  - tradeId: 2
+                    dropperId: 1
+                    gameId: 2
+                    position: DIRECTOR
+                    status: AVAILABLE 
+                    receiverId: null
   /scheduledGames/drop:
     post:
       tags:
