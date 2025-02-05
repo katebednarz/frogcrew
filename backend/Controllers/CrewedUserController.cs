@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace backend.Controllers
 {
     [ApiController]
-    [Route("/")]
+    [Route("/CrewedUser/{gameId:int}")]
     public class CrewedUserController(FrogcrewContext context) : Controller
     {
         private readonly DatabaseHelper _dbHelper = new(context);
@@ -18,10 +18,9 @@ namespace backend.Controllers
          * @param request ID# of Game and Position to search for
          * @return List of qualified crew members based on criteria
          */
-        [HttpGet("crewMember/{gameId:int}/{position}")]
+        [HttpGet("{position}")]
         public async Task<IActionResult> FindCrewMemberByGameAndPosition(int gameId, string position)
         {
-
             var positionId = _dbHelper.GetPositionIdByName(position);
 
             var availableQualifiedUsers = await context.Users
@@ -65,7 +64,7 @@ namespace backend.Controllers
          *          ]
          */
 
-        [HttpPost("CrewedUser/{gameId:int}")]
+        [HttpPost("")]
         public async Task<IActionResult> CreateCrewedUsers(int gameId, [FromBody] List<CrewedUserDTO>? crewedUsers)
         {
             // Basic model binding tests.
@@ -158,7 +157,7 @@ namespace backend.Controllers
          * @param request ID# of Game
          * @return Result of updated data
          */
-        [HttpPut("CrewedUser/{gameId:int}")]
+        [HttpPut("")]
         public async Task<IActionResult> UpdateCrewedUsers(int gameId, [FromBody] List<CrewedUserDTO>? crewedUsers)
         {
             // Basic model binding tests.
