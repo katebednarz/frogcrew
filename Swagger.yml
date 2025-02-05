@@ -1166,13 +1166,13 @@ paths:
                 message: Drop Success
                 data:
                   tradeId: 1
-                  userId: 1
+                  dropperId: 1
                   gameId: 1
                   position: DIRECTOR
                   status: AVAILABLE 
                   receiverId: null
         '404':
-          description: user or game not found
+          description: user, game, or shift not found
           content:
             application/json:
               examples:
@@ -1242,7 +1242,7 @@ paths:
                 message: User is not qualified for this position
                 data: null
         '404':
-          description: user or game not found
+          description: user or trade not found
           content:
             application/json:
               examples:
@@ -1283,13 +1283,13 @@ paths:
                 message: Approval Success
                 data:
                   tradeId: 1
-                  userId: 1
+                  dropperId: 1
                   gameId: 1
                   position: DIRECTOR
                   status: approved
                   receiverId: 2
         '404':
-          description: user or game not found
+          description: user not found
           content:
             application/json:
               example:
