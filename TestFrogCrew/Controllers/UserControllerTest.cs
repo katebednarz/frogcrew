@@ -4,15 +4,17 @@ using Microsoft.AspNetCore.Mvc;
 using backend.Models;
 using backend.DTO;
 using backend.Auth;
+using backend.Controllers;
 using backend.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using misc;
 using Moq.EntityFrameworkCore;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
-namespace backend.Controllers.Tests
+namespace TestFrogCrew.Controllers
 {
   [TestFixture()]
   public class UserControllerTest
@@ -77,6 +79,25 @@ namespace backend.Controllers.Tests
     public void Teardown()
     {
       _controller?.Dispose();
+    }
+    
+    private Mock<DbSet<T>> CreateMockDbSet<T>(List<T> sourceList) where T : class
+    {
+      var queryable = sourceList.AsQueryable();
+      var mockDbSet = new Mock<DbSet<T>>();
+
+      // Setup IQueryable methods
+      mockDbSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(new TestAsyncQueryProvider<T>(queryable.Provider));
+      mockDbSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(queryable.Expression);
+      mockDbSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
+      mockDbSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
+
+      // Setup IAsyncEnumerable method
+      mockDbSet.As<IAsyncEnumerable<T>>()
+        .Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
+        .Returns(new TestAsyncEnumerator<T>(queryable.GetEnumerator()));
+
+      return mockDbSet;
     }
 
     [Test()]
@@ -365,6 +386,114 @@ namespace backend.Controllers.Tests
     Assert.That(response?.Code, Is.EqualTo(401));
     Assert.That(response?.Message, Is.EqualTo("username or password is incorrect"));
   }
+  
+  [Test]
+  public async Task FindUserByIdSuccessTest()
+{
+    // Arrange
+    var userId = 1;
+    var user = new ApplicationUser
+    {
+        Id = userId,
+        FirstName = "Jane",
+        LastName = "Doe",
+        Email = "jane@gmail.com",
+        PhoneNumber = "3333333333"
+    };
+
+    var positions = new List<Position>
+    {
+        new()
+        {
+            PositionId = 1,
+            PositionName = "DIRECTOR"
+        },
+        new()
+        {
+            PositionId = 2,
+            PositionName = "PRODUCER"
+        }
+    };
+
+    var userQualifiedPositions = new List<UserQualifiedPosition>
+    {
+        new()
+        {
+            UserId = userId,
+            PositionId = 1,
+            Position = new Position { PositionId = 1, PositionName = "DIRECTOR" }
+        },
+        new()
+        {
+            UserId = userId,
+            PositionId = 2,
+            Position = new Position { PositionId = 2, PositionName = "PRODUCER" }
+        }
+    };
+
+    // Mock DbSets for Positions and UserQualifiedPositions
+    var mockPositionSet = CreateMockDbSet(positions);
+    var mockUserQualifiedPositionSet = CreateMockDbSet(userQualifiedPositions);
+    List<string> roles = new List<string>
+    {
+      "role"
+    };
+    // Setup mock context
+    _mockContext?.Setup(c => c.Positions).Returns(mockPositionSet.Object);
+    _mockContext?.Setup(c => c.UserQualifiedPositions).Returns(mockUserQualifiedPositionSet.Object);
+    _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync(user);
+    _mockContext?.Setup(c => c.UserQualifiedPositions).ReturnsDbSet(userQualifiedPositions);
+    _userManagerMock?.Setup(um => um.GetRolesAsync(user)).ReturnsAsync(roles);
+
+    // Act
+    var result = await _controller!.FindUserById(userId) as ObjectResult;
+    var response = result?.Value as Result;
+
+    // Assert
+    Assert.Multiple(() =>
+    {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(response?.Flag, Is.True); // Verify Flag
+        Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
+        Assert.That(response?.Message, Is.EqualTo("Find Success")); // Verify Message
+    });
+
+    // Check that data is correctly returned as a UserDTO
+    var foundUserDto = response?.Data as FoundUserDTO;
+    Assert.That(foundUserDto, Is.Not.Null);
+    Assert.That(foundUserDto?.UserId, Is.EqualTo(user.Id));
+
+    // Verify UserQualifiedPositions query works as expected
+    var retrievedPositions = foundUserDto?.Positions ?? new List<string>();
+    var expectedPositions = positions.Select(p => p.PositionName).ToList();
+
+    Assert.That(retrievedPositions, Is.EquivalentTo(expectedPositions));
+
+    // Verify FindAsync was called once
+    _mockContext?.Verify(c => c.Users.FindAsync(userId), Times.Once);
+}
+
+
+[Test]
+public async Task FindUserByIdBadRequestTest()
+{
+    // Arrange
+    int userId = 999; // Non-existent user ID
+    _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync((ApplicationUser)null);
+
+    // Act
+    var result = await _controller!.FindUserById(userId) as ObjectResult;
+    var response = result?.Value as Result;
+
+    // Assert
+    Assert.Multiple(() =>
+    {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(response?.Flag, Is.False); // Verify Flag
+        Assert.That(response?.Code, Is.EqualTo(404)); // Verify Code
+        Assert.That(response?.Message, Is.EqualTo($"User with ID {userId} not found.")); // Verify Message
+    });
+}
 
   [Test]
     public async Task GetUsersTestSuccess()

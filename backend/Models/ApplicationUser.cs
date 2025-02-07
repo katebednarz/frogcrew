@@ -63,6 +63,16 @@ public class ApplicationUser : IdentityUser<int>
             FullName = $"{this.FirstName} {this.LastName}"
         };
     }
+
+    public List<String> UserPositionToList()
+    {
+        List<String> positions = new List<String>();
+        foreach (var userQualifiedPosition in UserQualifiedPositions)
+        {
+            positions.Add(userQualifiedPosition.Position.PositionName);
+        }
+        return positions;
+    }
     
 }
 

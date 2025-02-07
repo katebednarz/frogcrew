@@ -263,5 +263,49 @@ public class UserController : Controller
         var response = new Result(true, 200, "Found Users", userDTOs);
         return Ok(response);
     }
+    
+    /*
+     * Find a crew member by userId
+     *
+     * @param request The id of the user to find
+     * @return The result of the operation
+     */         
+    [HttpGet("crewMember/{userId}")]
+    public async Task<IActionResult> FindUserById(int userId) {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) {
+            return new ObjectResult(new Result(false, 404, $"User with ID {userId} not found.")) { StatusCode = 404 };
+        }
+
+        var usersQualifiedPosition = await _context.UserQualifiedPositions
+            .Where(u => u.UserId == userId)
+            .Select(u => u.Position)
+            .ToListAsync(); // Materialize the query
+        Console.WriteLine($"User with ID {userId} has {usersQualifiedPosition.Count} positions.");
+        Console.WriteLine(usersQualifiedPosition[1]);
+        
+        List<string> Positions = new List<string>();
+
+        var usersQualifiedPositionList = usersQualifiedPosition.ToList();
+        
+        foreach (Position position in usersQualifiedPositionList)
+        {
+            Positions.Add(position.PositionName);
+        }
+
+        
+        var foundUserDto = new FoundUserDTO()
+        {
+            UserId = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            Role = _userManager.GetRolesAsync(user).Result.First(),
+            Positions = Positions
+        };
+        
+        return Ok(new Result(true, 200, "Find Success", foundUserDto));
+    }
 }
 
