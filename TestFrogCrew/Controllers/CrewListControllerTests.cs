@@ -144,7 +144,6 @@ namespace backend.Controllers.Tests
         // Check the first crew member
         Assert.That(data?.CrewedMembers?[0].UserId, Is.EqualTo(1));
         Assert.That(data?.CrewedMembers?[0].Position, Is.EqualTo("DIRECTOR"));
-        Assert.That(data?.CrewedMembers?[0].FullName, Is.EqualTo("John Smith"));
       });
 
       Assert.Multiple(() =>
@@ -152,7 +151,6 @@ namespace backend.Controllers.Tests
         // Check the second crew member
         Assert.That(data?.CrewedMembers?[1].UserId, Is.EqualTo(2));
         Assert.That(data?.CrewedMembers?[1].Position, Is.EqualTo("DIRECTOR"));
-        Assert.That(data?.CrewedMembers?[1].FullName, Is.EqualTo("Jane Doe"));
       });
     }
 

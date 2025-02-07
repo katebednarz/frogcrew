@@ -101,9 +101,7 @@ namespace backend.Controllers.Tests
         {
             // Arrange
             var gameId = 1;
-#pragma warning disable CS8600
-            _mockContext?.Setup(c => c.Games.FindAsync(gameId)).ReturnsAsync((Game)null);
-#pragma warning restore CS8602
+            _mockContext?.Setup(c => c.Games.FindAsync(gameId)).ReturnsAsync(null as Game);
 
             // Act
             var result = await _controller!.FindGameById(gameId) as ObjectResult;

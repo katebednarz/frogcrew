@@ -1095,7 +1095,7 @@ paths:
                 flag: false
                 code: 404
                 message: Could not find game with id 1
-                data: null
+                data: null    
   /scheduledGames/{userId}:
     get:
       tags:
@@ -1140,28 +1140,49 @@ paths:
                 code: 404
                 message: Could not find user with id 1
                 data: null
-  /scheduledGames/{userId}/drop/{gameId}:
+  /scheduledGames/tradeboard:
+    get:
+      tags:
+        - scheduledGames
+      summary: Return all tradeboard entries
+      description: Return a list of all entries on the tradeboard that are available
+      responses:
+        '200':
+          description: trade board entries found and returned
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Find Success
+                data:
+                  - tradeId: 1
+                    dropperId: 1
+                    gameId: 1
+                    position: DIRECTOR
+                    status: AVAILABLE 
+                    receiverId: null
+                  - tradeId: 2
+                    dropperId: 1
+                    gameId: 2
+                    position: DIRECTOR
+                    status: AVAILABLE 
+                    receiverId: null
+  /scheduledGames/drop:
     post:
       tags:
         - scheduledGames
-        - NYI
       summary: Add shift to trade board
       description: Add a scheduled game to the trade board.
-      parameters:
-        - in: path
-          name: userId
-          description: id of the user
-          required: true
-          schema:
-            type: string
-            example: 1
-        - in: path
-          name: gameId
-          description: id of the game
-          required: true
-          schema:
-            type: string
-            example: 1
+      requestBody:
+        required: true
+        description: relevant information for dropping a shift a game
+        content:
+          application/json:
+            example:
+              userId: 1
+              gameId: 1
+              positionId: 1
       responses:
         '200':
           description: Scheduled game dropped
@@ -1172,36 +1193,53 @@ paths:
                 code: 200
                 message: Drop Success
                 data:
-                  userId: 1
+                  tradeId: 1
+                  dropperId: 1
                   gameId: 1
-                  status: available 
+                  position: DIRECTOR
+                  status: AVAILABLE 
+                  receiverId: null
         '404':
-          description: user or game not found
+          description: user, game, or shift not found
           content:
             application/json:
-              example:
-                flag: false
-                code: 404
-                message: Could not find user with id 1 or game with id 1
-                data: null
-  /scheduledGames/{userId}/pickup/{gameId}:
+              examples:
+                UserNotFound:
+                  value:
+                    flag: false
+                    code: 404
+                    message: Could not find user with id 1
+                    data: null
+                GameNotFound:
+                  value:
+                    flag: false
+                    code: 404
+                    message: Could not find game with id 1
+                    data: null
+                ShiftNotFound:
+                  value:
+                    flag: false
+                    code: 404
+                    message: Could not find shift
+                    data: null
+
+  /scheduledGames/pickup/{tradeId}/{userId}:
     put:
       tags:
         - scheduledGames
-        - NYI
       summary: Request to pickup a game
       description: Request to pickup a game from the trade board.
       parameters:
         - in: path
-          name: userId
-          description: id of the user
+          name: tradeId
+          description: id of the trade board entry
           required: true
           schema:
             type: string
             example: 1
         - in: path
-          name: gameId
-          description: id of the game
+          name: userId
+          description: id of the user picking up the shift
           required: true
           schema:
             type: string
@@ -1216,54 +1254,76 @@ paths:
                 code: 200
                 message: Request Success
                 data:
-                  userId: 1
+                  tradeId: 1
+                  dropperId: 1
                   gameId: 1
+                  position: DIRECTOR
                   status: awaiting approval
-        '404':
-          description: user or game not found
+                  receiverId: 2
+        '400':
+          description: bad input parameter
           content:
             application/json:
               example:
                 flag: false
-                code: 404
-                message: Could not find user with id 1 or game with id 1
+                code: 400
+                message: User is not qualified for this position
                 data: null
-  /scheduledGames/{gameId}:
+        '404':
+          description: user or trade not found
+          content:
+            application/json:
+              examples:
+                UserNotFound:
+                  value:
+                    flag: false
+                    code: 404
+                    message: Could not find user with id 1
+                    data: null
+                TradeNotFound:
+                  value:
+                    flag: false
+                    code: 404
+                    message: Could not find trade with id 1
+                    data: null
+  /scheduledGames/approve/{tradeId}:
     put:
       tags:
         - scheduledGames
-        - NYI
-      summary: Approve shift exchange
-      description: Admin approve a shift exchange.
+      summary: Approve shift swap
+      description: Approve a request to swap shift on tradeboard.
       parameters:
         - in: path
-          name: gameId
-          description: Id of the game 
+          name: tradeId
+          description: id of the trade board entry
           required: true
           schema:
             type: string
             example: 1
       responses:
         '200':
-          description: Shift exchange approved
+          description: Game pickup approved
           content:
             application/json:
               example:
                 flag: true
                 code: 200
-                message: Approve Success
+                message: Approval Success
                 data:
+                  tradeId: 1
+                  dropperId: 1
                   gameId: 1
-                  userId: 1
+                  position: DIRECTOR
                   status: approved
+                  receiverId: 2
         '404':
-          description: game not found
+          description: user not found
           content:
             application/json:
               example:
                 flag: false
                 code: 404
-                message: Could not find game with id 1
+                message: Could not find trade with id 1
                 data: null
   /invite:
     post:
@@ -1273,7 +1333,7 @@ paths:
       description: Send invite to crew members.
       requestBody:
         required: true
-        description: Emails that need to be invited
+        description: Invites the crew members with one time links.
         content:
           application/json:
             example:
@@ -1292,6 +1352,40 @@ paths:
                 data: 
                   - john.smith@example.com
                   - jane.doe@example.com
+  /invite/{token}:
+    get:
+      tags:
+        - misc
+      summary: Validate Invite
+      description: Validate the invite link.
+      parameters:
+        - in: path
+          name: token
+          description: token from the invite link
+          required: true
+          schema:
+            type: string
+            example: "123456"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Invitation valid
+                data: 
+                  token: "123456"
+        '404':
+          description: token not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Invitation not valid
+                data: null
   /notifications/{userId}:
     get:
       tags:
@@ -1852,4 +1946,3 @@ components:
         data:
           type: object
           example: Endpoint specific data
-    

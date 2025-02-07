@@ -1,3 +1,4 @@
+using backend.DTO;
 using backend.Models;
 
 namespace backend.Utils;
@@ -24,4 +25,12 @@ public class DatabaseHelper
     public Invitation? GetInvitationByToken(string token) => _context.Invitations
         .FirstOrDefault(i => i.Token == token);
     
+    public CrewedUser? GetCrewedUserById(int userId, int gameId) => _context.CrewedUsers
+        .FirstOrDefault(u => u.UserId == userId && u.GameId == gameId);
+    
+    public TradeBoard? GetTradeBoardEntry(TradeRequestInfo request) => _context.TradeBoards
+        .FirstOrDefault(p => p.GameId == request.GameId && p.DropperId == request.UserId && p.Position == request.PositionId);
+    
+    public List<CrewedUser> GetCrewedUsersByGame(int gameId) => _context.CrewedUsers
+        .Where(p => p.GameId == gameId).ToList();
 }

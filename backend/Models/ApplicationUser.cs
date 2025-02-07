@@ -26,6 +26,8 @@ public class ApplicationUser : IdentityUser<int>
     public virtual ICollection<CrewedUser> CrewedUsers { get; set; } = new List<CrewedUser>();
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     public virtual ICollection<UserQualifiedPosition> UserQualifiedPositions { get; set; } = new List<UserQualifiedPosition>();
+    public virtual ICollection<TradeBoard> TradeBoardDroppers { get; set; } = new List<TradeBoard>();
+    public virtual ICollection<TradeBoard> TradeBoardReceivers { get; set; } = new List<TradeBoard>();
     
     // Conversion methods (optional):
     public UserDTO ToUserDTO(FrogcrewContext _context)
