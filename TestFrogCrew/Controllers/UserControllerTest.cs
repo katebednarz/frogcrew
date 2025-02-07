@@ -365,6 +365,64 @@ namespace backend.Controllers.Tests
     Assert.That(response?.Code, Is.EqualTo(401));
     Assert.That(response?.Message, Is.EqualTo("username or password is incorrect"));
   }
+  
+  [Test()]
+  public async Task FindUserByIdSuccessTest()
+  {
+    // Arrange
+    var userId = 1;
+    var user = new ApplicationUser
+    {
+      Id = userId,
+      FirstName = "Jane",
+      LastName = "Doe",
+      Email = "jane@gmail.com",
+      PhoneNumber = "3333333333"
+    };
+    _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync(user);
+
+    // Act
+    var result = await _controller!.FindUserById(userId) as ObjectResult;
+    var response = result?.Value as Result;
+    // Assert
+    Assert.Multiple(() =>
+    {
+
+      Assert.That(result, Is.Not.Null);
+      Assert.That(response?.Flag, Is.True); //Verify Flag
+      Assert.That(response?.Code, Is.EqualTo(200)); //Verify Code
+      Assert.That(response?.Message, Is.EqualTo("Find Success")); //Verify Message
+    });
+
+    // Check that data is correctly returned as a UserDTO
+    var foundUserDto = response?.Data as FoundUserDTO;
+    Assert.That(foundUserDto, Is.Not.Null);
+    Assert.That(foundUserDto?.UserId, Is.EqualTo(user.Id));
+
+    // Verify FindAsync was called once
+    _mockContext?.Verify(c => c.Users.FindAsync(userId), Times.Once);
+  }
+
+[Test]
+public async Task FindUserByIdBadRequestTest()
+{
+    // Arrange
+    int userId = 999; // Non-existent user ID
+    _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync((ApplicationUser)null);
+
+    // Act
+    var result = await _controller!.FindUserById(userId) as ObjectResult;
+    var response = result?.Value as Result;
+
+    // Assert
+    Assert.Multiple(() =>
+    {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(response?.Flag, Is.False); // Verify Flag
+        Assert.That(response?.Code, Is.EqualTo(404)); // Verify Code
+        Assert.That(response?.Message, Is.EqualTo($"User with ID {userId} not found.")); // Verify Message
+    });
+}
 
   [Test]
     public async Task GetUsersTestSuccess()
