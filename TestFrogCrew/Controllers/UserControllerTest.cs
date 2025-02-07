@@ -434,12 +434,16 @@ namespace TestFrogCrew.Controllers
     // Mock DbSets for Positions and UserQualifiedPositions
     var mockPositionSet = CreateMockDbSet(positions);
     var mockUserQualifiedPositionSet = CreateMockDbSet(userQualifiedPositions);
-
+    List<string> roles = new List<string>
+    {
+      "role"
+    };
     // Setup mock context
     _mockContext?.Setup(c => c.Positions).Returns(mockPositionSet.Object);
     _mockContext?.Setup(c => c.UserQualifiedPositions).Returns(mockUserQualifiedPositionSet.Object);
     _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync(user);
     _mockContext?.Setup(c => c.UserQualifiedPositions).ReturnsDbSet(userQualifiedPositions);
+    _userManagerMock?.Setup(um => um.GetRolesAsync(user)).ReturnsAsync(roles);
 
     // Act
     var result = await _controller!.FindUserById(userId) as ObjectResult;
