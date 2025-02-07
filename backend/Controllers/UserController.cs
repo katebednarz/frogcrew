@@ -281,10 +281,14 @@ public class UserController : Controller
             .Where(u => u.UserId == userId)
             .Select(u => u.Position)
             .ToListAsync(); // Materialize the query
+        Console.WriteLine($"User with ID {userId} has {usersQualifiedPosition.Count} positions.");
+        Console.WriteLine(usersQualifiedPosition[1]);
         
         List<string> Positions = new List<string>();
 
-        foreach (var position in usersQualifiedPosition)
+        var usersQualifiedPositionList = usersQualifiedPosition.ToList();
+        
+        foreach (Position position in usersQualifiedPositionList)
         {
             Positions.Add(position.PositionName);
         }
