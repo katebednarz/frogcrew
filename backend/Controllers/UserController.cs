@@ -96,7 +96,11 @@ public class UserController : Controller
         }
 
         if (token != "token")
+        {
             _context.Invitations.Remove(_dbHelper.GetInvitationByToken(token));
+            _context.SaveChanges();
+        }
+        
         return Ok(new Result(true, 200, "Add Success", request));
     }
 
