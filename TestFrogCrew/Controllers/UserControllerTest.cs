@@ -496,6 +496,24 @@ public async Task FindUserByIdBadRequestTest()
 }
 
   [Test]
+  public async Task UpdateUserByIdSuccessTest()
+  {
+    Assert.Pass();
+  }
+
+  [Test]
+  public async Task UpdateUserByIdBadRequestTest()
+  {
+    Assert.Pass();
+  }
+
+  [Test]
+  public async Task UpdateUserByIdUserNotFoundTest()
+  {
+    Assert.Pass();
+  }
+
+  [Test]
     public async Task GetUsersTestSuccess()
     {
       // Arrange
