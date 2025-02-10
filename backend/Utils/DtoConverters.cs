@@ -105,5 +105,14 @@ public class DtoConverters
             Season = schedule.Season,
         };
     }
+
+    public PositionDTO PositionToDto(Position position)
+    {
+        return new PositionDTO
+        {
+            Id = position.PositionId,
+            Name = position.PositionName,
+        };
+    }
     
 }

@@ -180,16 +180,15 @@ paths:
         content:
           application/json:
             example:
-              userId: 1
               firstName: John
               lastName: Doe
               email: john.doe@example.com
               phoneNumber: '1234567890'
               role: ADMIN
-              positions:
+              position:
                 - DIRECTOR
                 - PRODUCER
-                - CAMERA
+                - CAMERA-FIXED
       responses:
         '200':
           description: Crew member updated and returned
@@ -206,10 +205,10 @@ paths:
                   email: john.doe@example.com
                   phoneNumber: '1234567890'
                   role: ADMIN
-                  positions:
+                  position:
                     - DIRECTOR
                     - PRODUCER
-                    - CAMERA
+                    - CAMERA-FIXED
         '400':
           description: bad input parameter
           content:
@@ -224,7 +223,7 @@ paths:
                   email: "Email is required"
                   phoneNumber: "Phone number is required"
                   role: "Role is required"
-                  positions: "Positions is required"
+                  positions: "Position is required"
         '404':
           description: user not found
           content:
@@ -1695,7 +1694,6 @@ paths:
     get:
       tags:
         - Template/Position
-        - NYI
       summary: Find all positions
       description: Return a list of all positions in the system.
       responses:
@@ -1708,8 +1706,8 @@ paths:
                 code: 200
                 message: Find Success
                 data:
-                  - position: DIRECTOR
-                  - position: PRODUCER
+                  - DIRECTOR
+                  - PRODUCER
         '404':
           description: positions not found
           content:
@@ -1754,6 +1752,15 @@ paths:
                 message: Provided arguments are invalid, see data for details.
                 data:
                   position: "Position is required"
+        '409':
+          description: position already exists
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 409
+                message: Position already exists
+                data: null
   /positions/{positionId}:
     put:
       tags:
