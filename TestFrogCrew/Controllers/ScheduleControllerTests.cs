@@ -15,8 +15,8 @@ using backend.Models;
 using backend.DTO;
 using Moq.EntityFrameworkCore;
 
-namespace backend.Controllers.Tests
-{
+namespace TestFrogCrew.Controllers;
+
     [TestFixture()]
     public class ScheduleControllerTests
     {
@@ -317,4 +317,3 @@ namespace backend.Controllers.Tests
             });
         }
     }
-}

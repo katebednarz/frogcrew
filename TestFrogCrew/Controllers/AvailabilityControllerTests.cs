@@ -1,11 +1,12 @@
-﻿using Moq;
+﻿using backend.Controllers;
+using Moq;
 using Microsoft.AspNetCore.Mvc;
 using backend.Models;
 using backend.DTO;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Controllers.Tests
-{
+namespace TestFrogCrew.Controllers;
+
   [TestFixture()]
   public class AvailabilityControllerTests
   {
@@ -153,4 +154,3 @@ namespace backend.Controllers.Tests
     }
 
   }
-}

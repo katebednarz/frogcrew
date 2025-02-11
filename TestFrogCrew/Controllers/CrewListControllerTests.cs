@@ -17,8 +17,8 @@ using backend.Utils;
 using Microsoft.EntityFrameworkCore;
 using Moq.EntityFrameworkCore;
 
-namespace backend.Controllers.Tests
-{
+namespace TestFrogCrew.Controllers;
+
   [TestFixture()]
   public class CrewListControllerTests
   {
@@ -179,4 +179,3 @@ namespace backend.Controllers.Tests
       _mockContext?.Verify(c => c.Games.FindAsync(gameId), Times.Once);
     }
   }
-}
