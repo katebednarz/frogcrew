@@ -21,6 +21,8 @@ public class ApplicationUser : IdentityUser<int>
     public required string? LastName { get; set; }
     [MaxLength(25)]
     public string? PayRate { get; set; }
+
+    public int IsActive { get; set; }
     
     public virtual ICollection<Availability> Availabilities { get; set; } = new List<Availability>();
     public virtual ICollection<CrewedUser> CrewedUsers { get; set; } = new List<CrewedUser>();

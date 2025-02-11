@@ -122,6 +122,7 @@ paths:
     get:
       tags:
         - crew members
+        - NYI
       summary: Find crew member by id
       description: Find a specific crew member and return it.
       parameters:
@@ -198,7 +199,7 @@ paths:
               example:
                 flag: true
                 code: 200
-                message: Update Success
+                message: Find Success
                 data:
                   userId: 1
                   firstName: John
@@ -234,12 +235,12 @@ paths:
                 code: 404
                 message: Could not find user with id 1
                 data: null
-    delete:
+  /crewMember/disable/{userId}:
+    put:
       tags:
         - crew members
-        - NYI
-      summary: Delete a crew member
-      description: Delete an existing crew member.
+      summary: Disable a crew member
+      description: Disable an existing crew member.
       parameters:
         - in: path
           name: userId
@@ -250,13 +251,13 @@ paths:
             example: 1
       responses:
         '200':
-          description: Crew member deleted
+          description: Crew member disabled
           content:
             application/json:
               example:
                 flag: true
                 code: 200
-                message: Delete Success
+                message: Disable Success
                 data: null
         '404':
           description: user not found
@@ -1221,6 +1222,7 @@ paths:
                     code: 404
                     message: Could not find shift
                     data: null
+
   /scheduledGames/pickup/{tradeId}/{userId}:
     put:
       tags:
@@ -1691,323 +1693,6 @@ paths:
                     code: 400
                     message: Password must contain at least one letter and one number, and at least 6 characters.
                     data: null
-  /positions:
-    get:
-      tags:
-        - Template/Position
-        - NYI
-      summary: Find all positions
-      description: Return a list of all positions in the system.
-      responses:
-        '200':
-          description: Positions found and returned
-          content:
-            application/json:
-              example:
-                flag: true
-                code: 200
-                message: Find Success
-                data:
-                  - position: DIRECTOR
-                  - position: PRODUCER
-        '404':
-          description: positions not found
-          content:
-            application/json:
-              example:
-                flag: false
-                code: 404
-                message: Could not find any positions
-                data: null
-    post:
-      tags:
-        - Template/Position
-        - NYI
-      summary: Add a position
-      description: Add a new position and return the saved one.
-      requestBody:
-        required: true
-        description: Position that needs to be added
-        content:
-          application/json:
-            example:
-              position: DIRECTOR
-      responses:
-        '200':
-          description: Position added and returned
-          content:
-            application/json:
-              example:
-                flag: true
-                code: 200
-                message: Add Success
-                data:
-                  positionId: 1
-                  positionName: DIRECTOR
-        '400':
-          description: bad input parameter
-          content:
-            application/json:
-              example:
-                flag: false
-                code: 400
-                message: Provided arguments are invalid, see data for details.
-                data:
-                  position: "Position is required"
-  /positions/{positionId}:
-    put:
-      tags:
-        - Template/Position
-        - NYI
-      summary: Edit a position
-      description: Edit a position and return the updated one
-      parameters:
-        - in: path
-          name: positionId
-          description: Id of the position
-          required: true
-          schema:
-            type: string
-            example: 1
-      requestBody:
-        required: true
-        description: Position that needs to be updated
-        content:
-          application/json:
-            example:
-              position: DIRECTOR
-      responses:
-        '200':
-          description: Position updated and returned
-          content:
-            application/json:
-              example:
-                flag: true
-                code: 200
-                message: Update Success
-                data:
-                  positionId: 1
-                  position: DIRECTOR
-        '400':
-          description: bad input parameter
-          content:
-            application/json:
-              example:
-                flag: false
-                code: 400
-                message: Provided arguments are invalid, see data for details.
-                data:
-                  position: "Position is required"
-        '404':
-          description: position not found
-          content:
-            application/json:
-              example:
-                flag: false
-                code: 404
-                message: Could not find position with id 1
-                data: null
-  /template:
-    get:
-      tags:
-        - Template/Position
-        - NYI
-      summary: Find all crew list template
-      description: Return a list of all crew list templates
-      responses:
-        '200':
-          description: Templates found and returned
-          content:
-            application/json:
-              example:
-                flag: true
-                code: 200
-                message: Find Success
-                data:
-                  - templateId: 1
-                    templateName: "Football"
-                  - templateId: 2
-                    templateName: "Basketball"
-        '404':
-          description: templates not found
-          content:
-            application/json:
-              example:
-                flag: false
-                code: 404
-                message: Could not find any templates
-                data: null
-    post:
-      tags:
-        - Template/Position
-        - NYI
-      summary: Add crew list template
-      description: Add a new crew list template and return the saved one
-      requestBody:
-        required: true
-        description: Template that needs to be added
-        content:
-          application/json:
-            example:
-              templateName: "Football"
-              positions:
-                - position: DIRECTOR
-                - position: PRODUCER
-      responses:
-        '200':
-          description: Template added and returned
-          content:
-            application/json:
-              example:
-                flag: true
-                code: 200
-                message: Add Success
-                data:
-                  templateId: 1
-                  templateName: "Football"
-                  positions:
-                    - position: DIRECTOR
-                    - position: PRODUCER
-        '400':
-          description: bad input parameter
-          content:
-            application/json:
-              example:
-                flag: false
-                code: 400
-                message: Provided arguments are invalid, see data for details.
-                data:
-                  templateName: "Template name is required"
-  /template/{templateId}:
-    get:
-      tags:
-        - Template/Position
-        - NYI
-      summary: Find a crew list template by Id
-      description: Find and return a crew list template
-      parameters:
-        - in: path
-          name: templateId
-          description: Id of the template
-          required: true
-          schema:
-            type: string
-            example: 1
-      responses:
-        '200':
-          description: Template found and returned
-          content:
-            application/json:
-              example:
-                flag: true
-                code: 200
-                message: Find Success
-                data:
-                  templateId: 1
-                  templateName: "Football"
-                  positions:
-                    - position: DIRECTOR
-                    - position: PRODUCER
-        '404':
-          description: template not found
-          content:
-            application/json:
-              example:
-                flag: false
-                code: 404
-                message: Could not find template with id 1
-                data: null
-    put:
-      tags:
-        - Template/Position
-        - NYI
-      summary: Edit crew list template
-      description: Edit a crew list template and return the updated one
-      parameters:
-        - in: path
-          name: templateId
-          description: Id of the template
-          required: true
-          schema:
-            type: string
-            example: 1
-      requestBody:
-        required: true
-        description: Template that needs to be updated
-        content:
-          application/json:
-            example:
-              templateName: "Football"
-              positions:
-                - position: DIRECTOR
-                - position: PRODUCER
-      responses:
-        '200':
-          description: Template updated and returned
-          content:
-            application/json:
-              example:
-                flag: true
-                code: 200
-                message: Update Success
-                data:
-                  templateId: 1
-                  templateName: "Football"
-                  positions:
-                    - position: DIRECTOR
-                    - position: PRODUCER
-        '400':
-          description: bad input parameter
-          content:
-            application/json:
-              example:
-                flag: false
-                code: 400
-                message: Provided arguments are invalid, see data for details.
-                data:
-                  templateName: "Template name is required"
-        '404':
-          description: template not found
-          content:
-            application/json:
-              example:
-                flag: false
-                code: 404
-                message: Could not find template with id 1
-                data: null
-    delete:
-      tags:
-        - Template/Position
-        - NYI
-      summary: Delete crew list template
-      description: Delete an existing crew list template
-      parameters:
-        - in: path
-          name: templateId
-          description: Id of the template
-          required: true
-          schema:
-            type: string
-            example: 1
-      responses:
-        '200':
-          description: Template deleted
-          content:
-            application/json:
-              example:
-                flag: true
-                code: 200
-                message: Delete Success
-                data: null
-        '404':
-          description: template not found
-          content:
-            application/json:
-              example:
-                flag: false
-                code: 404
-                message: Could not find template with id 1
-                data: null
 components:
   schemas:
     AuthDTO:
