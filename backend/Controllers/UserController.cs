@@ -399,7 +399,7 @@ public class UserController : Controller
             return NotFound(new Result(false, 404, $"Could not find user with ID {userId}."));
         }
         
-        user.IsActive = 0;
+        user.IsActive = false;
         await _context.SaveChangesAsync(); // Save all changes
         return Ok(new Result(true, 200, "Disable Success", null));
     }
