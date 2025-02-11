@@ -389,5 +389,19 @@ public class UserController : Controller
 
         return Ok(new Result(true, 200, "Update Success", updatedUser));
     }
+
+    [HttpPut("crewMember/disable/{userId}")]
+    public async Task<IActionResult> DisableUser(int userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+        {
+            return NotFound(new Result(false, 404, $"Could not find user with ID {userId}."));
+        }
+        
+        user.IsActive = 0;
+        await _context.SaveChangesAsync(); // Save all changes
+        return Ok(new Result(true, 200, "Disable Success", null));
+    }
 }
 
