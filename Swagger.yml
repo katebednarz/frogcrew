@@ -233,12 +233,12 @@ paths:
                 code: 404
                 message: Could not find user with id 1
                 data: null
-    delete:
+  /crewMember/disable/{userId}:
+    put:
       tags:
         - crew members
-        - NYI
-      summary: Delete a crew member
-      description: Delete an existing crew member.
+      summary: Disable a crew member
+      description: Disable an existing crew member.
       parameters:
         - in: path
           name: userId
@@ -249,13 +249,13 @@ paths:
             example: 1
       responses:
         '200':
-          description: Crew member deleted
+          description: Crew member disabled
           content:
             application/json:
               example:
                 flag: true
                 code: 200
-                message: Delete Success
+                message: Disable Success
                 data: null
         '404':
           description: user not found
@@ -1813,6 +1813,15 @@ paths:
                 flag: false
                 code: 404
                 message: Could not find position with id 1
+                data: null
+        '409':
+          description: positions already exist
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 409
+                message: position already exists
                 data: null
   /template:
     get:

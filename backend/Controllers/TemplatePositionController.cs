@@ -39,7 +39,7 @@ public class TemplatePositionController : Controller
         var x = _dbHelper.GetPositionIdByName(position.Name);
         Console.WriteLine(x);
         if (x > 0)
-            return new ObjectResult(new Result(false, 409, "Position already exists")) { StatusCode = 409 };
+            return new ObjectResult(new Result(false, 409, "position already exists")) { StatusCode = 409 };
         
 
         var newPosition = new Position
@@ -52,7 +52,29 @@ public class TemplatePositionController : Controller
 
         return Ok(new Result(true, 200, "Add Success", _converters.PositionToDto(newPosition)));
     }
-    
+
+    [HttpPut("positions/{positionId}")]
+    public async Task<IActionResult> UpdatePosition([FromBody] PositionDTO position, int positionId)
+    {
+        var foundPosition = await _context.Positions.FindAsync(positionId);
+        if (foundPosition is null)
+            return new ObjectResult(new Result(false, 404, $"Could not find position with id {positionId}")) { StatusCode = 400 };
+        
+        if (position.Name is null)
+        {
+            return new ObjectResult(new Result(false, 400, "Provided arguments are invalid, see data for details.", "position is required")) { StatusCode = 400 };
+        }
+        
+        var x = _dbHelper.GetPositionIdByName(position.Name);
+        Console.WriteLine(x);
+        if (x > 0)
+            return new ObjectResult(new Result(false, 409, "position already exists")) { StatusCode = 409 };
+        
+        foundPosition.PositionName = position.Name;
+        _context.Positions.Update(foundPosition);
+        await _context.SaveChangesAsync();
+        return Ok(new Result(true, 200, "Update Success", _converters.PositionToDto(foundPosition)));
+    }
     
 }
     

@@ -95,4 +95,268 @@ public class TemplatePositionControllerTest
         });
         
     }
+
+    [Test]
+    public async Task AddPositionBadRequest()
+    {
+        // Arrange
+        PositionDTO request = new()
+        {
+            Name = null,
+        };
+
+        Position mockPosition = new()
+        {
+            PositionId = 1,
+            PositionName = "DIRECTOR"
+        };
+
+        var positions = new List<Position>();
+        
+        var mockPositionSet = CreateMockDbSet(positions);
+        _mockContext?.Setup(c => c.Positions).Returns(mockPositionSet.Object);
+        
+        _mockContext?.Setup(c => c.Add(It.IsAny<Position>())).Callback<Position>(position => position.PositionId = mockPosition.PositionId);
+        _mockContext?.Setup(c => c.SaveChanges()).Returns(1);
+        
+        // Act
+        var result = await _controller.AddPosition(request) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.False); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
+            Assert.That(response?.Data, Is.EqualTo("position is required"));
+        });
+    }
+    
+    [Test]
+    public async Task AddPositionAlreadyExists()
+    {
+        // Arrange
+        PositionDTO request = new()
+        {
+            Name = "DIRECTOR",
+        };
+
+        var positions = new List<Position>()
+        {
+            new()
+            {
+                PositionId = 1,
+                PositionName = "DIRECTOR"
+            }
+        };
+        
+        var mockPositionSet = CreateMockDbSet(positions);
+        _mockContext?.Setup(c => c.Positions).Returns(mockPositionSet.Object);
+        
+        // Act
+        var result = await _controller.AddPosition(request) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.False); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(409)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("position already exists")); //Verify Message
+        });
+    }
+    
+    [Test]
+    public async Task AddPositionSuccess()
+    {
+        // Arrange
+        PositionDTO request = new()
+        {
+            Name = "DIRECTOR",
+        };
+
+        Position mockPosition = new()
+        {
+            PositionId = 1,
+            PositionName = "DIRECTOR"
+        };
+
+        var positions = new List<Position>();
+        
+        var mockPositionSet = CreateMockDbSet(positions);
+        _mockContext?.Setup(c => c.Positions).Returns(mockPositionSet.Object);
+        
+        _mockContext?.Setup(c => c.Add(It.IsAny<Position>())).Callback<Position>(position => position.PositionId = mockPosition.PositionId);
+        _mockContext?.Setup(c => c.SaveChanges()).Returns(1);
+        
+        // Act
+        var result = await _controller.AddPosition(request) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.True); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(200)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Add Success")); //Verify Message
+        });
+    }
+    
+    [Test]
+    public async Task UpdatePositionNotFound()
+    {
+        // Arrange
+        int positionId = 2;
+        PositionDTO request = new()
+        {
+            Name = null
+        };
+        
+        var positions = new List<Position>()
+        {
+            new()
+            {
+                PositionId = 1,
+                PositionName = "DIRECTOR"
+            }
+        };
+        
+        var mockPositionSet = CreateMockDbSet(positions);
+        _mockContext?.Setup(c => c.Positions).Returns(mockPositionSet.Object);
+        
+        // Act
+        var result = await _controller.UpdatePosition(request,positionId) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.False); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(404)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Could not find position with id 2")); //Verify Message
+        });
+    }
+    
+    [Test]
+    public async Task UpdatePositionBadRequest()
+    {
+        // Arrange
+        int positionId = 1;
+        PositionDTO request = new()
+        {
+            Name = null
+        };
+        
+        var positions = new List<Position>()
+        {
+            new()
+            {
+                PositionId = 1,
+                PositionName = "DIRECTOR"
+            }
+        };
+        
+        var mockPositionSet = CreateMockDbSet(positions);
+        _mockContext?.Setup(c => c.Positions).Returns(mockPositionSet.Object);
+        _mockContext?.Setup(c => c.Positions.FindAsync(positionId))
+            .ReturnsAsync(positions.FirstOrDefault(u => u.PositionId == positionId));
+        _mockContext?.Setup(c => c.Add(It.IsAny<Position>())).Callback<Position>(position => position.PositionId = positionId);
+        _mockContext?.Setup(c => c.SaveChanges()).Returns(1);
+        
+        // Act
+        var result = await _controller.UpdatePosition(request,positionId) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.False); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
+            Assert.That(response?.Data, Is.EqualTo("position is required"));
+        });
+    }
+    
+    [Test]
+    public async Task UpdatePositionAlreadyExists()
+    {
+        // Arrange
+        int positionId = 1;
+        PositionDTO request = new()
+        {
+            Name = "DIRECTOR"
+        };
+        
+        var positions = new List<Position>()
+        {
+            new()
+            {
+                PositionId = 1,
+                PositionName = "DIRECTOR"
+            }
+        };
+        
+        var mockPositionSet = CreateMockDbSet(positions);
+        _mockContext?.Setup(c => c.Positions).Returns(mockPositionSet.Object);
+        _mockContext?.Setup(c => c.Positions.FindAsync(positionId))
+            .ReturnsAsync(positions.FirstOrDefault(u => u.PositionId == positionId));
+        
+        // Act
+        var result = await _controller.UpdatePosition(request,positionId) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.False); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(409)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("position already exists")); //Verify Message
+        });
+    }
+    
+    [Test]
+    public async Task UpdatePositionSuccess()
+    {
+        // Arrange
+        int positionId = 1;
+        PositionDTO request = new()
+        {
+            Name = "PRODUCER"
+        };
+        
+        var positions = new List<Position>()
+        {
+            new()
+            {
+                PositionId = 1,
+                PositionName = "DIRECTOR"
+            }
+        };
+        
+        var mockPositionSet = CreateMockDbSet(positions);
+        _mockContext?.Setup(c => c.Positions).Returns(mockPositionSet.Object);
+        _mockContext?.Setup(c => c.Positions.FindAsync(positionId))
+            .ReturnsAsync(positions.FirstOrDefault(u => u.PositionId == positionId));
+        
+        // Act
+        var result = await _controller.UpdatePosition(request,positionId) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.True); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(200)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Update Success")); //Verify Message
+        });
+    }
 }
+
