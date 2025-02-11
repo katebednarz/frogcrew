@@ -396,7 +396,7 @@ public class UserController : Controller
         var user = await _context.Users.FindAsync(userId);
         if (user == null)
         {
-            return NotFound(new Result(false, 404, $"Could not find user with ID {userId}."));
+            return NotFound(new Result(false, 404, $"User with ID {userId} not found."));
         }
         
         user.IsActive = false;
