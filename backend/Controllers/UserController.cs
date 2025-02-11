@@ -285,8 +285,6 @@ public class UserController : Controller
             .Where(u => u.UserId == userId)
             .Select(u => u.Position)
             .ToListAsync(); // Materialize the query
-        Console.WriteLine($"User with ID {userId} has {usersQualifiedPosition.Count} positions.");
-        Console.WriteLine(usersQualifiedPosition[1]);
         
         List<string> Positions = new List<string>();
 
@@ -310,6 +308,86 @@ public class UserController : Controller
         };
         
         return Ok(new Result(true, 200, "Find Success", foundUserDto));
+    }
+    
+    /*
+     * Update a crew member by userId
+     *
+     * @param request The id of the user to find
+     * @return The result of the operation
+     */
+    [HttpPut("crewMember/{userId}")]
+    public async Task<IActionResult> UpdateUserByUserId([FromBody] UserDTO request, int userId)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .SelectMany(kvp => kvp.Value.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+            var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
+            
+            return new ObjectResult(errorResponse) { StatusCode = 400 };
+        }
+        
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+        {
+            return NotFound(new Result(false, 404, $"Could not find user with ID {userId}."));
+        }
+
+        // Update user properties
+        user.FirstName = request.FirstName;
+        user.LastName = request.LastName;
+        user.Email = request.Email;
+        user.PhoneNumber = request.PhoneNumber;
+
+        // Update role
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        await _userManager.RemoveFromRolesAsync(user, currentRoles);
+        var roleResult = await _userManager.AddToRoleAsync(user, request.Role);
+        if (!roleResult.Succeeded)
+        {
+            return BadRequest(new Result(false, 400, "Role update failed", roleResult.Errors.Select(e => e.Description).ToList()));
+        }
+
+        // Remove old positions
+        var oldPositions = _context.UserQualifiedPositions.Where(up => up.UserId == user.Id);
+        _context.UserQualifiedPositions.RemoveRange(oldPositions);
+        await _context.SaveChangesAsync(); // Ensure old positions are removed before adding new ones
+
+        // Add new positions
+        foreach (var posName in request.Position)
+        {
+            var positionId = (int)_dbHelper.GetPositionIdByName(posName)!;
+            if (!(positionId > 0)) // Check if position exists
+            {
+                return BadRequest(new Result(false, 400, $"Position '{posName}' not found."));
+            }
+
+            var newPosition = new UserQualifiedPosition
+            {
+                UserId = user.Id,
+                PositionId = (int)positionId // Extract value safely
+            };
+            _context.UserQualifiedPositions.Add(newPosition);
+        }
+
+        await _context.SaveChangesAsync(); // Save all changes
+
+        // Prepare response
+        var updatedUser = new FoundUserDTO
+        {
+            UserId = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            Role = request.Role,
+            Positions = request.Position
+        };
+
+        return Ok(new Result(true, 200, "Update Success", updatedUser));
     }
 }
 

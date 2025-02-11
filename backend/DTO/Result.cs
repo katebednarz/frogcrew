@@ -24,4 +24,9 @@ public class Result {
       Message = message;
       Data = data;
     }
+
+    public override string ToString()
+    {
+        return $"Flag: {Flag}, Code: {Code}, Message: {Message}, Data: {Data}";
+    }
 }
