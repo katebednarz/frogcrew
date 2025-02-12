@@ -11,6 +11,7 @@ CREATE TABLE [User] (
     [FirstName] nvarchar(50) NULL,
     [LastName] nvarchar(50) NULL,
     [PayRate] nvarchar(25) NULL,
+    [IsActive] bit NOT NULL DEFAULT 1,
     [UserName] nvarchar(256) NULL,
     [NormalizedUserName] nvarchar(256) NULL,
     [Email] nvarchar(256) NULL,

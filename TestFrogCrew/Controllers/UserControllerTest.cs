@@ -339,6 +339,7 @@ namespace TestFrogCrew.Controllers
         Email = email,
         FirstName = "John",
         LastName = "Doe",
+        IsActive = true
       };
 
       _userManagerMock.Setup(um => um.FindByEmailAsync(email)).ReturnsAsync(user);
@@ -398,7 +399,8 @@ namespace TestFrogCrew.Controllers
         FirstName = "Jane",
         LastName = "Doe",
         Email = "jane@gmail.com",
-        PhoneNumber = "3333333333"
+        PhoneNumber = "3333333333",
+        IsActive = true
     };
 
     var positions = new List<Position>
@@ -606,13 +608,75 @@ public async Task FindUserByIdBadRequestTest()
   }
 
   [Test]
+  public async Task DisableUserByIdSuccessTest()
+  {
+    // Arrange
+    var userId = 1;
+    var user = new ApplicationUser
+    {
+      Id = userId,
+      FirstName = "John",
+      LastName = "Doe",
+      Email = "john.doe@example.com",
+      PhoneNumber = "1234567890",
+      IsActive = true // Initially, the user is active
+    };
+
+    // Mock the Users DbSet to return the user when FindAsync is called
+    _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync(user);
+
+    // Mock SaveChangesAsync to return the number of affected rows
+    _mockContext?.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
+    // Act
+    var result = await _controller!.DisableUser(userId) as ObjectResult;
+    var response = result?.Value as Result;
+
+    // Assert
+    Assert.Multiple(() =>
+    {
+      Assert.That(result, Is.Not.Null);
+      Assert.That(response?.Flag, Is.True); // Verify Flag
+      Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
+      Assert.That(response?.Message, Is.EqualTo("Disable Success")); // Verify Message
+    });
+
+    // Verify that the user's IsActive property was set to false
+    Assert.That(user.IsActive, Is.False);
+
+    // Verify that SaveChangesAsync was called once
+    _mockContext?.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+  }
+
+  [Test]
+  public async Task DisableUserByIdUserNotFoundTest()
+  {
+    // Arrange
+    int userId = 999; // Non-existent user ID
+    _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync((ApplicationUser)null);
+
+    // Act
+    var result = await _controller!.DisableUser(userId) as ObjectResult;
+    var response = result?.Value as Result;
+
+    // Assert
+    Assert.Multiple(() =>
+    {
+      Assert.That(result, Is.Not.Null);
+      Assert.That(response?.Flag, Is.False); // Verify Flag
+      Assert.That(response?.Code, Is.EqualTo(404)); // Verify Code
+      Assert.That(response?.Message, Is.EqualTo($"User with ID {userId} not found.")); // Verify Message
+    });
+  }
+
+  [Test]
     public async Task GetUsersTestSuccess()
     {
       // Arrange
       var users = new List<ApplicationUser>
         {
-        new ApplicationUser { Id = 1, FirstName = "John", LastName = "Doe", Email = "john.doe@example.com", PhoneNumber = "1234567890" },
-        new ApplicationUser { Id = 2, FirstName = "Jane", LastName = "Smith", Email = "jane.smith@example.com", PhoneNumber = "0987654321" }
+        new ApplicationUser { Id = 1, FirstName = "John", LastName = "Doe", Email = "john.doe@example.com", PhoneNumber = "1234567890", IsActive = true },
+        new ApplicationUser { Id = 2, FirstName = "Jane", LastName = "Smith", Email = "jane.smith@example.com", PhoneNumber = "0987654321", IsActive = true }
         };
 
       _mockContext?.Setup(c => c.Users).ReturnsDbSet(users);
