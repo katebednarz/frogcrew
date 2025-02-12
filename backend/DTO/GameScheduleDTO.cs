@@ -9,7 +9,7 @@ public class GameScheduleDTO
     public int Id { get; set; }
 
     [Required(ErrorMessage = "Sport is required.")]
-    public string? Sport { get; set; }
+    public required string? Sport { get; set; }
     [Required(ErrorMessage = "Season is required.")]
-    public string? Season { get; set; }
+    public required string? Season { get; set; }
 }

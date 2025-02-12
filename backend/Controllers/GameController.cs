@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Org.BouncyCastle.Tsp;
 using System.Threading.Tasks;
+using backend.Utils;
 
 namespace backend.Controllers
 {
@@ -15,10 +16,14 @@ namespace backend.Controllers
     public class GameController : Controller
     {
         private readonly FrogcrewContext _context;
+        private readonly DatabaseHelper _dbHelper;
+        private readonly DtoConverters _converters;
 
         public GameController(FrogcrewContext context)
         {
-        _context = context;
+            _context = context;
+            _dbHelper = new DatabaseHelper(context);
+            _converters = new DtoConverters(context);
         }
 
         /*
@@ -75,6 +80,36 @@ namespace backend.Controllers
 
             return Ok(new Result(true, 200, "Found Games", gameDTOs));
             
+        }
+
+        [HttpPut("gameSchedule/game/{gameId}")]
+        public async Task<IActionResult> UpdateGameById(int gameId, [FromBody] GameDTO request)
+        {
+            var game = await _context.Games.FindAsync(gameId);
+            if (game is null)
+                return new ObjectResult(new Result(false, 404, $"Could not find game with id {gameId}")) { StatusCode = 400 };
+        
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .SelectMany(kvp => kvp.Value.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
+        
+                return new ObjectResult(errorResponse) { StatusCode = 400 };
+            }
+            
+            var x = _dbHelper.GetGameIdByScheduleIdAndDate(request.ScheduleId, request.GameDate);
+            if (x > 0)
+                return new ObjectResult(new Result(false, 409, "Game already exists")) { StatusCode = 409 };
+            
+            game.GameDate = request.GameDate;
+            game.Venue = request.Venue;
+            game.Opponent = request.Opponent;
+            _context.Games.Update(game);
+            await _context.SaveChangesAsync();
+            return Ok(new Result(true, 200, "Update Success", _converters.GameToGameDto(game)));
         }
     }
 }

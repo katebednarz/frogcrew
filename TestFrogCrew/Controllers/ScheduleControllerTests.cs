@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Linq;
 using backend.Models;
 using backend.DTO;
+using Microsoft.EntityFrameworkCore;
+using misc;
 using Moq.EntityFrameworkCore;
 
 namespace TestFrogCrew.Controllers;
@@ -34,6 +36,25 @@ namespace TestFrogCrew.Controllers;
         public void Teardown()
         {
             _controller?.Dispose();
+        }
+        
+        private Mock<DbSet<T>> CreateMockDbSet<T>(List<T> sourceList) where T : class
+        {
+            var queryable = sourceList.AsQueryable();
+            var mockDbSet = new Mock<DbSet<T>>();
+
+            // Setup IQueryable methods
+            mockDbSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(new TestAsyncQueryProvider<T>(queryable.Provider));
+            mockDbSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(queryable.Expression);
+            mockDbSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
+            mockDbSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
+
+            // Setup IAsyncEnumerable method
+            mockDbSet.As<IAsyncEnumerable<T>>()
+                .Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
+                .Returns(new TestAsyncEnumerator<T>(queryable.GetEnumerator()));
+
+            return mockDbSet;
         }
 
         [Test()]
@@ -316,4 +337,180 @@ namespace TestFrogCrew.Controllers;
                 Assert.That(response?.Message, Is.EqualTo("Could not find any schedules for season 2024.")); //Verify Message
             });
         }
+        
+        [Test]
+    public async Task UpdateScheduleNotFound()
+    {
+        // Arrange
+        int scheduleId = 2;
+        GameScheduleDTO request = new()
+        {
+            Sport = null,
+            Season = null
+        };
+        
+        var schedules = new List<Schedule>()
+        {
+            new()
+            {
+                Id = 1,
+                Sport = "Water Polo"
+            }
+        };
+        
+        var mockScheduleSet = CreateMockDbSet(schedules);
+        _mockContext?.Setup(c => c.Schedules).Returns(mockScheduleSet.Object);
+        
+        // Act
+        var result = await _controller!.UpdateGameSchedule(request, scheduleId) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.False); // Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(404)); // Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Could not find schedule with id 2")); // Verify Message
+        });
     }
+    
+    [Test]
+    public async Task UpdateScheduleBadRequest()
+    {
+        // Arrange
+        int scheduleId = 1;
+        GameScheduleDTO request = new()
+        {
+            Sport = null,
+            Season = null
+        };
+        
+        var schedules = new List<Schedule>()
+        {
+            new()
+            {
+                Id = 1,
+                Sport = "Water Polo"
+            }
+        };
+        
+        var mockPositionSet = CreateMockDbSet(schedules);
+        _mockContext?.Setup(c => c.Schedules).Returns(mockPositionSet.Object);
+        _mockContext?.Setup(c => c.Schedules.FindAsync(scheduleId))
+            .ReturnsAsync(schedules.FirstOrDefault(u => u.Id == scheduleId));
+        _mockContext?.Setup(c => c.Add(It.IsAny<Schedule>())).Callback<Schedule>(schedule => schedule.Id = scheduleId);
+        _mockContext?.Setup(c => c.SaveChanges()).Returns(1);
+        
+        // Arrange
+        _controller.ModelState.AddModelError(nameof(GameScheduleDTO.Sport), "Sport is required.");
+        _controller.ModelState.AddModelError(nameof(GameScheduleDTO.Season), "Season is required.");
+        
+        // Act
+        var result = await _controller!.UpdateGameSchedule(request, scheduleId) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Expected data
+        var expectedData = new Dictionary<string, string>
+        {
+            { "sport", "Sport is required." },
+            { "season", "Season is required." }
+        };
+
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(response?.Flag, Is.False); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
+        });
+
+        // Check that the data contains the expected error messages
+        Assert.That(response?.Data, Is.Not.Null);
+        var errors = response?.Data as List<string>;
+        foreach (var error in expectedData)
+        {
+            Assert.That(errors?.Any(e => e.Contains(error.Value)), Is.True, $"Expected error message '{error.Value}' not found.");
+        }
+    }
+    
+    [Test]
+    public async Task UpdateScheduleAlreadyExists()
+    {
+        // Arrange
+        int scheduleId = 1;
+        GameScheduleDTO request = new()
+        {
+            Sport = "Water Polo",
+            Season = "2024-2025"
+        };
+        
+        var schedules = new List<Schedule>()
+        {
+            new()
+            {
+                Id = 1,
+                Sport = "Water Polo",
+                Season = "2024-2025"
+            }
+        };
+        
+        var mockScheduleSet = CreateMockDbSet(schedules);
+        _mockContext?.Setup(c => c.Schedules).Returns(mockScheduleSet.Object);
+        _mockContext?.Setup(c => c.Schedules.FindAsync(scheduleId))
+            .ReturnsAsync(schedules.FirstOrDefault(u => u.Id == scheduleId));
+        
+        // Act
+        var result = await _controller!.UpdateGameSchedule(request, scheduleId) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.False); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(409)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Schedule already exists")); //Verify Message
+        });
+    }
+    
+    [Test]
+    public async Task UpdateScheduleSuccess()
+    {
+        // Arrange
+        int scheduleId = 1;
+        GameScheduleDTO request = new()
+        {
+            Sport = "Water Polo",
+            Season = "2024-2025"
+        };
+        
+        var schedules = new List<Schedule>()
+        {
+            new()
+            {
+                Id = 1,
+                Sport = "New Sport",
+                Season = "2025-2026"
+            }
+        };
+        
+        var mockPositionSet = CreateMockDbSet(schedules);
+        _mockContext?.Setup(c => c.Schedules).Returns(mockPositionSet.Object);
+        _mockContext?.Setup(c => c.Schedules.FindAsync(scheduleId))
+            .ReturnsAsync(schedules.FirstOrDefault(u => u.Id == scheduleId));
+        
+        // Act
+        var result = await _controller.UpdateGameSchedule(request, scheduleId) as ObjectResult;
+        var response = result?.Value as Result;
+        
+        // Assert 
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(response?.Flag, Is.True); //Verify Flag
+            Assert.That(response?.Code, Is.EqualTo(200)); //Verify Code
+            Assert.That(response?.Message, Is.EqualTo("Update Success")); //Verify Message
+        });
+    }
+}
