@@ -34,6 +34,7 @@ GO
 CREATE TABLE Position (
     [PositionId] INT IDENTITY(1,1) PRIMARY KEY,
     [PositionName] nvarchar(255) NOT NULL,
+    CONSTRAINT UQ_Position_PositionName UNIQUE (PositionName)
 );
 
 -- User Qualified Positions

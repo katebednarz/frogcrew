@@ -18,8 +18,8 @@ using Microsoft.EntityFrameworkCore;
 using misc;
 using Moq.EntityFrameworkCore;
 
-namespace backend.Controllers.Tests
-{
+namespace TestFrogCrew.Controllers;
+
     [TestFixture()]
     public class CrewedUserControllerTests
     {
@@ -171,4 +171,3 @@ namespace backend.Controllers.Tests
 
         }
     }
-}

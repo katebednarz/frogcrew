@@ -16,8 +16,8 @@ using backend.DTO;
 using Microsoft.EntityFrameworkCore;
 using misc;
 
-namespace backend.Controllers.Tests
-{
+namespace TestFrogCrew.Controllers;
+
     [TestFixture()]
     public class GameControllerTests
     {
@@ -194,4 +194,3 @@ namespace backend.Controllers.Tests
 
         }
     }
-}
