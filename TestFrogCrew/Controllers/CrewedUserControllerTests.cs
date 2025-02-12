@@ -48,9 +48,9 @@ namespace backend.Controllers.Tests
         public async Task FindCrewMemberByGameAndPositionTestSuccess()
         {
             // Arrange
-            int gameId = 1;
-            int positionId = 1;
-            string positionName = "PRODUCER";
+            const int gameId = 1;
+            const int positionId = 1;
+            const string positionName = "PRODUCER";
 
             var users = new List<ApplicationUser>
         {
@@ -137,9 +137,9 @@ namespace backend.Controllers.Tests
         public async Task FindCrewMemberByGameAndPositionTestNotFound()
         {
             // Arrange
-            int gameId = 1;
-            int positionId = 1;
-            string positionName = "PRODUCER";
+            const int gameId = 1;
+            const int positionId = 1;
+            const string positionName = "PRODUCER";
 
             var users = new List<ApplicationUser>().AsQueryable(); // No users in the database
 
@@ -170,5 +170,58 @@ namespace backend.Controllers.Tests
             });
 
         }
+
+        public async Task CreateCrewMemberTestSuccess()
+        {
+            // Arrange
+            const int gameId = 1;
+            const string positionName = "PRODUCER";
+            const int userId = 1;
+
+            var users = new List<ApplicationUser>
+            {
+                new()
+                {
+                    Id = 1,
+                    FirstName = "Billy",
+                    LastName = "Bob",
+                    Availabilities = new List<Availability>
+                    {
+                        new() { GameId = 1, Available = 1 }
+                    },
+                    UserQualifiedPositions = new List<UserQualifiedPosition>
+                    {
+                        new() { PositionId = 1 }
+                    }
+                },
+                new()
+                {
+                    Id = 2,
+                    FirstName = "Bob",
+                    LastName = "Smith",
+                    Availabilities = new List<Availability>
+                    {
+                        new() { GameId = 1, Available = 1 }
+                    },
+                    UserQualifiedPositions = new List<UserQualifiedPosition>
+                    {
+                        new() { PositionId = 2 }
+                    }
+                },
+                new()
+                {
+                    Id = 3,
+                    FirstName = "Joe",
+                    LastName = "Smith",
+                    Availabilities = new List<Availability>
+                    {
+                        new() { GameId = 1, Available = 1 }
+                    },
+                    UserQualifiedPositions = new List<UserQualifiedPosition>
+                    {
+                        new() { PositionId = 1 }
+                    }
+                }
+            }.AsQueryable();
+        }
     }
-}

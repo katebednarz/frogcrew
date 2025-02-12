@@ -11,6 +11,7 @@ namespace backend.Controllers
     public class CrewedUserController(FrogcrewContext context) : Controller
     {
         private readonly DatabaseHelper _dbHelper = new(context);
+        private readonly DtoConverters _converters = new DtoConverters(context);
 
         /*
          * Return a list of crew member who are qualified for the position and available for the game.
@@ -95,13 +96,9 @@ namespace backend.Controllers
             {
                 startTime = game.GameStart;
             }
-
-            // Set up for out return object on success.
-            var returnDto = new CrewedUserDTO
-            {
-                GameId = gameId,
-                Position = "",
-            };
+            
+            // Set up return object for later
+            List<object> returnDto = [];
 
             // Update arrival times of each CrewedUser based on position.
             foreach (var crewedUser in crewedUsers)
@@ -130,17 +127,13 @@ namespace backend.Controllers
                         arrivalTime.Value.Millisecond)
                 };
 
-                returnDto = new CrewedUserDTO
-                {
-                    UserId = crewedUser.UserId,
-                    GameId = gameId,
-                    Position = crewedUser.Position,
-                };
+                // Append new crewed user to return object
+                returnDto.Add(_converters.CrewedUserToDto(newCrewedUser));
 
                 // Append updates to CrewedUser table.
                 await context.AddAsync(newCrewedUser);
             }
-            
+
             // Save changes to the database
             var changes = await context.SaveChangesAsync();
             if (changes <= 0)

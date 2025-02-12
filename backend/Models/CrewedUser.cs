@@ -19,15 +19,4 @@ public partial class CrewedUser
     public virtual Game Game { get; set; } = null!;
 
     public virtual ApplicationUser User { get; set; } = null!;
-
-    public CrewedUserDTO ConvertToCrewedUserDTO(FrogcrewContext _context)
-    {
-        var positionName = _context.Positions.FirstOrDefault(p => p.PositionId == PositionId)!.PositionName;
-        return new CrewedUserDTO
-        {
-            UserId = UserId,
-            GameId = GameId,
-            Position = positionName,
-        };
-    }
 }

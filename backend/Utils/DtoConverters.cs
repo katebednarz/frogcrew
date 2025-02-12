@@ -87,13 +87,8 @@ public class DtoConverters
 
     private List<CrewedUserDTO> CrewedUsersToDtoList(int gameId)
     {
-        var crewedUserDtoList = new List<CrewedUserDTO>();
         var crewedUserList = _dbHelper.GetCrewedUsersByGame(gameId);
-        foreach (var cu in crewedUserList)
-        {
-            crewedUserDtoList.Add(CrewedUserToDto(cu));
-        }
-        return crewedUserDtoList;
+        return crewedUserList.Select(CrewedUserToDto).ToList();
     }
 
     public GameScheduleDTO ScheduleToGameScheduleDto(Schedule schedule)

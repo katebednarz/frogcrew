@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using backend.DTO;
+using backend.Utils;
 
 namespace backend.Models;
 
 public partial class Game
 {
+    
+    private readonly DtoConverters _converters;
     public int Id { get; set; }
 
     public int ScheduleId { get; set; }
@@ -51,13 +54,7 @@ public partial class Game
     }
     
     private List<CrewedUserDTO> CrewedUsersToDTOList(FrogcrewContext _context) {
-        var CrewedUserDTOList = new List<CrewedUserDTO>();
-        var CrewedUserList = _context.CrewedUsers.Where(c => c.GameId == Id).ToList(); 
-        foreach (var CrewedUser in CrewedUserList)
-        {
-            CrewedUserDTOList.Add(CrewedUser.ConvertToCrewedUserDTO(_context));
-        }
-    
-        return CrewedUserDTOList;
+        var crewedUserList = _context.CrewedUsers.Where(c => c.GameId == Id).ToList();
+        return crewedUserList.Select(crewedUser => _converters.CrewedUserToDto(crewedUser)).ToList();
     }
 }
