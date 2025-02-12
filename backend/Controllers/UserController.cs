@@ -64,6 +64,7 @@ public class UserController : Controller
             PhoneNumber = request.PhoneNumber,
             FirstName = request.FirstName,
             LastName = request.LastName,
+            IsActive = true
         };
         if (request.Password == null)
         {
@@ -205,6 +206,11 @@ public class UserController : Controller
         var signInResult = await _signInManager.CheckPasswordSignInAsync(user, Password, false);
         if (!signInResult.Succeeded)
             return new ObjectResult(new Result(false, 401, "username or password is incorrect")) {StatusCode = 401};
+
+        if (user.IsActive != true)
+        {
+            return new ObjectResult(new Result(false, 404, "User is not active", null));
+        }
         
         var token = GenerateJwtToken(user);
         
@@ -254,14 +260,18 @@ public class UserController : Controller
         List<UserSimpleDTO> userDTOs = [];
         foreach (var user in users)
         {
-           var userDto = new UserSimpleDTO {
-                UserId = user.Id,
-                FullName = user.FirstName + " " + user.LastName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber
-            };
-            
-            userDTOs.Add(userDto);
+            if (user.IsActive)
+            {
+                var userDto = new UserSimpleDTO
+                {
+                    UserId = user.Id,
+                    FullName = user.FirstName + " " + user.LastName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber
+                };
+
+                userDTOs.Add(userDto);
+            }
         }
         
         var response = new Result(true, 200, "Found Users", userDTOs);
@@ -279,6 +289,11 @@ public class UserController : Controller
         var user = await _context.Users.FindAsync(userId);
         if (user == null) {
             return new ObjectResult(new Result(false, 404, $"User with ID {userId} not found.")) { StatusCode = 404 };
+        }
+        
+        if (user.IsActive != true)
+        {
+            return new ObjectResult(new Result(false, 404, "User is not active", null));
         }
 
         var usersQualifiedPosition = await _context.UserQualifiedPositions

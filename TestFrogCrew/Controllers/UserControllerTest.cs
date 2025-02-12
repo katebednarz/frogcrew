@@ -339,6 +339,7 @@ namespace TestFrogCrew.Controllers
         Email = email,
         FirstName = "John",
         LastName = "Doe",
+        IsActive = true
       };
 
       _userManagerMock.Setup(um => um.FindByEmailAsync(email)).ReturnsAsync(user);
@@ -398,7 +399,8 @@ namespace TestFrogCrew.Controllers
         FirstName = "Jane",
         LastName = "Doe",
         Email = "jane@gmail.com",
-        PhoneNumber = "3333333333"
+        PhoneNumber = "3333333333",
+        IsActive = true
     };
 
     var positions = new List<Position>
@@ -673,8 +675,8 @@ public async Task FindUserByIdBadRequestTest()
       // Arrange
       var users = new List<ApplicationUser>
         {
-        new ApplicationUser { Id = 1, FirstName = "John", LastName = "Doe", Email = "john.doe@example.com", PhoneNumber = "1234567890" },
-        new ApplicationUser { Id = 2, FirstName = "Jane", LastName = "Smith", Email = "jane.smith@example.com", PhoneNumber = "0987654321" }
+        new ApplicationUser { Id = 1, FirstName = "John", LastName = "Doe", Email = "john.doe@example.com", PhoneNumber = "1234567890", IsActive = true },
+        new ApplicationUser { Id = 2, FirstName = "Jane", LastName = "Smith", Email = "jane.smith@example.com", PhoneNumber = "0987654321", IsActive = true }
         };
 
       _mockContext?.Setup(c => c.Users).ReturnsDbSet(users);
