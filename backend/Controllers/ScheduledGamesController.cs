@@ -107,4 +107,33 @@ public class ScheduledGamesController : Controller
 
         return Ok(new Result(true, 200, "Find Success", dtos));
     }
+    
+    [HttpGet("get/{userId}")]
+    public async Task<IActionResult> GetScheduledGames(int userId)
+    {
+        var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+        if (!userExists)
+        {
+            var notFoundResponse = new Result(false, 404, $"Could not find user with id {userId}", null);
+            return new ObjectResult(notFoundResponse) { StatusCode = 404 };
+        }
+
+        var scheduledGames = await _context.CrewedUsers
+            .Where(cu => cu.UserId == userId)
+            .Join(_context.Games,
+                cu => cu.GameId,
+                g => g.Id,
+                (cu, g) => new
+                {
+                    g.Id,
+                    g.GameDate,
+                    g.Venue,
+                    g.Opponent,
+                    g.IsFinalized
+                })
+            .ToListAsync();
+
+        var response = new Result(true, 200, "Find Success", scheduledGames);
+        return Ok(response);
+    }
 }
