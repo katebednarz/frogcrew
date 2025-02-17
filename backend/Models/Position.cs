@@ -13,6 +13,7 @@ public partial class Position
 
     //public virtual ICollection<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
 
+    public virtual ICollection<Template> Templates { get; set; } = new List<Template>();
     public ICollection<UserQualifiedPosition> UserQualifiedPositions { get; set; } = new List<UserQualifiedPosition>();
     
     public virtual ICollection<TradeBoard> TradeBoards { get; set; } = new List<TradeBoard>();

@@ -191,6 +191,25 @@ CREATE TABLE TradeBoard (
     CONSTRAINT UQ_TradeBoard_Dropper_Game_Position UNIQUE (DropperID, GameId, Position)
 );
 Go
+
+-- Templates Table
+CREATE TABLE Templates (
+    [TemplateId] INT IDENTITY(1,1) PRIMARY KEY,
+    [TemplateName] NVARCHAR(255) NOT NULL,
+    CONSTRAINT UQ_Templates_TemplateName UNIQUE (TemplateName)
+);
+Go
+
+-- Junction Table to Associate Templates with Positions
+CREATE TABLE TemplatePositions (
+    [TemplateId] INT NOT NULL,
+    [PositionId] INT NOT NULL,
+    PRIMARY KEY (TemplateId, PositionId),
+    FOREIGN KEY (TemplateId) REFERENCES Templates(TemplateId) ON DELETE CASCADE,
+    FOREIGN KEY (PositionId) REFERENCES Position(PositionId)
+);
+Go
+
 -- Indexes
 
 CREATE INDEX [IX_AspNetRoleClaims_RoleId] ON [AspNetRoleClaims] ([RoleId]);
@@ -228,6 +247,8 @@ Go
 
 CREATE INDEX [NotificationIndex] ON [Notification] ([userId]);
 Go
+
+CREATE INDEX [TemplatePositions] ON [TemplatePositions] ([TemplateId]);
 
 
 -- User Values
