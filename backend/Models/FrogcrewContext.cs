@@ -180,6 +180,9 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
             entity.Property(e => e.PositionName)
                 .HasMaxLength(255)
                 .HasColumnName("PositionName");
+
+            entity.HasIndex(e => new { e.PositionName })
+                .IsUnique();
         });
         
         modelBuilder.Entity<Schedule>(entity =>

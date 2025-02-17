@@ -33,4 +33,14 @@ public class DatabaseHelper
     
     public List<CrewedUser> GetCrewedUsersByGame(int gameId) => _context.CrewedUsers
         .Where(p => p.GameId == gameId).ToList();
+    
+    public int GetScheduleIdBySportAndSeason(string? sport, string? season) => _context.Schedules
+        .Where(s => s.Sport == sport && s.Season == season)
+        .Select(s => s.Id)
+        .FirstOrDefault();
+    
+    public int GetGameIdByScheduleIdAndDate(int scheduleId, DateOnly? date) => _context.Games
+        .Where(g => g.ScheduleId == scheduleId && g.GameDate == date)
+        .Select(g => g.Id)
+        .FirstOrDefault();
 }
