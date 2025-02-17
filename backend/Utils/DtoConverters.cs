@@ -44,7 +44,7 @@ public class DtoConverters
         {
             UserId = availability.UserId,
             GameId = availability.GameId,
-            Available = availability.Available == 1,
+            Available = availability.Available,
             Comments = availability.Comments
         };
     }

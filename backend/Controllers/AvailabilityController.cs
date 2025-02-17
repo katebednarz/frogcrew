@@ -39,7 +39,7 @@ namespace backend.Controllers
 			List<Availability> availabilityList = request.Select(s => new Availability {
 				UserId = s.UserId,
 				GameId = s.GameId,
-				Available = s.Available ? 1 : 0,
+				Available = s.Available,
 				Comments = s.Comments
 			}).ToList();
 
@@ -53,7 +53,7 @@ namespace backend.Controllers
 				availabilityDTO.Add(new AvailabilityDTO {
 					UserId = availability.UserId,
 					GameId = availability.GameId,
-					Available = availability.Available == 1,
+					Available = availability.Available,
 					Comments = availability.Comments
 				});
 			}
@@ -83,7 +83,7 @@ namespace backend.Controllers
 				{
 					UserId = a.UserId,
 					GameId = a.GameId,
-					Available = a.Available == 1,
+					Available = a.Available,
 					Comments = a.Comments
 				})
 				.ToListAsync();
@@ -95,6 +95,46 @@ namespace backend.Controllers
 			}
 
 			var successResponse = new Result(true, 200, "Find Success", availabilityList);
+			return Ok(successResponse);
+		}
+		
+		[HttpPut("availability")]
+		public async Task<IActionResult> UpdateAvailability([FromBody] AvailabilityDTO request)
+		{
+			if (!ModelState.IsValid)
+			{
+				var errors = ModelState
+					.SelectMany(kvp => kvp.Value!.Errors)
+					.Select(e => e.ErrorMessage)
+					.ToList();
+				var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
+				return new ObjectResult(errorResponse) { StatusCode = 400 };
+			}
+
+			var availability = await _context.Availabilities
+				.FirstOrDefaultAsync(a => a.UserId == request.UserId && a.GameId == request.GameId);
+
+			if (availability == null)
+			{
+				var notFoundResponse = new Result(false, 404, $"Could not find game with id {request.GameId}", null);
+				return new ObjectResult(notFoundResponse) { StatusCode = 404 };
+			}
+
+			availability.Available = request.Available;
+			availability.Comments = request.Comments;
+
+			_context.Availabilities.Update(availability);
+			await _context.SaveChangesAsync();
+
+			var updatedAvailabilityDTO = new AvailabilityDTO
+			{
+				UserId = availability.UserId,
+				GameId = availability.GameId,
+				Available = availability.Available,
+				Comments = availability.Comments
+			};
+
+			var successResponse = new Result(true, 200, "Update Success", updatedAvailabilityDTO);
 			return Ok(successResponse);
 		}
 	}

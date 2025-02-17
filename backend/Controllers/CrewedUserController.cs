@@ -25,7 +25,7 @@ namespace backend.Controllers
             var positionId = _dbHelper.GetPositionIdByName(position);
 
             var availableQualifiedUsers = await context.Users
-                .Where(u => u.Availabilities.Any(a => a.GameId == gameId && a.Available == 1)
+                .Where(u => u.Availabilities.Any(a => a.GameId == gameId && a.Available)
                             && u.UserQualifiedPositions.Any(qp => qp.PositionId == positionId))
                 .Select(u => new UserSimpleDTO
                 {
