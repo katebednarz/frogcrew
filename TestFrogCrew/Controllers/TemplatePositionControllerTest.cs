@@ -173,8 +173,6 @@ public class TemplatePositionControllerTest
             Assert.That(response?.Code, Is.EqualTo(409)); //Verify Code
             Assert.That(response?.Message, Is.EqualTo("position already exists")); //Verify Message
         });
-        
-        Assert.That(response?.Data, Is.Not.Null);
     }
     
     [Test]
@@ -278,7 +276,16 @@ public class TemplatePositionControllerTest
             Assert.That(response?.Flag, Is.False); //Verify Flag
             Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
             Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
-            Assert.That(response?.Data, Is.EqualTo("position is required"));
+        });
+        
+        // Verify data matches expected PositionDTO structure
+        var data = response?.Data as List<string>;
+        
+        Assert.Multiple(() =>
+        {
+            // Check the first crew member
+            Assert.That(data?[0], Is.EqualTo("name is required."));
+            Assert.That(data?[1], Is.EqualTo("location is required."));
         });
     }
     
@@ -319,16 +326,6 @@ public class TemplatePositionControllerTest
             Assert.That(response?.Flag, Is.False); //Verify Flag
             Assert.That(response?.Code, Is.EqualTo(409)); //Verify Code
             Assert.That(response?.Message, Is.EqualTo("position already exists")); //Verify Message
-        });
-        
-        // Verify data matches expected PositionDTO structure
-        var data = response?.Data as List<string>;
-        
-        Assert.Multiple(() =>
-        {
-            // Check the first crew member
-            Assert.That(data?[0], Is.EqualTo("name is required."));
-            Assert.That(data?[1], Is.EqualTo("location is required."));
         });
     }
     

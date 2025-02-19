@@ -65,10 +65,6 @@ public class TemplatePositionController : Controller
     [HttpPut("positions/{positionId}")]
     public async Task<IActionResult> UpdatePosition([FromBody] PositionDTO position, int positionId)
     {
-        var foundPosition = await _context.Positions.FindAsync(positionId);
-        if (foundPosition is null)
-            return new ObjectResult(new Result(false, 404, $"Could not find position with id {positionId}")) { StatusCode = 400 };
-        
         if (!ModelState.IsValid)
         {
             var errors = ModelState
@@ -77,6 +73,10 @@ public class TemplatePositionController : Controller
                 .ToList();
             return new ObjectResult(new Result(false, 400, "Provided arguments are invalid, see data for details.", errors)) { StatusCode = 400 };
         }
+        
+        var foundPosition = await _context.Positions.FindAsync(positionId);
+        if (foundPosition is null)
+            return new ObjectResult(new Result(false, 404, $"Could not find position with id {positionId}")) { StatusCode = 400 };
         
         var x = _dbHelper.GetPositionIdByName(position.Name);
         if (x > 0)
