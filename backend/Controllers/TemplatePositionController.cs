@@ -89,6 +89,49 @@ public class TemplatePositionController : Controller
         return Ok(new Result(true, 200, "Update Success", _converters.PositionToDto(foundPosition)));
     }
     
+    [HttpGet("template")]
+    public async Task<IActionResult> GetTemplates()
+    {
+        var templates = await _context.Templates
+            .Select(template => new 
+            {
+                template.TemplateId,
+                template.TemplateName
+            })
+            .ToListAsync();
+
+        if (templates.Any())
+        {
+            return Ok(new Result(true, 200, "Find Success", templates));
+        }
+        return new ObjectResult(new Result(false, 404, "Could not find any templates")) { StatusCode = 404 };
+    }
+    
+    // [HttpPost("positions")]
+    // public async Task<IActionResult> AddTemplate([FromBody] TemplateDTO template)
+    // {
+    //     // fix this
+    //     if (template.Name is null)
+    //     {
+    //         return new ObjectResult(new Result(false, 400, "Provided arguments are invalid, see data for details.", "position is required")) { StatusCode = 400 };
+    //     }
+    //     
+    //     var x = _dbHelper.GetTemplateIdByName(template.Name);
+    //     if (x > 0)
+    //         return new ObjectResult(new Result(false, 409, "position already exists")) { StatusCode = 409 };
+    //     
+    //
+    //     var newTemplate = new Template
+    //     {
+    //         TemplateName = template.Name,
+    //     };
+    //     
+    //     _context.Templates.Add(newTemplate);
+    //     await _context.SaveChangesAsync();
+    //
+    //     return Ok(new Result(true, 200, "Add Success", _converters.TemplateToDTO(newTemplate)));
+    // }
+    
 }
     
     
