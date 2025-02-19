@@ -52,8 +52,6 @@ namespace backend.Controllers
             if (game == null) {
                 return new ObjectResult(new Result(false, 404, $"Game with ID {gameId} not found.")) { StatusCode = 404 };
             }
-            
-            var crewList = _converters.GameToCrewListDto(game);
 
             var gameTitle = $"TCU {game.Schedule.Sport.ToUpper()} vs {game.Opponent}";
             var dayOfWeek = game.GameDate.Value.DayOfWeek.ToString();
@@ -63,14 +61,23 @@ namespace backend.Controllers
 
             var crewData = new List<(string Position, string Name, string ReportTime, string ReportLocation)>();
 
-            foreach (var crewedMember in crewList.CrewedMembers)
+            var crewedMembers = _dbHelper.GetCrewedUsersByGame(game.Id);
+            
+            foreach (var crewedMember in crewedMembers)
             {
-                
+                var position = crewedMember.CrewedPositionNavigation.PositionName;
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == crewedMember.UserId);
                 var name = $"{user.FirstName} {user.LastName}";
-                var location = "";
+                var reportTime = crewedMember.ArrivalTime?.ToString("HH:mm");
+                var location = "Location NYI";
                 
-                crewData.Add( new (crewedMember.Position, name, "Arrival Time NYI", "Position NYI") );
+                crewData.Add( 
+                    new (
+                        position, 
+                        name, 
+                        reportTime ?? "n/a", 
+                        location
+                    ));
             }
 
             using (var workbook = new XLWorkbook())

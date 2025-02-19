@@ -1,5 +1,6 @@
 using backend.DTO;
 using backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Utils;
 
@@ -32,6 +33,7 @@ public class DatabaseHelper
         .FirstOrDefault(p => p.GameId == request.GameId && p.DropperId == request.UserId && p.Position == request.PositionId);
     
     public List<CrewedUser> GetCrewedUsersByGame(int gameId) => _context.CrewedUsers
+        .Include(p => p.CrewedPositionNavigation)
         .Where(p => p.GameId == gameId).ToList();
     
     public int GetScheduleIdBySportAndSeason(string? sport, string? season) => _context.Schedules
