@@ -183,9 +183,9 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
                 .HasMaxLength(255)
                 .HasColumnName("PositionName");
             
-            // entity.Property(e => e.PositionLocation)
-            //     .HasMaxLength(255)
-            //     .HasColumnName("PositionLocation");
+            entity.Property(e => e.PositionLocation)
+                .HasMaxLength(255)
+                .HasColumnName("PositionLocation");
 
             entity.HasIndex(e => new { e.PositionName })
                 .IsUnique();

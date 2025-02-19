@@ -9,6 +9,6 @@ public record PositionDTO()
     [Required(ErrorMessage = "Name is required.")]
     public required string Name { get; init; }
     
-    //[Required(ErrorMessage = "Location is required.")]
-    //public required string Location { get; set; }
+    [Required(ErrorMessage = "Location is required.")]
+    public required string Location { get; set; }
 }

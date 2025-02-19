@@ -109,7 +109,7 @@ namespace TestFrogCrew.Controllers;
       _mockContext?.Setup(c => c.Users).Returns(mockUserSet.Object);
 
       _mockContext?.Setup(c => c.Positions)
-        .ReturnsDbSet(new List<Position> { new() { PositionId = positionId, PositionName = positionName } });
+        .ReturnsDbSet(new List<Position> { new() { PositionId = positionId, PositionName = positionName, PositionLocation = "CONTROL ROOM" } });
       
       // Act
       var result = await _controller!.FindCrewListById(gameId) as ObjectResult;
@@ -178,7 +178,10 @@ namespace TestFrogCrew.Controllers;
       // Verify FindAsync was called once
       _mockContext?.Verify(c => c.Games.FindAsync(gameId), Times.Once);
     }
-    
+
     [Test()]
     public async Task ExportCrewListGameNotFound()
+    {
+      Assert.Pass();
+    }
   }

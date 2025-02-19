@@ -9,7 +9,7 @@ public partial class Position
 
     public required string PositionName { get; set; }
 
-    //public required string PositionLocation { get; set; }
+    public required string PositionLocation { get; set; }
 
     public virtual ICollection<CrewedUser> CrewedUsers { get; set; } = new List<CrewedUser>();
 

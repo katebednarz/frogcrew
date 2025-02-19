@@ -24,20 +24,28 @@ public class TemplatePositionController : Controller
     [HttpGet("positions")]
     public async Task<IActionResult> GetPositions()
     {
-        var positions = await _context.Positions.Select(position => position.PositionName).ToListAsync();
-        return Ok(new Result(true, 200, "Find Success", positions));
+        var positions = await _context.Positions.ToListAsync();
+        var positionsDto = new List<PositionDTO>();
+        foreach (var position in positions)
+        {
+            positionsDto.Add(_converters.PositionToDto(position));
+        }
+        return Ok(new Result(true, 200, "Find Success", positionsDto));
     }
 
     [HttpPost("positions")]
     public async Task<IActionResult> AddPosition([FromBody] PositionDTO position)
     {
-        if (position.Name is null)
+        if (!ModelState.IsValid)
         {
-            return new ObjectResult(new Result(false, 400, "Provided arguments are invalid, see data for details.", "position is required")) { StatusCode = 400 };
+            var errors = ModelState
+                .SelectMany(kvp => kvp.Value.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+            return new ObjectResult(new Result(false, 400, "Provided arguments are invalid, see data for details.", errors)) { StatusCode = 400 };
         }
         
         var x = _dbHelper.GetPositionIdByName(position.Name);
-        Console.WriteLine(x);
         if (x > 0)
             return new ObjectResult(new Result(false, 409, "position already exists")) { StatusCode = 409 };
         
@@ -45,6 +53,7 @@ public class TemplatePositionController : Controller
         var newPosition = new Position
         {
             PositionName = position.Name,
+            PositionLocation = position.Location,
         };
         
         _context.Positions.Add(newPosition);
@@ -60,17 +69,21 @@ public class TemplatePositionController : Controller
         if (foundPosition is null)
             return new ObjectResult(new Result(false, 404, $"Could not find position with id {positionId}")) { StatusCode = 400 };
         
-        if (position.Name is null)
+        if (!ModelState.IsValid)
         {
-            return new ObjectResult(new Result(false, 400, "Provided arguments are invalid, see data for details.", "position is required")) { StatusCode = 400 };
+            var errors = ModelState
+                .SelectMany(kvp => kvp.Value.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+            return new ObjectResult(new Result(false, 400, "Provided arguments are invalid, see data for details.", errors)) { StatusCode = 400 };
         }
         
         var x = _dbHelper.GetPositionIdByName(position.Name);
-        Console.WriteLine(x);
         if (x > 0)
             return new ObjectResult(new Result(false, 409, "position already exists")) { StatusCode = 409 };
         
         foundPosition.PositionName = position.Name;
+        foundPosition.PositionLocation = position.Location;
         _context.Positions.Update(foundPosition);
         await _context.SaveChangesAsync();
         return Ok(new Result(true, 200, "Update Success", _converters.PositionToDto(foundPosition)));

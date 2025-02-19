@@ -118,7 +118,7 @@ public class ScheduledGamesControllerTest
         _mockContext?.Setup(c => c.Users).Returns(mockUserSet.Object);
         _mockContext?.Setup(c => c.TradeBoards).Returns(mockTradeBoardSet.Object);
         _mockContext?.Setup(c => c.Positions)
-            .ReturnsDbSet(new List<Position> { new() { PositionId = 1, PositionName = "DIRECTOR" } });
+            .ReturnsDbSet(new List<Position> { new() { PositionId = 1, PositionName = "DIRECTOR", PositionLocation = "CONTROL ROOM" } });
         _mockContext?.Setup(c => c.Users.FindAsync(1))
             .ReturnsAsync(users.FirstOrDefault(u => u.Id == 1));
         _mockContext?.Setup(c => c.CrewedUsers.FindAsync(It.IsAny<object[]>()))
@@ -336,12 +336,14 @@ public class ScheduledGamesControllerTest
             new()
             {
                 PositionId = 1,
-                PositionName = "DIRECTOR"
+                PositionName = "DIRECTOR",
+                PositionLocation = "CONTROL ROOM"
             },
             new()
             {
                 PositionId = 2,
-                PositionName = "PRODUCER"
+                PositionName = "PRODUCER",
+                PositionLocation = "CONTROL ROOM"
             }
         };
         
@@ -494,12 +496,14 @@ public class ScheduledGamesControllerTest
             new()
             {
                 PositionId = 1,
-                PositionName = "DIRECTOR"
+                PositionName = "DIRECTOR",
+                PositionLocation = "CONTROL ROOM"
             },
             new()
             {
                 PositionId = 1,
-                PositionName = "DIRECTOR"
+                PositionName = "DIRECTOR",
+                PositionLocation = "CONTROL ROOM"
             }
             
         };
@@ -578,12 +582,14 @@ public class ScheduledGamesControllerTest
             new()
             {
                 PositionId = 1,
-                PositionName = "DIRECTOR"
+                PositionName = "DIRECTOR",
+                PositionLocation = "CONTROL ROOM"
             },
             new()
             {
                 PositionId = 2,
-                PositionName = "PRODUCER"
+                PositionName = "PRODUCER",
+                PositionLocation = "CONTROL ROOM"
             }
         };
         
@@ -675,12 +681,14 @@ public class ScheduledGamesControllerTest
             new()
             {
                 PositionId = 1,
-                PositionName = "DIRECTOR"
+                PositionName = "DIRECTOR",
+                PositionLocation = "CONTROL ROOM"
             },
             new()
             {
                 PositionId = 2,
-                PositionName = "PRODUCER"
+                PositionName = "PRODUCER",
+                PositionLocation = "CONTROL ROOM"
             }
         };
         
