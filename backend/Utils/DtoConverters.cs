@@ -112,6 +112,7 @@ public class DtoConverters
         {
             Id = position.PositionId,
             Name = position.PositionName,
+            Location = position.PositionLocation
         };
     }
     

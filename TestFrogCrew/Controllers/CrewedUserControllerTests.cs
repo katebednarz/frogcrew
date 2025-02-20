@@ -106,7 +106,7 @@ namespace TestFrogCrew.Controllers;
             _mockContext?.Setup(c => c.Users).Returns(_mockUsersDbSet!.Object);
 
             _mockContext?.Setup(c => c.Positions)
-                .ReturnsDbSet(new List<Position> { new() { PositionId = positionId, PositionName = positionName } });
+                .ReturnsDbSet(new List<Position> { new() { PositionId = positionId, PositionName = positionName, PositionLocation = "CONTROL ROOM"} });
             
             // Act
             var result = await _controller!.FindCrewMemberByGameAndPosition(gameId, positionName) as ObjectResult;
@@ -154,7 +154,7 @@ namespace TestFrogCrew.Controllers;
             _mockContext?.Setup(c => c.Users).Returns(_mockUsersDbSet!.Object);
             
             _mockContext?.Setup(c => c.Positions)
-                .ReturnsDbSet(new List<Position> { new() { PositionId = positionId, PositionName = positionName } });
+                .ReturnsDbSet(new List<Position> { new() { PositionId = positionId, PositionName = positionName, PositionLocation = "CONTROL ROOM" } });
 
             // Act
             var result = await _controller!.FindCrewMemberByGameAndPosition(gameId, positionName) as ObjectResult;

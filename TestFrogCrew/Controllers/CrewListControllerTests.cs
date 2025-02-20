@@ -14,7 +14,9 @@ using System.Linq;
 using backend.Models;
 using backend.DTO;
 using backend.Utils;
+using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
+using misc;
 using Moq.EntityFrameworkCore;
 
 namespace TestFrogCrew.Controllers;
@@ -41,15 +43,21 @@ namespace TestFrogCrew.Controllers;
       _controller?.Dispose();
     }
 
-    private static Mock<DbSet<T>> CreateMockDbSet<T>(IList<T> sourceList) where T : class
+    private Mock<DbSet<T>> CreateMockDbSet<T>(List<T> sourceList) where T : class
     {
       var queryable = sourceList.AsQueryable();
       var mockDbSet = new Mock<DbSet<T>>();
 
-      mockDbSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(queryable.Provider);
+      // Setup IQueryable methods
+      mockDbSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(new TestAsyncQueryProvider<T>(queryable.Provider));
       mockDbSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(queryable.Expression);
       mockDbSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
       mockDbSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
+
+      // Setup IAsyncEnumerable method
+      mockDbSet.As<IAsyncEnumerable<T>>()
+        .Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
+        .Returns(new TestAsyncEnumerator<T>(queryable.GetEnumerator()));
 
       return mockDbSet;
     }
@@ -109,7 +117,7 @@ namespace TestFrogCrew.Controllers;
       _mockContext?.Setup(c => c.Users).Returns(mockUserSet.Object);
 
       _mockContext?.Setup(c => c.Positions)
-        .ReturnsDbSet(new List<Position> { new() { PositionId = positionId, PositionName = positionName } });
+        .ReturnsDbSet(new List<Position> { new() { PositionId = positionId, PositionName = positionName, PositionLocation = "CONTROL ROOM" } });
       
       // Act
       var result = await _controller!.FindCrewListById(gameId) as ObjectResult;
@@ -177,5 +185,99 @@ namespace TestFrogCrew.Controllers;
 
       // Verify FindAsync was called once
       _mockContext?.Verify(c => c.Games.FindAsync(gameId), Times.Once);
+    }
+
+    [Test()]
+    public async Task ExportCrewListGameNotFound()
+    {
+      // Arrange
+      var gameId = 1;
+      _mockContext?.Setup(c => c.Games.FindAsync(gameId)).ReturnsAsync((Game)null);
+      
+      // Act
+      var result = await _controller!.FindCrewListById(gameId) as ObjectResult;
+      var response = result?.Value as Result;
+      
+      // Assert
+      Assert.Multiple(() =>
+      {
+        Assert.That(result, Is.Not.Null);
+        Assert.That(response?.Flag, Is.False); //Verify Flag
+        Assert.That(response?.Code, Is.EqualTo(404)); //Verify Code
+        Assert.That(response?.Message, Is.EqualTo($"Game with ID {gameId} not found.")); //Verify Message
+      });
+    }
+
+    [Test()]
+    public async Task ExportCrewListSuccess()
+    {
+      // Arrange
+      var gameId = 1;
+      
+      var game = new Game
+      {
+        Id = gameId,
+        Opponent = "Texas",
+        GameDate = new DateOnly(2024, 11, 06),
+        GameStart = new TimeOnly(18,0),
+        Schedule = new Schedule { Sport = "Basketball" }
+      };
+
+      var user = new ApplicationUser
+      {
+        Id = 1,
+        FirstName = "John",
+        LastName = "Smith",
+      };
+
+      var crewedUsers = new List<CrewedUser>
+      {
+        new()
+        {
+          UserId = 1,
+          GameId = gameId,
+          Game = game,
+          CrewedPositionNavigation = new Position
+          {
+            PositionId = 1,
+            PositionName = "DIRECTOR",
+            PositionLocation = "CONTROL ROOM"
+          },
+          ArrivalTime = new TimeOnly(17, 0),
+        }
+      };
+      
+      var mockCrewedUserSet = CreateMockDbSet(crewedUsers);
+      _mockContext?.Setup(c => c.CrewedUsers).Returns(mockCrewedUserSet.Object);
+      
+      _mockContext?.Setup(c => c.Games).ReturnsDbSet(new List<Game> { game });
+      _mockContext?.Setup(c => c.Users).ReturnsDbSet(new List<ApplicationUser> { user });
+      
+      // Act
+      var result = await _controller!.ExportCrewList(gameId) as FileContentResult;
+      
+      //Assert
+      Assert.IsNotNull(result);
+      Assert.That(result.ContentType, Is.EqualTo("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+      Assert.That(result.FileDownloadName, Is.EqualTo("CrewList.xlsx"));
+
+      // Verify the Excel file structure
+      using (var stream = new MemoryStream(result.FileContents))
+      using (var workbook = new XLWorkbook(stream))
+      {
+        var worksheet = workbook.Worksheet(1);
+        Assert.That(worksheet.Cell("A1").Value, Is.EqualTo("TCU SPORTS BROADCASTING CREW LIST"));
+        Assert.That(worksheet.Cell("A2").Value, Is.EqualTo("TCU BASKETBALL vs Texas"));
+        Assert.That(worksheet.Cell("A3").Value, Is.EqualTo("Wednesday 11-06-24"));
+        Assert.That(worksheet.Cell("A4").Value, Is.EqualTo("6:00 PM"));
+        Assert.That(worksheet.Cell("A8").Value, Is.EqualTo("DIRECTOR"));
+        Assert.That(worksheet.Cell("B8").Value, Is.EqualTo("John Smith"));
+        Assert.That(worksheet.Cell("C8").Value, Is.EqualTo("17:00"));
+        Assert.That(worksheet.Cell("D8").Value, Is.EqualTo("CONTROL ROOM"));
+
+      }
+      
+
+
     }
   }

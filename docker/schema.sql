@@ -34,6 +34,7 @@ GO
 CREATE TABLE Position (
     [PositionId] INT IDENTITY(1,1) PRIMARY KEY,
     [PositionName] nvarchar(255) NOT NULL,
+    [PositionLocation] nvarchar(255) NOT NULL,
     CONSTRAINT UQ_Position_PositionName UNIQUE (PositionName)
 );
 
@@ -263,25 +264,25 @@ INSERT INTO [User] (FirstName, LastName, PayRate, UserName, NormalizedUserName, 
     ('Mike','Martin',null,'m.martin@tcu.edu','M.MARTIN@TCU.EDU','m.martin@tcu.edu','M.MARTIN@TCU.EDU',0,'AQAAAAIAAYagAAAAELchPSUc5T7AMrm2j7v31sXaKlSgL5rP9WbtJ+cCwgkVeoTfay8dsaer5zZLfis7yw==','4ZRQUMRFJR5UPEMKU4ZJ4COU44A5ONEX','cb3ffecd-392a-4caf-9355-8f67e06974c5','9876543210',0,0,null,1,0);
 
 -- Position Values
-INSERT INTO [Position] (PositionName) VALUES
-        ('PRODUCER'),
-        ('ASSISTANT PRODUCER'),
-        ('DIRECTOR'),
-        ('ASSISTANT DIRECTOR'),
-        ('TECHNICAL DIRECTOR'),
-        ('GRAPHICS OPERATOR'),
-        ('BUG OPERATOR'),
-        ('EVS REPLAY-LEAD'),
-        ('VIDEO OPERATOR'),
-        ('EIC'),
-        ('ENG 2'),
-        ('AUDIO A1'),
-        ('AUDIO ASSISTANT A2'),
-        ('CAMERA-FIXED'),
-        ('CAMERA-HANDHELD'),
-        ('CAMERA-STEADICAM'),
-        ('UTILITY'),
-        ('TIME OUT COORDINATOR');
+INSERT INTO [Position] (PositionName, PositionLocation) VALUES
+        ('PRODUCER','CONTROL ROOM'),
+        ('ASSISTANT PRODUCER','CONTROL ROOM'),
+        ('DIRECTOR','CONTROL ROOM'),
+        ('ASSISTANT DIRECTOR','CONTROL ROOM'),
+        ('TECHNICAL DIRECTOR','CONTROL ROOM'),
+        ('GRAPHICS OPERATOR','CONTROL ROOM'),
+        ('BUG OPERATOR','CONTROL ROOM'),
+        ('EVS REPLAY-LEAD','CONTROL ROOM'),
+        ('VIDEO OPERATOR','CONTROL ROOM'),
+        ('EIC','CONTROL ROOM'),
+        ('ENG 2', 'VENUE'),
+        ('AUDIO A1', 'VENUE'),
+        ('AUDIO ASSISTANT A2', 'VENUE'),
+        ('CAMERA-FIXED', 'VENUE'),
+        ('CAMERA-HANDHELD', 'VENUE'),
+        ('CAMERA-STEADICAM', 'VENUE'),
+        ('UTILITY', 'VENUE'),
+        ('TIME OUT COORDINATOR', 'VENUE');
 
 -- UserQualifiedPositions Values
 INSERT INTO UserQualifiedPositions VALUES

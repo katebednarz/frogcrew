@@ -7,7 +7,9 @@ public partial class Position
 {
     public int PositionId { get; set; }
 
-    public string PositionName { get; set; } = null!;
+    public required string PositionName { get; set; }
+
+    public required string PositionLocation { get; set; }
 
     public virtual ICollection<CrewedUser> CrewedUsers { get; set; } = new List<CrewedUser>();
 
