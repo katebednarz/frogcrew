@@ -266,11 +266,10 @@ namespace TestFrogCrew.Controllers;
       using (var workbook = new XLWorkbook(stream))
       {
         var worksheet = workbook.Worksheet(1);
-        string actualTime = worksheet.Cell("A4").GetFormattedString().Replace("\u202F", " ").Trim();
         Assert.That(worksheet.Cell("A1").Value, Is.EqualTo("TCU SPORTS BROADCASTING CREW LIST"));
         Assert.That(worksheet.Cell("A2").Value, Is.EqualTo("TCU BASKETBALL vs Texas"));
         Assert.That(worksheet.Cell("A3").Value, Is.EqualTo("Wednesday 11-06-24"));
-        Assert.That(actualTime, Is.EqualTo("6:00 PM"));
+        Assert.That(worksheet.Cell("A4").Value, Is.EqualTo("6:00 PM"));
         Assert.That(worksheet.Cell("A8").Value, Is.EqualTo("DIRECTOR"));
         Assert.That(worksheet.Cell("B8").Value, Is.EqualTo("John Smith"));
         Assert.That(worksheet.Cell("C8").Value, Is.EqualTo("17:00"));

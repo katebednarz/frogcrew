@@ -105,7 +105,7 @@ namespace backend.Controllers
                 dateRange.Style.Font.FontSize = 14;
 
                 var timeRange = worksheet.Range("A4:D4").Merge();
-                timeRange.Value = game.GameStart.ToString();
+                timeRange.Value = game.GameStart?.ToString("h:mm tt", CultureInfo.InvariantCulture);
                 timeRange.Style.Font.FontSize = 14;
 
                 var networkRange = worksheet.Range("A5:D5").Merge();
