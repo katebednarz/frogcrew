@@ -69,7 +69,7 @@ namespace backend.Controllers
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == crewedMember.UserId);
                 var name = $"{user.FirstName} {user.LastName}";
                 var reportTime = crewedMember.ArrivalTime?.ToString("HH:mm");
-                var location = "Location NYI";
+                var location = crewedMember.CrewedPositionNavigation.PositionLocation;
                 
                 crewData.Add( 
                     new (
