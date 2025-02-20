@@ -250,7 +250,7 @@ CREATE INDEX [NotificationIndex] ON [Notification] ([userId]);
 Go
 
 CREATE INDEX [TemplatePositions] ON [TemplatePositions] ([TemplateId]);
-
+Go
 
 -- User Values
 INSERT INTO [User] (FirstName, LastName, PayRate, UserName, NormalizedUserName, Email, NormalizedEmail, EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp, PhoneNumber, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnd, LockoutEnabled, AccessFailedCount) VALUES

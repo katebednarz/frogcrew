@@ -30,6 +30,7 @@ public class ApplicationUser : IdentityUser<int>
     public virtual ICollection<UserQualifiedPosition> UserQualifiedPositions { get; set; } = new List<UserQualifiedPosition>();
     public virtual ICollection<TradeBoard> TradeBoardDroppers { get; set; } = new List<TradeBoard>();
     public virtual ICollection<TradeBoard> TradeBoardReceivers { get; set; } = new List<TradeBoard>();
+    public virtual ICollection<ResetPasswordToken> ResetPasswordTokens { get; set; } = new List<ResetPasswordToken>();
     
     // Conversion methods (optional):
     public UserDTO ToUserDTO(FrogcrewContext _context)

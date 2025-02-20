@@ -17,23 +17,15 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
     }
 
     public virtual DbSet<Availability> Availabilities { get; set; } = null!;
-
     public virtual DbSet<CrewedUser> CrewedUsers { get; set; } = null!;
-
     public virtual DbSet<Game> Games { get; set; } = null!;
-
     public virtual DbSet<Notification> Notifications { get; set; } = null!;
-
     public virtual DbSet<Schedule> Schedules { get; set; } = null!;
-
     public virtual DbSet<Invitation> Invitations { get; set; } = null!;
-    
     public virtual DbSet<Position> Positions { get; set; }
-    
+    public virtual DbSet<ResetPasswordToken> ResetPasswordTokens { get; set; }
     public virtual DbSet<TradeBoard> TradeBoards { get; set; }
-    
     public virtual DbSet<UserQualifiedPosition> UserQualifiedPositions { get; set; } = null!;
-    
     public virtual DbSet<Template> Templates { get; set; }
 
     //public virtual DbSet<User> Users { get; set; } = null!;
@@ -189,6 +181,22 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
 
             entity.HasIndex(e => new { e.PositionName })
                 .IsUnique();
+        });
+        
+        modelBuilder.Entity<ResetPasswordToken>(entity =>
+        {
+            entity.HasKey(e => e.Token);
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ExpiresAt)
+                .HasComputedColumnSql("(dateadd(minute,(1),[CreatedAt]))", true)
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.User).WithMany(p => p.ResetPasswordTokens)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
         
         modelBuilder.Entity<Schedule>(entity =>
