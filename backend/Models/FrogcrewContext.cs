@@ -33,6 +33,8 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
     public virtual DbSet<TradeBoard> TradeBoards { get; set; }
     
     public virtual DbSet<UserQualifiedPosition> UserQualifiedPositions { get; set; } = null!;
+    
+    public virtual DbSet<Template> Templates { get; set; }
 
     //public virtual DbSet<User> Users { get; set; } = null!;
     
@@ -180,6 +182,13 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
             entity.Property(e => e.PositionName)
                 .HasMaxLength(255)
                 .HasColumnName("PositionName");
+            
+            entity.Property(e => e.PositionLocation)
+                .HasMaxLength(255)
+                .HasColumnName("PositionLocation");
+
+            entity.HasIndex(e => new { e.PositionName })
+                .IsUnique();
         });
         
         modelBuilder.Entity<Schedule>(entity =>
@@ -195,6 +204,32 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
             entity.Property(e => e.Sport)
                 .HasMaxLength(255)
                 .HasColumnName("sport");
+        });
+        
+        modelBuilder.Entity<Template>(entity =>
+        {
+            entity.HasKey(e => e.TemplateId).HasName("PK__Template__F87ADD27C4829B3E");
+
+            entity.HasIndex(e => e.TemplateName, "UQ_Templates_TemplateName").IsUnique();
+
+            entity.Property(e => e.TemplateName).HasMaxLength(255);
+
+            entity.HasMany(d => d.Positions).WithMany(p => p.Templates)
+                .UsingEntity<Dictionary<string, object>>(
+                    "TemplatePosition",
+                    r => r.HasOne<Position>().WithMany()
+                        .HasForeignKey("PositionId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK__TemplateP__Posit__5BE2A6F2"),
+                    l => l.HasOne<Template>().WithMany()
+                        .HasForeignKey("TemplateId")
+                        .HasConstraintName("FK__TemplateP__Templ__5AEE82B9"),
+                    j =>
+                    {
+                        j.HasKey("TemplateId", "PositionId").HasName("PK__Template__7E716480D76A8E5F");
+                        j.ToTable("TemplatePositions");
+                        j.HasIndex(new[] { "TemplateId" }, "TemplatePositions");
+                    });
         });
         
         modelBuilder.Entity<TradeBoard>(entity =>

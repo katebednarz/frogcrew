@@ -1,5 +1,6 @@
 using backend.DTO;
 using backend.Models;
+using backend.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,9 +12,13 @@ namespace backend.Controllers
     {
 
         private readonly FrogcrewContext _context;
+        private readonly DatabaseHelper _dbHelper;
+        private readonly DtoConverters _converters;
         public ScheduleController(FrogcrewContext context)
         {
             _context = context;
+            _dbHelper = new DatabaseHelper(context);
+            _converters = new DtoConverters(context);
         }
         
         /*
@@ -128,6 +133,35 @@ namespace backend.Controllers
             }).ToList();
 
             return Ok(new Result(true, 200, "Find Success", gameScheduleDTOs));
+        }
+
+        [HttpPut("gameSchedule/{scheduleId}")]
+        public async Task<IActionResult> UpdateGameSchedule([FromBody] GameScheduleDTO request, int scheduleId)
+        {
+            var schedule = await _context.Schedules.FindAsync(scheduleId);
+            if (schedule is null)
+                return new ObjectResult(new Result(false, 404, $"Could not find schedule with id {scheduleId}")) { StatusCode = 400 };
+        
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .SelectMany(kvp => kvp.Value.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
+        
+                return new ObjectResult(errorResponse) { StatusCode = 400 };
+            }
+            
+            var x = _dbHelper.GetScheduleIdBySportAndSeason(request.Sport, request.Season);
+            if (x > 0)
+                return new ObjectResult(new Result(false, 409, "Schedule already exists")) { StatusCode = 409 };
+        
+            schedule.Sport = request.Sport;
+            schedule.Season = request.Season;
+            _context.Schedules.Update(schedule);
+            await _context.SaveChangesAsync();
+            return Ok(new Result(true, 200, "Update Success", _converters.ScheduleToGameScheduleDto(schedule)));
         }
     }
 }

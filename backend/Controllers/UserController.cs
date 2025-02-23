@@ -64,6 +64,7 @@ public class UserController : Controller
             PhoneNumber = request.PhoneNumber,
             FirstName = request.FirstName,
             LastName = request.LastName,
+            IsActive = true
         };
         if (request.Password == null)
         {
@@ -96,7 +97,11 @@ public class UserController : Controller
         }
 
         if (token != "token")
+        {
             _context.Invitations.Remove(_dbHelper.GetInvitationByToken(token));
+            _context.SaveChanges();
+        }
+        
         return Ok(new Result(true, 200, "Add Success", request));
     }
 
@@ -201,6 +206,11 @@ public class UserController : Controller
         var signInResult = await _signInManager.CheckPasswordSignInAsync(user, Password, false);
         if (!signInResult.Succeeded)
             return new ObjectResult(new Result(false, 401, "username or password is incorrect")) {StatusCode = 401};
+
+        if (user.IsActive != true)
+        {
+            return new ObjectResult(new Result(false, 404, "User is not active", null));
+        }
         
         var token = GenerateJwtToken(user);
         
@@ -250,18 +260,163 @@ public class UserController : Controller
         List<UserSimpleDTO> userDTOs = [];
         foreach (var user in users)
         {
-           var userDto = new UserSimpleDTO {
-                UserId = user.Id,
-                FullName = user.FirstName + " " + user.LastName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber
-            };
-            
-            userDTOs.Add(userDto);
+            if (user.IsActive)
+            {
+                var userDto = new UserSimpleDTO
+                {
+                    UserId = user.Id,
+                    FullName = user.FirstName + " " + user.LastName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber
+                };
+
+                userDTOs.Add(userDto);
+            }
         }
         
         var response = new Result(true, 200, "Found Users", userDTOs);
         return Ok(response);
+    }
+    
+    /*
+     * Find a crew member by userId
+     *
+     * @param request The id of the user to find
+     * @return The result of the operation
+     */         
+    [HttpGet("crewMember/{userId}")]
+    public async Task<IActionResult> FindUserById(int userId) {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) {
+            return new ObjectResult(new Result(false, 404, $"User with ID {userId} not found.")) { StatusCode = 404 };
+        }
+        
+        if (user.IsActive != true)
+        {
+            return new ObjectResult(new Result(false, 404, "User is not active", null));
+        }
+
+        var usersQualifiedPosition = await _context.UserQualifiedPositions
+            .Where(u => u.UserId == userId)
+            .Select(u => u.Position)
+            .ToListAsync(); // Materialize the query
+        
+        List<string> Positions = new List<string>();
+
+        var usersQualifiedPositionList = usersQualifiedPosition.ToList();
+        
+        foreach (Position position in usersQualifiedPositionList)
+        {
+            Positions.Add(position.PositionName);
+        }
+
+        
+        var foundUserDto = new FoundUserDTO()
+        {
+            UserId = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            Role = _userManager.GetRolesAsync(user).Result.First(),
+            Positions = Positions
+        };
+        
+        return Ok(new Result(true, 200, "Find Success", foundUserDto));
+    }
+    
+    /*
+     * Update a crew member by userId
+     *
+     * @param request The id of the user to find
+     * @return The result of the operation
+     */
+    [HttpPut("crewMember/{userId}")]
+    public async Task<IActionResult> UpdateUserByUserId([FromBody] UserDTO request, int userId)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState
+                .SelectMany(kvp => kvp.Value.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+            var errorResponse = new Result(false, 400, "Provided arguments are invalid, see data for details.", errors);
+            
+            return new ObjectResult(errorResponse) { StatusCode = 400 };
+        }
+        
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+        {
+            return NotFound(new Result(false, 404, $"Could not find user with ID {userId}."));
+        }
+
+        // Update user properties
+        user.FirstName = request.FirstName;
+        user.LastName = request.LastName;
+        user.Email = request.Email;
+        user.PhoneNumber = request.PhoneNumber;
+
+        // Update role
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        await _userManager.RemoveFromRolesAsync(user, currentRoles);
+        var roleResult = await _userManager.AddToRoleAsync(user, request.Role);
+        if (!roleResult.Succeeded)
+        {
+            return BadRequest(new Result(false, 400, "Role update failed", roleResult.Errors.Select(e => e.Description).ToList()));
+        }
+
+        // Remove old positions
+        var oldPositions = _context.UserQualifiedPositions.Where(up => up.UserId == user.Id);
+        _context.UserQualifiedPositions.RemoveRange(oldPositions);
+        await _context.SaveChangesAsync(); // Ensure old positions are removed before adding new ones
+
+        // Add new positions
+        foreach (var posName in request.Position)
+        {
+            var positionId = (int)_dbHelper.GetPositionIdByName(posName)!;
+            if (!(positionId > 0)) // Check if position exists
+            {
+                return BadRequest(new Result(false, 400, $"Position '{posName}' not found."));
+            }
+
+            var newPosition = new UserQualifiedPosition
+            {
+                UserId = user.Id,
+                PositionId = (int)positionId // Extract value safely
+            };
+            _context.UserQualifiedPositions.Add(newPosition);
+        }
+
+        await _context.SaveChangesAsync(); // Save all changes
+
+        // Prepare response
+        var updatedUser = new FoundUserDTO
+        {
+            UserId = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            Role = request.Role,
+            Positions = request.Position
+        };
+
+        return Ok(new Result(true, 200, "Update Success", updatedUser));
+    }
+
+    [HttpPut("crewMember/disable/{userId}")]
+    public async Task<IActionResult> DisableUser(int userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+        {
+            return NotFound(new Result(false, 404, $"User with ID {userId} not found."));
+        }
+        
+        user.IsActive = false;
+        await _context.SaveChangesAsync(); // Save all changes
+        return Ok(new Result(true, 200, "Disable Success", null));
     }
 }
 
