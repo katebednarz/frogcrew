@@ -96,12 +96,6 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<DatabaseHelper>();
-
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(5228); // HTTP
-    options.ListenAnyIP(5051, listenOptions => listenOptions.UseHttps()); // HTTPS
-});
     
 var app = builder.Build();
 
@@ -124,10 +118,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 //StartUpFile.RunStartupFile(app.Services);
-
-app.UseDefaultFiles();
-app.UseStaticFiles();
-app.MapFallbackToFile("index.html");
-//app.MapGet("/", () => "Hello, Kestrel is working! 🚀");
-
 app.Run();

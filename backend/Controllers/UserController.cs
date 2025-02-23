@@ -10,6 +10,7 @@ using System.Security.Claims;
 using backend.Auth;
 using backend.Utils;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
@@ -199,29 +200,42 @@ public class UserController : Controller
     [HttpPost("auth/login")]
     public async Task<IActionResult> Login(String Email, String Password)
     {
-        var user = await _userManager.FindByEmailAsync(Email);
-        if (user == null)
-            return new ObjectResult(new Result(false, 401, "username or password is incorrect")) {StatusCode = 401};
-        
-        var signInResult = await _signInManager.CheckPasswordSignInAsync(user, Password, false);
-        if (!signInResult.Succeeded)
-            return new ObjectResult(new Result(false, 401, "username or password is incorrect")) {StatusCode = 401};
+        try
+        {
+            var user = await _userManager.FindByEmailAsync(Email);
+            if (user == null)
+                return new ObjectResult(new Result(false, 401, "username or password is incorrect"))
+                    { StatusCode = 401 };
 
-        if (user.IsActive != true)
-        {
-            return new ObjectResult(new Result(false, 404, "User is not active", null));
+            var signInResult = await _signInManager.CheckPasswordSignInAsync(user, Password, false);
+            if (!signInResult.Succeeded)
+                return new ObjectResult(new Result(false, 401, "username or password is incorrect"))
+                    { StatusCode = 401 };
+
+            if (user.IsActive != true)
+            {
+                return new ObjectResult(new Result(false, 404, "User is not active", null));
+            }
+
+            var token = GenerateJwtToken(user);
+
+            var authDTO = new AuthDTO
+            {
+                UserId = user.Id,
+                Role = _userManager.GetRolesAsync(user).Result.First(),
+                Token = token
+            };
+
+            return Ok(new Result(true, 200, "Login successful", authDTO));
         }
-        
-        var token = GenerateJwtToken(user);
-        
-        var authDTO = new AuthDTO
+        catch (SqlException ex)
         {
-            UserId = user.Id,
-            Role = _userManager.GetRolesAsync(user).Result.First(),
-            Token = token
-        };
-        
-        return Ok(new Result(true, 200, "Login successful", authDTO));
+            return new ObjectResult(new Result(false, 500, "Database connection error", ex.Message)) { StatusCode = 500 };
+        }
+        catch (Exception ex)
+        {
+            return new ObjectResult(new Result(false, 500, "An unexpected error occurred", ex.Message)) { StatusCode = 500 };
+        }
     }
     
     private string GenerateJwtToken(ApplicationUser user)
