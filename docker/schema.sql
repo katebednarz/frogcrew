@@ -465,3 +465,25 @@ INSERT INTO AspNetUserRoles VALUES
     (6,3),
     (7,3),
     (8,1);
+
+INSERT INTO Templates (TemplateName) VALUES ('Football');
+
+INSERT INTO TemplatePositions (TemplateId, PositionId, HoursBeforeGameTime) VALUES
+    (1, 1, 3),
+    (1, 2, 3),
+    (1, 3, 3),
+    (1, 4, 3),
+    (1, 5, 3),
+    (1, 6, 3),
+    (1, 7, 3),
+    (1, 8, 3),
+    (1, 9, 3),
+    (1, 10, 3),
+    (1, 11, 3),
+    (1, 12, 3),
+    (1, 13, 3),
+    (1, 14, 3),
+    (1, 15, 3),
+    (1, 16, 3),
+    (1, 17, 3),
+    (1, 18, 3);
