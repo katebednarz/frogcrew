@@ -149,28 +149,26 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
         
         modelBuilder.Entity<Notification>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            entity.HasKey(e => e.Id).HasName("PK__Notifica__3213E83FEA1725FF");
 
             entity.ToTable("Notification");
 
             entity.HasIndex(e => e.UserId, "NotificationIndex");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Content)
-                .HasMaxLength(255)
-                .HasColumnName("content");
             entity.Property(e => e.Date)
                 .HasColumnType("datetime")
                 .HasColumnName("date");
-            entity.Property(e => e.Title)
+            entity.Property(e => e.IsRead).HasColumnName("isRead");
+            entity.Property(e => e.Message)
                 .HasMaxLength(255)
-                .HasColumnName("title");
+                .IsUnicode(false)
+                .HasColumnName("message");
             entity.Property(e => e.UserId).HasColumnName("userId");
 
             entity.HasOne(d => d.User).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("Notification_ibfk_1");
+                .HasConstraintName("FK__Notificat__userI__3C69FB99");
         });
 
         modelBuilder.Entity<Position>(entity =>
