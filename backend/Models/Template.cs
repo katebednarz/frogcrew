@@ -9,5 +9,5 @@ public partial class Template
 
     public string TemplateName { get; set; } = null!;
 
-    public virtual ICollection<Position> Positions { get; set; } = new List<Position>();
+    public virtual ICollection<TemplatePosition> TemplatePositions { get; set; } = new List<TemplatePosition>();
 }
