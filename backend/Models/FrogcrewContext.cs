@@ -35,6 +35,8 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
     public virtual DbSet<UserQualifiedPosition> UserQualifiedPositions { get; set; } = null!;
     
     public virtual DbSet<Template> Templates { get; set; }
+    
+    public virtual DbSet<TemplatePosition> TemplatePositions { get; set; }
 
     //public virtual DbSet<User> Users { get; set; } = null!;
     
@@ -208,28 +210,29 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
         
         modelBuilder.Entity<Template>(entity =>
         {
-            entity.HasKey(e => e.TemplateId).HasName("PK__Template__F87ADD27C4829B3E");
+            entity.HasKey(e => e.TemplateId).HasName("PK__Template__F87ADD27BFC77FAC");
 
             entity.HasIndex(e => e.TemplateName, "UQ_Templates_TemplateName").IsUnique();
 
             entity.Property(e => e.TemplateName).HasMaxLength(255);
+        });
 
-            entity.HasMany(d => d.Positions).WithMany(p => p.Templates)
-                .UsingEntity<Dictionary<string, object>>(
-                    "TemplatePosition",
-                    r => r.HasOne<Position>().WithMany()
-                        .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__TemplateP__Posit__5BE2A6F2"),
-                    l => l.HasOne<Template>().WithMany()
-                        .HasForeignKey("TemplateId")
-                        .HasConstraintName("FK__TemplateP__Templ__5AEE82B9"),
-                    j =>
-                    {
-                        j.HasKey("TemplateId", "PositionId").HasName("PK__Template__7E716480D76A8E5F");
-                        j.ToTable("TemplatePositions");
-                        j.HasIndex(new[] { "TemplateId" }, "TemplatePositions");
-                    });
+        modelBuilder.Entity<TemplatePosition>(entity =>
+        {
+            entity.HasKey(e => new { e.TemplateId, e.PositionId }).HasName("PK__Template__7E716480656C7B04");
+
+            entity.HasIndex(e => e.TemplateId, "TemplatePositions");
+
+            entity.Property(e => e.HoursBeforeGameTime).HasColumnType("decimal(18, 0)");
+
+            entity.HasOne(d => d.Position).WithMany(p => p.TemplatePositions)
+                .HasForeignKey(d => d.PositionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__TemplateP__Posit__5BE2A6F2");
+
+            entity.HasOne(d => d.Template).WithMany(p => p.TemplatePositions)
+                .HasForeignKey(d => d.TemplateId)
+                .HasConstraintName("FK__TemplateP__Templ__5AEE82B9");
         });
         
         modelBuilder.Entity<TradeBoard>(entity =>

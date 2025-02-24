@@ -205,6 +205,7 @@ Go
 CREATE TABLE TemplatePositions (
     [TemplateId] INT NOT NULL,
     [PositionId] INT NOT NULL,
+    [HoursBeforeGameTime] DECIMAL NOT NULL, 
     PRIMARY KEY (TemplateId, PositionId),
     FOREIGN KEY (TemplateId) REFERENCES Templates(TemplateId) ON DELETE CASCADE,
     FOREIGN KEY (PositionId) REFERENCES Position(PositionId)
