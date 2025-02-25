@@ -45,4 +45,8 @@ public class DatabaseHelper
         .Where(g => g.ScheduleId == scheduleId && g.GameDate == date)
         .Select(g => g.Id)
         .FirstOrDefault();
+    
+    public List<Notification> GetNotificationsByUserId(int userId) => _context.Notifications
+        .Where(n => n.UserId == userId)
+        .ToList();
 }
