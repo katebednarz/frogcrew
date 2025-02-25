@@ -53,8 +53,7 @@ namespace backend.Controllers
             if (game == null) {
                 return new ObjectResult(new Result(false, 404, $"Game with ID {gameId} not found.")) { StatusCode = 404 };
             }
-
-            var gameTitle = $"TCU {game.Schedule.Sport.ToUpper()} vs {game.Opponent}";
+            
             var dayOfWeek = game.GameDate.Value.DayOfWeek.ToString();
             var formattedDate = game.GameDate?.ToString("MM-dd-yy");
             var date = $"{dayOfWeek} {formattedDate}";
@@ -81,7 +80,25 @@ namespace backend.Controllers
                     ));
             }
             
-            string logoPath = Path.Combine(Directory.GetCurrentDirectory(), "Images/TCU_Sports Broadcasting Athletics Style.jpg");
+            string currentDir = Directory.GetCurrentDirectory();
+            string solutionRoot;
+
+            if (currentDir.Contains("TestFrogCrew"))
+            {
+                // Running from TestFrogCrew/bin/Debug/net8.0/
+                solutionRoot = Directory.GetParent(currentDir)?.Parent?.Parent?.Parent?.FullName; 
+            }
+            else
+            {
+                // Running from backend project
+                solutionRoot = Directory.GetParent(currentDir)?.FullName;
+            }
+            string imagePath = Path.Combine("backend", "Images", "TCU_Sports Broadcasting Athletics Style.jpg");
+            string logoPath = Path.Combine(solutionRoot, imagePath);
+            
+            Console.WriteLine($"Looking for image at: {logoPath}");
+            
+            //string logoPath = Path.Combine(Directory.GetCurrentDirectory(), "Images/TCU_Sports Broadcasting Athletics Style.jpg");
 
             using (var workbook = new XLWorkbook())
             {
@@ -93,50 +110,59 @@ namespace backend.Controllers
                 worksheet.Style.Font.FontName = "Arial";
                 worksheet.Style.Font.FontSize = 12;
                 
-                var logoRange = worksheet.Range("A1:A5").Merge();
+                // Logo
+                var logoRange = worksheet.Range("A1:A6").Merge();
                 logoRange.Value = ""; // Clear the merged cell value
                 var picture = worksheet.AddPicture(logoPath);
                 picture.Placement = XLPicturePlacement.MoveAndSize;
                 picture.MoveTo(logoRange.FirstCell(), logoRange.LastCell().CellRight());
                 
-                var titleRange = worksheet.Range("B1:D1").Merge();
-                titleRange.Value = "TCU SPORTS BROADCASTING CREW LIST";
-                titleRange.Style.Font.FontSize = 16;
+                // Sport
+                var sportRange = worksheet.Range("B1:D1").Merge();
+                sportRange.Value = game.Schedule.Sport.ToUpper();
+                sportRange.Style.Font.FontSize = 16;
                 
-                // Title Section
+                // Versus
                 var gameRange = worksheet.Range("B2:D2").Merge();
-                gameRange.Value = gameTitle;
-                titleRange.Style.Font.FontSize = 16;
+                gameRange.Value = "vs";
+                gameRange.Style.Font.FontSize = 16;
                 
-                var dateRange = worksheet.Range("B3:D3").Merge();
-                dateRange.Value = date;
-                dateRange.Style.Font.Bold = true;
-                titleRange.Style.Font.FontSize = 16;
+                // Opponent
+                var opponentRange = worksheet.Range("B3:D3").Merge();
+                opponentRange.Value = game.Opponent;
+                opponentRange.Style.Font.FontSize = 16;
 
-                var timeRange = worksheet.Range("B4:D4").Merge();
+                // Date
+                var dateRange = worksheet.Range("B4:D4").Merge();
+                dateRange.Value = game.GameDate?.ToString("MMMM dd, yyyy");
+                dateRange.Style.Font.FontSize = 16;
+
+                // Start Time
+                var timeRange = worksheet.Range("B5:D5").Merge();
                 timeRange.Value = game.GameStart?.ToString("h:mm tt", CultureInfo.InvariantCulture);
-                titleRange.Style.Font.FontSize = 16;
-
-                var networkRange = worksheet.Range("B5:D5").Merge();
-                networkRange.Value = eventType;
-                titleRange.Style.Font.FontSize = 16;
+                timeRange.Style.Font.FontSize = 16;
                 
-                var crewList = worksheet.Range("A7:D7").Merge();
+                // Event Type
+                var networkRange = worksheet.Range("B6:D6").Merge();
+                networkRange.Value = eventType;
+                networkRange.Style.Font.FontSize = 16;
+                
+                var crewList = worksheet.Range("A8:D8").Merge();
                 crewList.Value = "CREW LIST";
                 crewList.Style.Font.FontSize = 16;
                 crewList.Style.Fill.BackgroundColor = XLColor.LightGray;
                 
                 // HEADER ROW (Bold, Background Color, and Borders)
-                worksheet.Cell("A8").Value = "POSITION";
-                worksheet.Cell("B8").Value = "NAME";
-                worksheet.Cell("C8").Value = "REPORT TIME";
-                worksheet.Cell("D8").Value = "LOCATION";
+                worksheet.Cell("A9").Value = "POSITION";
+                worksheet.Cell("B9").Value = "NAME";
+                worksheet.Cell("C9").Value = "REPORT TIME";
+                worksheet.Cell("D9").Value = "LOCATION";
 
-                var headerRange = worksheet.Range("A8:D8");
+                var headerRange = worksheet.Range("A9:D9");
                 headerRange.Style.Font.FontSize = 12;
                 
                 // Insert Crew Data with Alignment
-                int row = 9; // Start after header
+                int row = 10; // Start after header
                 foreach (var (position, name, reportTime,reportLocation) in crewData)
                 {
                     worksheet.Cell(row, 1).Value = position;
