@@ -65,13 +65,13 @@ namespace TestFrogCrew.Controllers;
         new() {
           UserId = 1,
           GameId = 1,
-          Available = 1,
+          Available = true,
           Comments = "Coming from another game, will be 30 mins late."
         },
         new() {
           UserId = 1,
           GameId = 2,
-          Available = 0,
+          Available = false,
           Comments = null
         }
       };
