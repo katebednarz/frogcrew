@@ -63,8 +63,8 @@ namespace backend.Controllers
 			var user = _context.Users.Find(request[0].UserId);
 			var game = await _context.Games.Include(g => g.Schedule).FirstOrDefaultAsync(g => g.Id == request[0].GameId);
 			
-			//string notificationMessage = NotificationContent.GetNotificationTemplate(AvailabiltyPostedNotification, [user.FirstName, user.LastName, availabilityList.Count, game.Schedule.Sport]);
-			_notificationsHelper.SendNotificationToAdmin($"{user.FirstName} {user.LastName} has submitted availability for {availabilityList.Count} game(s) for {game.Schedule.Sport}.");
+			string notificationMessage = NotificationContent.GetNotificationTemplate("AvailabiltyPostedNotification", [user.FirstName, user.LastName, availabilityList.Count, game.Schedule.Sport]);
+			_notificationsHelper.SendNotificationToAdmin(notificationMessage);
 			var response = new Result(true, 200, "Add Success", availabilityDTO);
 			return Ok(response);
 		}
