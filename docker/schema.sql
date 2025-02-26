@@ -34,6 +34,7 @@ GO
 CREATE TABLE Position (
     [PositionId] INT IDENTITY(1,1) PRIMARY KEY,
     [PositionName] nvarchar(255) NOT NULL,
+    [PositionLocation] nvarchar(255) NOT NULL,
     CONSTRAINT UQ_Position_PositionName UNIQUE (PositionName)
 );
 
@@ -96,11 +97,11 @@ GO
 
 -- Notification Table
 CREATE TABLE Notification (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    userId INT,
-    title VARCHAR(255),
-    content VARCHAR(255),
-    date DATETIME,
+    [id] INT IDENTITY(1,1) PRIMARY KEY,
+    [userId] INT NOT NULL,
+    [message] VARCHAR(255) NOT NULL,
+    [date] DATETIME NOT NULL,
+    [isRead] BIT NOT NULL DEFAULT 0,
     FOREIGN KEY (userId) REFERENCES [User](id) ON DELETE CASCADE
 );
 GO
@@ -191,6 +192,26 @@ CREATE TABLE TradeBoard (
     CONSTRAINT UQ_TradeBoard_Dropper_Game_Position UNIQUE (DropperID, GameId, Position)
 );
 Go
+
+-- Templates Table
+CREATE TABLE Templates (
+    [TemplateId] INT IDENTITY(1,1) PRIMARY KEY,
+    [TemplateName] NVARCHAR(255) NOT NULL,
+    CONSTRAINT UQ_Templates_TemplateName UNIQUE (TemplateName)
+);
+Go
+
+-- Junction Table to Associate Templates with Positions
+CREATE TABLE TemplatePositions (
+    [TemplateId] INT NOT NULL,
+    [PositionId] INT NOT NULL,
+    [HoursBeforeGameTime] DECIMAL NOT NULL, 
+    PRIMARY KEY (TemplateId, PositionId),
+    FOREIGN KEY (TemplateId) REFERENCES Templates(TemplateId) ON DELETE CASCADE,
+    FOREIGN KEY (PositionId) REFERENCES Position(PositionId)
+);
+Go
+
 -- Indexes
 
 CREATE INDEX [IX_AspNetRoleClaims_RoleId] ON [AspNetRoleClaims] ([RoleId]);
@@ -229,6 +250,8 @@ Go
 CREATE INDEX [NotificationIndex] ON [Notification] ([userId]);
 Go
 
+CREATE INDEX [TemplatePositions] ON [TemplatePositions] ([TemplateId]);
+
 
 -- User Values
 INSERT INTO [User] (FirstName, LastName, PayRate, UserName, NormalizedUserName, Email, NormalizedEmail, EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp, PhoneNumber, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnd, LockoutEnabled, AccessFailedCount) VALUES
@@ -242,25 +265,25 @@ INSERT INTO [User] (FirstName, LastName, PayRate, UserName, NormalizedUserName, 
     ('Mike','Martin',null,'m.martin@tcu.edu','M.MARTIN@TCU.EDU','m.martin@tcu.edu','M.MARTIN@TCU.EDU',0,'AQAAAAIAAYagAAAAELchPSUc5T7AMrm2j7v31sXaKlSgL5rP9WbtJ+cCwgkVeoTfay8dsaer5zZLfis7yw==','4ZRQUMRFJR5UPEMKU4ZJ4COU44A5ONEX','cb3ffecd-392a-4caf-9355-8f67e06974c5','9876543210',0,0,null,1,0);
 
 -- Position Values
-INSERT INTO [Position] (PositionName) VALUES
-        ('PRODUCER'),
-        ('ASSISTANT PRODUCER'),
-        ('DIRECTOR'),
-        ('ASSISTANT DIRECTOR'),
-        ('TECHNICAL DIRECTOR'),
-        ('GRAPHICS OPERATOR'),
-        ('BUG OPERATOR'),
-        ('EVS REPLAY-LEAD'),
-        ('VIDEO OPERATOR'),
-        ('EIC'),
-        ('ENG 2'),
-        ('AUDIO A1'),
-        ('AUDIO ASSISTANT A2'),
-        ('CAMERA-FIXED'),
-        ('CAMERA-HANDHELD'),
-        ('CAMERA-STEADICAM'),
-        ('UTILITY'),
-        ('TIME OUT COORDINATOR');
+INSERT INTO [Position] (PositionName, PositionLocation) VALUES
+        ('PRODUCER','CONTROL ROOM'),
+        ('ASSISTANT PRODUCER','CONTROL ROOM'),
+        ('DIRECTOR','CONTROL ROOM'),
+        ('ASSISTANT DIRECTOR','CONTROL ROOM'),
+        ('TECHNICAL DIRECTOR','CONTROL ROOM'),
+        ('GRAPHICS OPERATOR','CONTROL ROOM'),
+        ('BUG OPERATOR','CONTROL ROOM'),
+        ('EVS REPLAY-LEAD','CONTROL ROOM'),
+        ('VIDEO OPERATOR','CONTROL ROOM'),
+        ('EIC','CONTROL ROOM'),
+        ('ENG 2', 'VENUE'),
+        ('AUDIO A1', 'VENUE'),
+        ('AUDIO ASSISTANT A2', 'VENUE'),
+        ('CAMERA-FIXED', 'VENUE'),
+        ('CAMERA-HANDHELD', 'VENUE'),
+        ('CAMERA-STEADICAM', 'VENUE'),
+        ('UTILITY', 'VENUE'),
+        ('TIME OUT COORDINATOR', 'VENUE');
 
 -- UserQualifiedPositions Values
 INSERT INTO UserQualifiedPositions VALUES
@@ -423,8 +446,14 @@ INSERT INTO Availability VALUES
     (7, 1, 1, null);
 
 -- Notification Values
-INSERT INTO Notification (userId, title, content, date) VALUES
-    (1, 'Game Scheduled', 'You have been scheduled to work the game', '2024-11-10 14:00:00');
+INSERT INTO Notification (userId, message, date) VALUES
+    (1, 'New Notification 1', '2024-11-10 14:00:00'),
+    (1, 'New Notification 2', '2024-11-10 14:00:00'),
+    (1, 'New Notification 3', '2024-11-10 14:00:00'),
+    (1, 'New Notification 4', '2024-11-10 14:00:00'),
+    (1, 'New Notification 5', '2024-11-10 14:00:00'),
+    (1, 'New Notification 6', '2024-11-10 14:00:00'),
+    (1, 'New Notification 7', '2024-11-10 14:00:00');  
 
 -- AspNetRoles Values
 INSERT INTO AspNetRoles (Name, NormalizedName, ConcurrencyStamp) VALUES
@@ -442,3 +471,25 @@ INSERT INTO AspNetUserRoles VALUES
     (6,3),
     (7,3),
     (8,1);
+
+INSERT INTO Templates (TemplateName) VALUES ('Football');
+
+INSERT INTO TemplatePositions (TemplateId, PositionId, HoursBeforeGameTime) VALUES
+    (1, 1, 3),
+    (1, 2, 3),
+    (1, 3, 3),
+    (1, 4, 3),
+    (1, 5, 3),
+    (1, 6, 3),
+    (1, 7, 3),
+    (1, 8, 3),
+    (1, 9, 3),
+    (1, 10, 3),
+    (1, 11, 3),
+    (1, 12, 3),
+    (1, 13, 3),
+    (1, 14, 3),
+    (1, 15, 3),
+    (1, 16, 3),
+    (1, 17, 3),
+    (1, 18, 3);

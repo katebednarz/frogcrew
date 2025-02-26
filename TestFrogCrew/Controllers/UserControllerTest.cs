@@ -113,12 +113,14 @@ namespace TestFrogCrew.Controllers
           new()
           {
             PositionId = 1, 
-            PositionName = "DIRECTOR"
+            PositionName = "DIRECTOR",
+            PositionLocation = "CONTROL ROOM"
           },
           new()
           {
             PositionId = 2, 
-            PositionName = "PRODUCER"
+            PositionName = "PRODUCER",
+            PositionLocation = "CONTROL ROOM"
           }
         });
 
@@ -408,12 +410,14 @@ namespace TestFrogCrew.Controllers
         new()
         {
             PositionId = 1,
-            PositionName = "DIRECTOR"
+            PositionName = "DIRECTOR",
+            PositionLocation = "CONTROL ROOM"
         },
         new()
         {
             PositionId = 2,
-            PositionName = "PRODUCER"
+            PositionName = "PRODUCER",
+            PositionLocation = "CONTROL ROOM"
         }
     };
 
@@ -423,13 +427,13 @@ namespace TestFrogCrew.Controllers
         {
             UserId = userId,
             PositionId = 1,
-            Position = new Position { PositionId = 1, PositionName = "DIRECTOR" }
+            Position = new Position { PositionId = 1, PositionName = "DIRECTOR", PositionLocation = "CONTROL ROOM"}
         },
         new()
         {
             UserId = userId,
             PositionId = 2,
-            Position = new Position { PositionId = 2, PositionName = "PRODUCER" }
+            Position = new Position { PositionId = 2, PositionName = "PRODUCER", PositionLocation = "CONTROL ROOM"}
         }
     };
 
@@ -523,8 +527,8 @@ public async Task FindUserByIdBadRequestTest()
 
       var positions = new List<Position>
       {
-          new Position { PositionId = 1, PositionName = "UPDATED_POSITION_1" },
-          new Position { PositionId = 2, PositionName = "UPDATED_POSITION_2" }
+          new Position { PositionId = 1, PositionName = "UPDATED_POSITION_1", PositionLocation = "CONTROL ROOM" },
+          new Position { PositionId = 2, PositionName = "UPDATED_POSITION_2", PositionLocation = "CONTROL ROOM"}
       };
 
       var userQualifiedPositions = new List<UserQualifiedPosition>

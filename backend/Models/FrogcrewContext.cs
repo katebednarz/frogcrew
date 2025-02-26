@@ -33,6 +33,10 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
     public virtual DbSet<TradeBoard> TradeBoards { get; set; }
     
     public virtual DbSet<UserQualifiedPosition> UserQualifiedPositions { get; set; } = null!;
+    
+    public virtual DbSet<Template> Templates { get; set; }
+    
+    public virtual DbSet<TemplatePosition> TemplatePositions { get; set; }
 
     //public virtual DbSet<User> Users { get; set; } = null!;
     
@@ -147,28 +151,26 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
         
         modelBuilder.Entity<Notification>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            entity.HasKey(e => e.Id).HasName("PK__Notifica__3213E83FEA1725FF");
 
             entity.ToTable("Notification");
 
             entity.HasIndex(e => e.UserId, "NotificationIndex");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Content)
-                .HasMaxLength(255)
-                .HasColumnName("content");
             entity.Property(e => e.Date)
                 .HasColumnType("datetime")
                 .HasColumnName("date");
-            entity.Property(e => e.Title)
+            entity.Property(e => e.IsRead).HasColumnName("isRead");
+            entity.Property(e => e.Message)
                 .HasMaxLength(255)
-                .HasColumnName("title");
+                .IsUnicode(false)
+                .HasColumnName("message");
             entity.Property(e => e.UserId).HasColumnName("userId");
 
             entity.HasOne(d => d.User).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("Notification_ibfk_1");
+                .HasConstraintName("FK__Notificat__userI__3C69FB99");
         });
 
         modelBuilder.Entity<Position>(entity =>
@@ -180,6 +182,10 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
             entity.Property(e => e.PositionName)
                 .HasMaxLength(255)
                 .HasColumnName("PositionName");
+            
+            entity.Property(e => e.PositionLocation)
+                .HasMaxLength(255)
+                .HasColumnName("PositionLocation");
 
             entity.HasIndex(e => new { e.PositionName })
                 .IsUnique();
@@ -198,6 +204,33 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
             entity.Property(e => e.Sport)
                 .HasMaxLength(255)
                 .HasColumnName("sport");
+        });
+        
+        modelBuilder.Entity<Template>(entity =>
+        {
+            entity.HasKey(e => e.TemplateId).HasName("PK__Template__F87ADD27BFC77FAC");
+
+            entity.HasIndex(e => e.TemplateName, "UQ_Templates_TemplateName").IsUnique();
+
+            entity.Property(e => e.TemplateName).HasMaxLength(255);
+        });
+
+        modelBuilder.Entity<TemplatePosition>(entity =>
+        {
+            entity.HasKey(e => new { e.TemplateId, e.PositionId }).HasName("PK__Template__7E716480656C7B04");
+
+            entity.HasIndex(e => e.TemplateId, "TemplatePositions");
+
+            entity.Property(e => e.HoursBeforeGameTime).HasColumnType("decimal(18, 0)");
+
+            entity.HasOne(d => d.Position).WithMany(p => p.TemplatePositions)
+                .HasForeignKey(d => d.PositionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__TemplateP__Posit__5BE2A6F2");
+
+            entity.HasOne(d => d.Template).WithMany(p => p.TemplatePositions)
+                .HasForeignKey(d => d.TemplateId)
+                .HasConstraintName("FK__TemplateP__Templ__5AEE82B9");
         });
         
         modelBuilder.Entity<TradeBoard>(entity =>

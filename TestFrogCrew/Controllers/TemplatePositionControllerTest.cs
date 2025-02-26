@@ -59,12 +59,14 @@ public class TemplatePositionControllerTest
             new()
             {
                 PositionId = 1,
-                PositionName = "DIRECTOR"
+                PositionName = "DIRECTOR",
+                PositionLocation = "CONTROL ROOM"
             },
             new()
             {
                 PositionId = 2,
-                PositionName = "PRODUCER"
+                PositionName = "PRODUCER",
+                PositionLocation = "CONTROL ROOM"
             }
         };
         
@@ -84,14 +86,16 @@ public class TemplatePositionControllerTest
             Assert.That(response?.Message, Is.EqualTo("Find Success")); //Verify Message
         });
         
-        // Verify data matches expected TradeBoardDTO structure
-        var data = response?.Data as List<string>;
+        // Verify data matches expected PositionDTO structure
+        var data = response?.Data as List<PositionDTO>;
         
         Assert.Multiple(() =>
         {
             // Check the first crew member
-            Assert.That(data?[0], Is.EqualTo("DIRECTOR"));
-            Assert.That(data?[1], Is.EqualTo("PRODUCER"));
+            Assert.That(data?[0].Name, Is.EqualTo("DIRECTOR"));
+            Assert.That(data?[0].Location, Is.EqualTo("CONTROL ROOM"));
+            Assert.That(data?[1].Name, Is.EqualTo("PRODUCER"));
+            Assert.That(data?[1].Location, Is.EqualTo("CONTROL ROOM"));
         });
         
     }
@@ -103,21 +107,12 @@ public class TemplatePositionControllerTest
         PositionDTO request = new()
         {
             Name = null,
+            Location = null
         };
 
-        Position mockPosition = new()
-        {
-            PositionId = 1,
-            PositionName = "DIRECTOR"
-        };
-
-        var positions = new List<Position>();
+        _controller.ModelState.AddModelError("name", "name is required.");
+        _controller?.ModelState.AddModelError("location", "location is required.");
         
-        var mockPositionSet = CreateMockDbSet(positions);
-        _mockContext?.Setup(c => c.Positions).Returns(mockPositionSet.Object);
-        
-        _mockContext?.Setup(c => c.Add(It.IsAny<Position>())).Callback<Position>(position => position.PositionId = mockPosition.PositionId);
-        _mockContext?.Setup(c => c.SaveChanges()).Returns(1);
         
         // Act
         var result = await _controller.AddPosition(request) as ObjectResult;
@@ -130,7 +125,16 @@ public class TemplatePositionControllerTest
             Assert.That(response?.Flag, Is.False); //Verify Flag
             Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
             Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
-            Assert.That(response?.Data, Is.EqualTo("position is required"));
+        });
+        
+        // Verify data matches expected PositionDTO structure
+        var data = response?.Data as List<string>;
+        
+        Assert.Multiple(() =>
+        {
+            // Check the first crew member
+            Assert.That(data?[0], Is.EqualTo("name is required."));
+            Assert.That(data?[1], Is.EqualTo("location is required."));
         });
     }
     
@@ -141,6 +145,7 @@ public class TemplatePositionControllerTest
         PositionDTO request = new()
         {
             Name = "DIRECTOR",
+            Location = "CONTROL ROOM"
         };
 
         var positions = new List<Position>()
@@ -148,7 +153,8 @@ public class TemplatePositionControllerTest
             new()
             {
                 PositionId = 1,
-                PositionName = "DIRECTOR"
+                PositionName = "DIRECTOR",
+                PositionLocation = "CONTROL ROOM"
             }
         };
         
@@ -176,12 +182,14 @@ public class TemplatePositionControllerTest
         PositionDTO request = new()
         {
             Name = "DIRECTOR",
+            Location = "CONTROL ROOM"
         };
 
         Position mockPosition = new()
         {
             PositionId = 1,
-            PositionName = "DIRECTOR"
+            PositionName = "DIRECTOR",
+            PositionLocation = "CONTROL ROOM"
         };
 
         var positions = new List<Position>();
@@ -213,7 +221,8 @@ public class TemplatePositionControllerTest
         int positionId = 2;
         PositionDTO request = new()
         {
-            Name = null
+            Name = null,
+            Location = null
         };
         
         var positions = new List<Position>()
@@ -221,7 +230,8 @@ public class TemplatePositionControllerTest
             new()
             {
                 PositionId = 1,
-                PositionName = "DIRECTOR"
+                PositionName = "DIRECTOR",
+                PositionLocation = "CONTROL ROOM"
             }
         };
         
@@ -246,30 +256,17 @@ public class TemplatePositionControllerTest
     public async Task UpdatePositionBadRequest()
     {
         // Arrange
-        int positionId = 1;
         PositionDTO request = new()
         {
-            Name = null
+            Name = null,
+            Location = null
         };
-        
-        var positions = new List<Position>()
-        {
-            new()
-            {
-                PositionId = 1,
-                PositionName = "DIRECTOR"
-            }
-        };
-        
-        var mockPositionSet = CreateMockDbSet(positions);
-        _mockContext?.Setup(c => c.Positions).Returns(mockPositionSet.Object);
-        _mockContext?.Setup(c => c.Positions.FindAsync(positionId))
-            .ReturnsAsync(positions.FirstOrDefault(u => u.PositionId == positionId));
-        _mockContext?.Setup(c => c.Add(It.IsAny<Position>())).Callback<Position>(position => position.PositionId = positionId);
-        _mockContext?.Setup(c => c.SaveChanges()).Returns(1);
+
+        _controller.ModelState.AddModelError("name", "name is required.");
+        _controller?.ModelState.AddModelError("location", "location is required.");
         
         // Act
-        var result = await _controller.UpdatePosition(request,positionId) as ObjectResult;
+        var result = await _controller.UpdatePosition(request,1) as ObjectResult;
         var response = result?.Value as Result;
         
         // Assert 
@@ -279,7 +276,16 @@ public class TemplatePositionControllerTest
             Assert.That(response?.Flag, Is.False); //Verify Flag
             Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
             Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
-            Assert.That(response?.Data, Is.EqualTo("position is required"));
+        });
+        
+        // Verify data matches expected PositionDTO structure
+        var data = response?.Data as List<string>;
+        
+        Assert.Multiple(() =>
+        {
+            // Check the first crew member
+            Assert.That(data?[0], Is.EqualTo("name is required."));
+            Assert.That(data?[1], Is.EqualTo("location is required."));
         });
     }
     
@@ -290,7 +296,8 @@ public class TemplatePositionControllerTest
         int positionId = 1;
         PositionDTO request = new()
         {
-            Name = "DIRECTOR"
+            Name = "DIRECTOR",
+            Location = null
         };
         
         var positions = new List<Position>()
@@ -298,7 +305,8 @@ public class TemplatePositionControllerTest
             new()
             {
                 PositionId = 1,
-                PositionName = "DIRECTOR"
+                PositionName = "DIRECTOR",
+                PositionLocation = "CONTROL ROOM"
             }
         };
         
@@ -328,7 +336,8 @@ public class TemplatePositionControllerTest
         int positionId = 1;
         PositionDTO request = new()
         {
-            Name = "PRODUCER"
+            Name = "PRODUCER",
+            Location = null
         };
         
         var positions = new List<Position>()
@@ -336,7 +345,8 @@ public class TemplatePositionControllerTest
             new()
             {
                 PositionId = 1,
-                PositionName = "DIRECTOR"
+                PositionName = "DIRECTOR",
+                PositionLocation = "CONTROL ROOM"
             }
         };
         

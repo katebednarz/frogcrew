@@ -107,6 +107,17 @@ public class DtoConverters
         {
             Id = position.PositionId,
             Name = position.PositionName,
+            Location = position.PositionLocation
+        };
+    }
+
+    public NotificationDTO NotificationToDto(Notification notification)
+    {
+        return new NotificationDTO
+        {
+            Id = notification.Id,
+            Message = notification.Message,
+            IsRead = notification.IsRead,
         };
     }
     

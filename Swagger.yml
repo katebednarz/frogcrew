@@ -163,7 +163,6 @@ paths:
     put:
       tags:
         - crew members
-        - NYI
       summary: Update a crew member
       description: Update an existing crew member and return the updated one.
       parameters:
@@ -740,7 +739,6 @@ paths:
     put:
       tags:
         - game schedule
-        - NYI
       summary: Update a game
       description: Update an existing game and return the updated one.
       parameters:
@@ -1098,7 +1096,6 @@ paths:
     get:
       tags:
         - scheduledGames
-        - NYI
       summary: Find scheduled games by userId
       description: Return a list of games that a crew member is scheduled to work.
       parameters:
@@ -1387,7 +1384,6 @@ paths:
     get:
       tags:
         - misc
-        - NYI
       summary: Find notifications by userId
       description: Return a list of notifications for a specific user.
       parameters:
@@ -1409,13 +1405,11 @@ paths:
                 message: Find Success
                 data:
                   - notificationId: 1
-                    userId: 1
                     message: "You have been assigned to game 1"
-                    dateTime: "2021-10-01T12:00:00Z"
+                    read: false
                   - notificationId: 2
-                    userId: 1
                     message: "You have been unassigned from game 2"
-                    dateTime: "2021-10-02T12:00:00Z"
+                    read: false
         '404':
           description: user not found
           content:
@@ -1426,10 +1420,44 @@ paths:
                 message: Could not find user with id 1
                 data: null
   /notifications/{notificationId}:
+    put:
+      tags:
+        - misc
+      summary: Mark notification as read
+      description: Mark a notification as read.
+      parameters:
+        - in: path
+          name: notificationId
+          description: Id of the notification
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Notification marked as read
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Mark Success
+                data: 
+                  notificationId: 1
+                  message: "You have been assigned to game 1"
+                  read: true
+        '404':
+          description: notification not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find notification with id 1
+                data: null
     delete:
       tags:
         - misc
-        - NYI
       summary: Delete a notification
       description: Delete an existing notification.
       parameters:
@@ -1720,7 +1748,6 @@ paths:
     post:
       tags:
         - Template/Position
-        - NYI
       summary: Add a position
       description: Add a new position and return the saved one.
       requestBody:
@@ -1765,7 +1792,6 @@ paths:
     put:
       tags:
         - Template/Position
-        - NYI
       summary: Edit a position
       description: Edit a position and return the updated one
       parameters:
