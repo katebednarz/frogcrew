@@ -96,6 +96,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<DatabaseHelper>();
+builder.Services.AddScoped<NotificationsHelper>();
+
     
 var app = builder.Build();
 

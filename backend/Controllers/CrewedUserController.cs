@@ -11,6 +11,7 @@ namespace backend.Controllers
     public class CrewedUserController(FrogcrewContext context) : Controller
     {
         private readonly DatabaseHelper _dbHelper = new(context);
+        private readonly NotificationsHelper _notificationsHelper = new NotificationsHelper(context);
 
         /*
          * Return a list of crew member who are qualified for the position and available for the game.
@@ -139,6 +140,8 @@ namespace backend.Controllers
 
                 // Append updates to CrewedUser table.
                 await context.AddAsync(newCrewedUser);
+                var foundGame = await context.Games.Include(g => g.Schedule).FirstOrDefaultAsync(g => g.Id == gameId);
+                _notificationsHelper.SendNotificationToUser(crewedUser.UserId, $"You have been crewed as {crewedUser.Position} for {foundGame.Schedule.Sport} vs. {game.Opponent} on {game.GameDate}.", true);
             }
             
             // Save changes to the database

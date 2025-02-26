@@ -256,11 +256,10 @@ public class UserController : Controller
     public async Task<IActionResult> GetUsers()
     {
         var users = await _context.Users.ToListAsync();
-        
         List<UserSimpleDTO> userDTOs = [];
         foreach (var user in users)
         {
-            if (user.IsActive)
+            if (user.IsActive && _userManager.GetRolesAsync(user).Result.First() != "ADMIN")
             {
                 var userDto = new UserSimpleDTO
                 {

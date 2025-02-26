@@ -255,14 +255,15 @@ CREATE INDEX [TemplatePositions] ON [TemplatePositions] ([TemplateId]);
 
 -- User Values
 INSERT INTO [User] (FirstName, LastName, PayRate, UserName, NormalizedUserName, Email, NormalizedEmail, EmailConfirmed, PasswordHash, SecurityStamp, ConcurrencyStamp, PhoneNumber, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnd, LockoutEnabled, AccessFailedCount) VALUES
+    ('Mike','Martin',null,'m.martin@tcu.edu','M.MARTIN@TCU.EDU','m.martin@tcu.edu','M.MARTIN@TCU.EDU',0,'AQAAAAIAAYagAAAAELchPSUc5T7AMrm2j7v31sXaKlSgL5rP9WbtJ+cCwgkVeoTfay8dsaer5zZLfis7yw==','4ZRQUMRFJR5UPEMKU4ZJ4COU44A5ONEX','cb3ffecd-392a-4caf-9355-8f67e06974c5','9876543210',0,0,null,1,0),
     ('Kate','Bednarz',null,'kate.bednarz@tcu.edu','KATE.BEDNARZ@TCU.EDU','kate.bednarz@tcu.edu','KATE.BEDNARZ@TCU.EDU',0,'AQAAAAIAAYagAAAAEB4ENT4XTLogUHTairPIvQ5cclWtwIIPxmBpNf8P4TSGMkY7GHTJqZq1QBgW328HVw==','GXVIZJY7LUAZVWWUUCZBGWN5UQWC3WIO','57d2b946-1889-4a59-a819-5ce3716b5831','1234512345',0,0,null,1,0),
     ('Dave','Park',250,'dave.park@tcu.edu','DAVE.PARK@TCU.EDU','dave.park@tcu.edu','DAVE.PARK@TCU.EDU',0,'AQAAAAIAAYagAAAAEAml3Yg61kzSQ+3LbxQhtEdFOG9Cp3sVXIZ+7xhI1ATyxYvYbPWP+N+u+gMZRLbqZg==','Q5P45UEJUUNJCJCB63EKISHL32L2PM7I','65f00c08-6f90-4e4d-956c-f3aadc72c7b8','1234567890',0,0,null,1,0),
     ('Aliya','Suri',null,'aliya.suri@tcu.edu','ALIYA.SURI@TCU.EDU','aliya.suri@tcu.edu','ALIYA.SURI@TCU.EDU',0,'AQAAAAIAAYagAAAAECrLmLFEaCNQ+QpJEszAw2hTF4QLXA1EKhvoehBZiAYJ7/W+4wBOZsziSvTivqoSkg==','NYSH3MURGPGRAMISHNCR7EZCJDJEPU5V','c7d729fb-454a-44b0-aa32-0280f55c38d1','1112223333',0,0,null,1,0),
     ('Michala','Rogers',null,'michala.rogers@tcu.edu','MICHALA.ROGERS@TCU.EDU','michala.rogers@tcu.edu','MICHALA.ROGERS@TCU.EDU',0,'AQAAAAIAAYagAAAAEGio/sQhVyYelYxUuY1JlPCgA5s4GAplUXAor85ppcCz7Su67T4fQEmgLOJ90tJkbw==','SWHDYYUFD2DZ4U7EM7KSLWUEN74FE7YQ','315646f4-6822-482d-a779-6561d894a573','1231231234',0,0,null,1,0),
     ('James','Clarke',260,'james.clarke@tcu.edu','JAMES.CLARKE@TCU.EDU','james.clarke@tcu.edu','JAMES.CLARKE@TCU.EDU',0,'AQAAAAIAAYagAAAAEPXDnLGyqSdktHAyJbHTELODH67iijhA9IngN6iddRM9nqttHtPT4ssOSp0D6r7hlA==','JBQ66N7YSGCCX2ZXOLW3RRJGZWZWCMEB','7426ce63-8636-4be9-be85-95f1aa44c076','3213214321',0,0,null,1,0),
     ('James','Edmonson',270,'james.edmonson@tcu.edu','JAMES.EDMONSON@TCU.EDU','james.edmonson@tcu.edu','JAMES.EDMONSON@TCU.EDU',0,'AQAAAAIAAYagAAAAENNjgAUa30Q3oHwNGOM/4klbGWLptXEEHtRvQcvoGwGO6M3fJWFpDE6TboWJTV/LpQ==','Z2WGIHH44OPWAYTGPWEJ4WQRF2YCT6DF','884ef31d-9ce3-48f7-a679-79092987644c','9876543210',0,0,null,1,0),
-    ('Manny','Burciaga',280,'manuel.burciaga@tcu.edu','MANUEL.BURCIAGA@TCU.EDU','manuel.burciaga@tcu.edu','MANUEL.BURCIAGA@TCU.EDU',0,'AQAAAAIAAYagAAAAENlDIZ1dT6Ril7CE6IsrU+fRcO9meA9n3SsWaZS8yW4KFuv56pv/RtngmYM4mwT15A==','YQFMZNUSFLP5RINJWKP4DE7PMGGSHTCD','a02dcd8e-1523-4b24-bdaf-0f4f2a5a9eec','9876543210',0,0,null,1,0),
-    ('Mike','Martin',null,'m.martin@tcu.edu','M.MARTIN@TCU.EDU','m.martin@tcu.edu','M.MARTIN@TCU.EDU',0,'AQAAAAIAAYagAAAAELchPSUc5T7AMrm2j7v31sXaKlSgL5rP9WbtJ+cCwgkVeoTfay8dsaer5zZLfis7yw==','4ZRQUMRFJR5UPEMKU4ZJ4COU44A5ONEX','cb3ffecd-392a-4caf-9355-8f67e06974c5','9876543210',0,0,null,1,0);
+    ('Manny','Burciaga',280,'manuel.burciaga@tcu.edu','MANUEL.BURCIAGA@TCU.EDU','manuel.burciaga@tcu.edu','MANUEL.BURCIAGA@TCU.EDU',0,'AQAAAAIAAYagAAAAENlDIZ1dT6Ril7CE6IsrU+fRcO9meA9n3SsWaZS8yW4KFuv56pv/RtngmYM4mwT15A==','YQFMZNUSFLP5RINJWKP4DE7PMGGSHTCD','a02dcd8e-1523-4b24-bdaf-0f4f2a5a9eec','9876543210',0,0,null,1,0);
+    
 
 -- Position Values
 INSERT INTO [Position] (PositionName, PositionLocation) VALUES
@@ -287,20 +288,20 @@ INSERT INTO [Position] (PositionName, PositionLocation) VALUES
 
 -- UserQualifiedPositions Values
 INSERT INTO UserQualifiedPositions VALUES
-    (1,1),
+    (8,1),
     (2,2),
     (3,3),
     (4,4),
     (5,5),
     (6,6),
     (7,7),
-    (1,8),
+    (8,8),
     (3,9),
     (4,10),
     (5,11),
     (6,12),
     (7,13),
-    (1,14),
+    (8,14),
     (2,15),
     (3,16),
     (4,17),
@@ -427,7 +428,7 @@ INSERT INTO Game (scheduleId, opponent, gameDate, gameStart, venue, isFinalized)
 
 -- CrewedUser Values
 INSERT INTO CrewedUser VALUES
-    (1, 1, 1, null),
+    (8, 1, 1, null),
     (2, 1, 2, null),
     (3, 1, 3, null),
     (4, 1, 4, null),
@@ -437,7 +438,7 @@ INSERT INTO CrewedUser VALUES
 
 -- Availability Values
 INSERT INTO Availability VALUES
-    (1, 1, 1, null),
+    (8, 1, 1, null),
     (2, 1, 1, null),
     (3, 1, 1, null),
     (4, 1, 1, null),
@@ -447,7 +448,7 @@ INSERT INTO Availability VALUES
 
 -- Notification Values
 INSERT INTO Notification (userId, message, date) VALUES
-    (1, 'New Notification 1', '2024-11-10 14:00:00'),
+    (1, 'New Notification 8', '2024-11-10 14:00:00'),
     (1, 'New Notification 2', '2024-11-10 14:00:00'),
     (1, 'New Notification 3', '2024-11-10 14:00:00'),
     (1, 'New Notification 4', '2024-11-10 14:00:00'),
@@ -463,14 +464,14 @@ INSERT INTO AspNetRoles (Name, NormalizedName, ConcurrencyStamp) VALUES
 
 -- AspNetUserRoles Values
 INSERT INTO AspNetUserRoles VALUES
-    (1,2),
+    (8,2),
     (2,3),
     (3,2),
     (4,2),
     (5,3),
     (6,3),
     (7,3),
-    (8,1);
+    (1,1);
 
 INSERT INTO Templates (TemplateName) VALUES ('Football');
 

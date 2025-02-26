@@ -3,6 +3,7 @@ using Moq;
 using Microsoft.AspNetCore.Mvc;
 using backend.Models;
 using backend.DTO;
+using backend.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace TestFrogCrew.Controllers;
@@ -12,13 +13,15 @@ namespace TestFrogCrew.Controllers;
   {
     private Mock<FrogcrewContext>? _mockContext;
     private AvailabilityController? _controller;
+    private NotificationsHelper? _notificationsHelper;
 
 
     [SetUp]
     public void Setup()
     {
       _mockContext = new Mock<FrogcrewContext>();
-      _controller = new AvailabilityController(_mockContext.Object);
+      _notificationsHelper = new NotificationsHelper(_mockContext.Object);
+      _controller = new AvailabilityController(_mockContext.Object,_notificationsHelper);
     }
 
     [TearDown]
