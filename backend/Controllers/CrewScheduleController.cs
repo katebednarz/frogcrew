@@ -216,42 +216,32 @@ namespace backend.Controllers
             * @param gameId The ID of the game
             * @return The result of the operation
         */
-        [HttpGet("crewSchedule/{gameId}")]
-        public async Task<IActionResult> FindCrewScheduleByGameId(int gameId)
+        [HttpGet("{gameId:int}")]
+        public async Task<IActionResult> Get(int gameId)
         {
-            CrewScheduleDTO crewScheduleDTO = new()
+            var game = await _context.Games.FindAsync(gameId);
+            if (game == null)
+                return NotFound(new Result(false, 404, $"Error: No Game with ID: {gameId} exists.", null!));
+
+            var crewScheduleDto = new CrewScheduleDTO
             {
                 gameId = gameId,
-                changes = []
+                crew = await _context.CrewedUsers
+                    .Where(cu => cu.GameId == gameId)
+                    .Select(cu => new ChangesDTO()
+                    {
+                        Action = "GET",
+                        Id = cu.UserId,
+                        FullName = _context.Users
+                            .Where(u => u.Id == cu.UserId)
+                            .Select(u => u.FirstName + " " + u.LastName).FirstOrDefault(),
+                        Position = _context.Positions
+                            .Where(p => p.PositionId == cu.PositionId)
+                            .Select(p => p.PositionName).FirstOrDefault()
+                    }).ToListAsync()
             };
 
-
-            var crewedUsers = await _context.CrewedUsers.Where(c => c.GameId == gameId).ToListAsync();
-            if (crewedUsers == null)
-            {
-                return new ObjectResult(new Result(false, 404, $"Crewed users associated with Game ID {gameId} not found.")) { StatusCode = 404 };
-            }
-
-            foreach (CrewedUser crewedUser in crewedUsers)
-            {
-                var user = await _context.Users.FindAsync(crewedUser.UserId);
-                if (user == null)
-                {
-                    return new ObjectResult(new Result(false, 404, $"User with ID {crewedUser.UserId} not found.")) { StatusCode = 404 };
-                }
-
-                ChangesDTO changesDTO = new()
-                {
-                    Id = user.Id,
-                    Position = _context.Positions.FirstOrDefault(p => p.PositionId == crewedUser.PositionId)?.PositionName,
-                    FullName = $"{user.FirstName} {user?.LastName}",
-                };
-
-                crewScheduleDTO.changes.Add(changesDTO);
-            }
-
-            var response = new Result(true, 200, "Crew schedule found", crewScheduleDTO);
-            return Ok(response);
+            return Ok(new Result(true, 200, "Find Success", crewScheduleDto));
         }
     }
 }
