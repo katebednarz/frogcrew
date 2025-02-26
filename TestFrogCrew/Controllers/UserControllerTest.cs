@@ -682,7 +682,7 @@ public async Task FindUserByIdBadRequestTest()
         new ApplicationUser { Id = 1, FirstName = "John", LastName = "Doe", Email = "john.doe@example.com", PhoneNumber = "1234567890", IsActive = true },
         new ApplicationUser { Id = 2, FirstName = "Jane", LastName = "Smith", Email = "jane.smith@example.com", PhoneNumber = "0987654321", IsActive = true }
         };
-
+      
       _mockContext?.Setup(c => c.Users).ReturnsDbSet(users);
 
       // Act

@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Mail;
 using backend.Controllers;
 using backend.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MySqlX.XDevAPI.Common;
 
@@ -23,17 +24,23 @@ public class NotificationsHelper
 
     public void SendNotificationToAllUsers(string notificationType, bool sendEmail = false)
     {
-        var users = await _context.Users
-            .Where(u => u.Availabilities.Any(a => a.GameId == gameId && a.Available == 1)
-                        && u.UserQualifiedPositions.Any(qp => qp.PositionId == positionId))
-            .Select(u => new UserSimpleDTO
+        var users = from u in _context.Users
+            join ur in _context.UserRoles on u.Id equals ur.UserId
+            join r in _context.Roles on ur.RoleId equals r.Id
+            where u.IsActive == true && r.Name != "ADMIN"
+            select new
             {
                 UserId = u.Id,
-                FullName = $"{u.FirstName} {u.LastName}"
-            })
-            .ToListAsync();
-        
-        
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                UserName = u.UserName,
+                Email = u.Email,
+                RoleId = r.Id,
+                RoleName = r.Name
+            };
+
+        var result = users.ToList();
+
     }
 
     public  void SendNotificationToUser(int userId, string message, bool sendEmail)

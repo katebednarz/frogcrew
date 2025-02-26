@@ -255,11 +255,11 @@ public class UserController : Controller
     [HttpGet("users")]
     public async Task<IActionResult> GetUsers()
     {
-        var users = await _context.Users.ToListAsync();
+        var users = _dbHelper.GetNonAdminUser();
         List<UserSimpleDTO> userDTOs = [];
         foreach (var user in users)
         {
-            if (user.IsActive && _userManager.GetRolesAsync(user).Result.First() != "ADMIN")
+            if (user.IsActive)
             {
                 var userDto = new UserSimpleDTO
                 {
