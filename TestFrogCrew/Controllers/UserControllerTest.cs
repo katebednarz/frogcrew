@@ -26,12 +26,14 @@ namespace TestFrogCrew.Controllers
     private Mock<UserManager<ApplicationUser>> _userManagerMock;
     private Mock<SignInManager<ApplicationUser>> _signInManagerMock;
     private DatabaseHelper? _dbHelper;
+    private NotificationsHelper _notificationHelper;
 
     [SetUp]
     public void Setup()
     {
       _mockContext = new Mock<FrogcrewContext>();
       _dbHelper = new DatabaseHelper(_mockContext.Object);
+      _notificationHelper = new NotificationsHelper(_mockContext.Object);
       _userManagerMock = new Mock<UserManager<ApplicationUser>>(
         new Mock<IUserStore<ApplicationUser>>().Object,
         null,
@@ -65,7 +67,7 @@ namespace TestFrogCrew.Controllers
         Session = _mockSession.Object
       };
 
-      _controller = new UserController(_userManagerMock.Object, _signInManagerMock.Object, _mockContext.Object, _config)
+      _controller = new UserController(_userManagerMock.Object, _signInManagerMock.Object, _mockContext.Object, _config, _notificationHelper)
       {
         ControllerContext = new ControllerContext
         {

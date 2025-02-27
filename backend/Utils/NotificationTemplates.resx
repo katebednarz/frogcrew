@@ -27,4 +27,7 @@
     <data name="AvailabiltyPostedNotification">
         <value>"{0} {1} has submitted availability for {2} game(s) for {3}."</value>
     </data>
+    <data name="UserCreatedNotification">
+        <value>"{0} {1} has created an account."</value>
+    </data>
 </root>

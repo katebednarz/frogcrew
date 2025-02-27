@@ -23,18 +23,21 @@ public class UserController : Controller
     private readonly FrogcrewContext _context;
     private readonly IConfiguration _configuration;
     private readonly DatabaseHelper _dbHelper;
+    private readonly NotificationsHelper _notificationsHelper;
 
     public UserController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         FrogcrewContext context, 
-        IConfiguration configuration)
+        IConfiguration configuration,
+        NotificationsHelper notificationsHelper)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _context = context;
         _configuration = configuration;
         _dbHelper = new DatabaseHelper(context);
+        _notificationsHelper = notificationsHelper;
     }
 
     /*
@@ -101,6 +104,9 @@ public class UserController : Controller
             _context.Invitations.Remove(_dbHelper.GetInvitationByToken(token));
             _context.SaveChanges();
         }
+        
+        string notificationMessage = NotificationContent.GetNotificationTemplate("UserCreatedNotification", [request.FirstName, request.LastName]);
+        _notificationsHelper.SendNotificationToAdmin(notificationMessage);
         
         return Ok(new Result(true, 200, "Add Success", request));
     }

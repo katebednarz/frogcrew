@@ -6,7 +6,7 @@ namespace backend.Utils;
 public static class NotificationContent
 {
     private static readonly ResourceManager ResourceManager =
-        new ResourceManager("backend.Utils", typeof(NotificationContent).Assembly);
+        new ResourceManager("backend.Utils.NotificationTemplates", typeof(NotificationContent).Assembly);
 
     public static string GetNotificationTemplate(string key, params object[] args)
     {
