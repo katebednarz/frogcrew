@@ -62,5 +62,11 @@ namespace backend {
                 return ResourceManager.GetString("AvailabiltyPostedNotification", resourceCulture);
             }
         }
+        
+        internal static string UserCreatedNotification {
+            get {
+                return ResourceManager.GetString("UserCreatedNotification", resourceCulture);
+            }
+        }
     }
 }
