@@ -16,12 +16,14 @@ public class ScheduledGamesControllerTest
     private Mock<FrogcrewContext>? _mockContext;
     private ScheduledGamesController _controller;
     private DatabaseHelper? _dbHelper;
+    private NotificationsHelper? _notificationsHelper;
 
     [SetUp]
     public void Setup()
     {
         _mockContext = new Mock<FrogcrewContext>();
-        _controller = new ScheduledGamesController(_mockContext.Object);
+        _notificationsHelper = new NotificationsHelper(_mockContext.Object);
+        _controller = new ScheduledGamesController(_mockContext.Object, _notificationsHelper);
         _dbHelper = new DatabaseHelper(_mockContext.Object);
     }
     

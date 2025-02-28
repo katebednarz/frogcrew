@@ -5,6 +5,7 @@ using backend.Models;
 using backend.DTO;
 using backend.Utils;
 using Microsoft.EntityFrameworkCore;
+using misc;
 
 namespace TestFrogCrew.Controllers;
 
@@ -30,15 +31,21 @@ namespace TestFrogCrew.Controllers;
       _controller?.Dispose();
     }
     
-    private static Mock<DbSet<T>> CreateMockDbSet<T>(IList<T> sourceList) where T : class
+    private Mock<DbSet<T>> CreateMockDbSet<T>(List<T> sourceList) where T : class
     {
       var queryable = sourceList.AsQueryable();
       var mockDbSet = new Mock<DbSet<T>>();
 
-      mockDbSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(queryable.Provider);
+      // Setup IQueryable methods
+      mockDbSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(new TestAsyncQueryProvider<T>(queryable.Provider));
       mockDbSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(queryable.Expression);
       mockDbSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
       mockDbSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
+
+      // Setup IAsyncEnumerable method
+      mockDbSet.As<IAsyncEnumerable<T>>()
+        .Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
+        .Returns(new TestAsyncEnumerator<T>(queryable.GetEnumerator()));
 
       return mockDbSet;
     }
@@ -79,8 +86,30 @@ namespace TestFrogCrew.Controllers;
         }
       };
 
+      var users = new List<ApplicationUser>
+      {
+        new()
+        {
+          Id = 1,
+          FirstName = "John",
+          LastName = "Doe",
+        }
+      };
+
+      var games = new List<Game>
+      {
+        new()
+        {
+          Id = 1,
+        }
+      };
+
+      var mockUserSet = CreateMockDbSet(users);
       var mockDbSet = CreateMockDbSet(availabilityList);
+      var mockGamesSet = CreateMockDbSet(games);
       
+      _mockContext?.Setup(m => m.Users).Returns(mockUserSet.Object);
+      _mockContext?.Setup(m => m.Games).Returns(mockGamesSet.Object);
       _mockContext?.Setup(c => c.Availabilities).Returns(mockDbSet.Object);
 
       // Act

@@ -80,22 +80,17 @@ namespace misc
         {
             return _inner.Execute<TResult>(expression);
         }
-
-        public IAsyncEnumerable<TResult> ExecuteAsync<TResult>(Expression expression)
-        {
-            return new TestAsyncEnumerable<TResult>(expression);
-        }
+        
         #pragma warning disable IDE0060
         public Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
         {
-            return Task.FromResult(Execute<TResult>(expression));
+            return Task.FromResult(_inner.Execute<TResult>(expression));
         }
-        #pragma warning disable IDE0060
 
-        TResult IAsyncQueryProvider.ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
+
+
+
+        #pragma warning disable IDE0060
     }
 
 }

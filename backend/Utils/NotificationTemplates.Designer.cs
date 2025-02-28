@@ -63,9 +63,39 @@ namespace backend {
             }
         }
         
+        internal static string AvailabiltyEditedNotification {
+            get {
+                return ResourceManager.GetString("AvailabiltyEditedNotification", resourceCulture);
+            }
+        }
+        
         internal static string UserCreatedNotification {
             get {
                 return ResourceManager.GetString("UserCreatedNotification", resourceCulture);
+            }
+        }
+        
+        internal static string UserCrewedNotification {
+            get {
+                return ResourceManager.GetString("UserCrewedNotification", resourceCulture);
+            }
+        }
+        
+        internal static string DroppedShiftNotification {
+            get {
+                return ResourceManager.GetString("DroppedShiftNotification", resourceCulture);
+            }
+        }
+        
+        internal static string PickedUpShiftNotification {
+            get {
+                return ResourceManager.GetString("PickedUpShiftNotification", resourceCulture);
+            }
+        }
+        
+        internal static string ApprovedShiftPickUpNotification {
+            get {
+                return ResourceManager.GetString("ApprovedShiftPickUpNotification", resourceCulture);
             }
         }
     }

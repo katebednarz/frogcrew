@@ -17,12 +17,41 @@ public class NotificationsHelper
         _context = context;
     }
     
-    public  void SendNotificationToAdmin(string notificationType)
+    public void SendNotificationToAdmin(string message)
     {
-        SendNotificationToUser(1, notificationType, false);
+        var user = _context.Users.Find(1);
+        // create a new notification and add it to that userId's notifications
+        Notification newNotif = new Notification()
+        {
+            UserId = 1,
+            Message = message,
+            Date = DateTime.Now,
+            IsRead = false,
+        };
+        
+        _context.Notifications.Add(newNotif);
+        _context.SaveChanges();
+    }
+    
+    public  void SendNotificationToCrewMember(int userId, string message)
+    {
+        var user = _context.Users.Find(userId);
+        // create a new notification and add it to that userId's notifications
+        Notification newNotif = new Notification()
+        {
+            UserId = userId,
+            Message = message,
+            Date = DateTime.Now,
+            IsRead = false,
+        };
+        
+        _context.Notifications.Add(newNotif);
+        _context.SaveChanges();
+        
+        // SendEmailNotification(user.Email, message);
     }
 
-    public void SendNotificationToAllUsers(string notificationType, bool sendEmail = false)
+    public void SendNotificationToAllCrewMembers(string notificationType, bool sendEmail)
     {
         var users = from u in _context.Users
             join ur in _context.UserRoles on u.Id equals ur.UserId
@@ -39,28 +68,10 @@ public class NotificationsHelper
                 RoleName = r.Name
             };
 
-        var result = users.ToList();
-
-    }
-
-    public  void SendNotificationToUser(int userId, string message, bool sendEmail)
-    {
-        var user = _context.Users.Find(userId);
-        // create a new notification and add it to that userId's notifications
-        Notification newNotif = new Notification()
+        var results = users.ToList();
+        foreach (var user in results)
         {
-            UserId = userId,
-            Message = message,
-            Date = DateTime.Now,
-            IsRead = false,
-        };
-        
-        _context.Notifications.Add(newNotif);
-        _context.SaveChanges();
-        
-        if (sendEmail)
-        {
-            SendEmailNotification(user.Email, message);
+            SendNotificationToCrewMember(user.UserId, notificationType);
         }
     }
 

@@ -25,9 +25,24 @@
         Hello
     </data>
     <data name="AvailabiltyPostedNotification">
-        <value>"{0} {1} has submitted availability for {2} game(s) for {3}."</value>
+        <value>{0} {1} has submitted availability for {2} game(s) for {3}.</value>
+    </data>
+    <data name="AvailabiltyEditedNotification">
+        <value>{0} {1} has edited availability for {2} game(s) for {3}.</value>
     </data>
     <data name="UserCreatedNotification">
-        <value>"{0} {1} has created an account."</value>
+        <value>{0} {1} has created an account.</value>
+    </data>
+    <data name="UserCrewedNotification">
+        <value>You have been crewed as {0} for {1} vs. {2} on {3}.</value>
+    </data>
+    <data name="DroppedShiftNotification">
+        <value>{0} {1} as {2} has requested shift coverage for {3} on {4}.</value>
+    </data>
+    <data name="PickedUpShiftNotification">
+        <value>{0} {1} has requested to pick up a shift for {2} {3} for {4} on {5}.</value>
+    </data>
+    <data name="ApprovedShiftPickUpNotification">
+        <value>Your shift has been picked up and approved for {0} on {1}.</value>
     </data>
 </root>
