@@ -97,11 +97,11 @@ GO
 
 -- Notification Table
 CREATE TABLE Notification (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    userId INT,
-    title VARCHAR(255),
-    content VARCHAR(255),
-    date DATETIME,
+    [id] INT IDENTITY(1,1) PRIMARY KEY,
+    [userId] INT NOT NULL,
+    [message] VARCHAR(255) NOT NULL,
+    [date] DATETIME NOT NULL,
+    [isRead] BIT NOT NULL DEFAULT 0,
     FOREIGN KEY (userId) REFERENCES [User](id) ON DELETE CASCADE
 );
 GO
@@ -205,6 +205,7 @@ Go
 CREATE TABLE TemplatePositions (
     [TemplateId] INT NOT NULL,
     [PositionId] INT NOT NULL,
+    [HoursBeforeGameTime] DECIMAL NOT NULL, 
     PRIMARY KEY (TemplateId, PositionId),
     FOREIGN KEY (TemplateId) REFERENCES Templates(TemplateId) ON DELETE CASCADE,
     FOREIGN KEY (PositionId) REFERENCES Position(PositionId)
@@ -445,8 +446,14 @@ INSERT INTO Availability VALUES
     (7, 1, 1, null);
 
 -- Notification Values
-INSERT INTO Notification (userId, title, content, date) VALUES
-    (1, 'Game Scheduled', 'You have been scheduled to work the game', '2024-11-10 14:00:00');
+INSERT INTO Notification (userId, message, date) VALUES
+    (1, 'New Notification 1', '2024-11-10 14:00:00'),
+    (1, 'New Notification 2', '2024-11-10 14:00:00'),
+    (1, 'New Notification 3', '2024-11-10 14:00:00'),
+    (1, 'New Notification 4', '2024-11-10 14:00:00'),
+    (1, 'New Notification 5', '2024-11-10 14:00:00'),
+    (1, 'New Notification 6', '2024-11-10 14:00:00'),
+    (1, 'New Notification 7', '2024-11-10 14:00:00');  
 
 -- AspNetRoles Values
 INSERT INTO AspNetRoles (Name, NormalizedName, ConcurrencyStamp) VALUES
@@ -464,3 +471,25 @@ INSERT INTO AspNetUserRoles VALUES
     (6,3),
     (7,3),
     (8,1);
+
+INSERT INTO Templates (TemplateName) VALUES ('Football');
+
+INSERT INTO TemplatePositions (TemplateId, PositionId, HoursBeforeGameTime) VALUES
+    (1, 1, 3),
+    (1, 2, 3),
+    (1, 3, 3),
+    (1, 4, 3),
+    (1, 5, 3),
+    (1, 6, 3),
+    (1, 7, 3),
+    (1, 8, 3),
+    (1, 9, 3),
+    (1, 10, 3),
+    (1, 11, 3),
+    (1, 12, 3),
+    (1, 13, 3),
+    (1, 14, 3),
+    (1, 15, 3),
+    (1, 16, 3),
+    (1, 17, 3),
+    (1, 18, 3);

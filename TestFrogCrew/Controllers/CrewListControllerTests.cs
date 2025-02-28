@@ -266,14 +266,15 @@ namespace TestFrogCrew.Controllers;
       using (var workbook = new XLWorkbook(stream))
       {
         var worksheet = workbook.Worksheet(1);
-        Assert.That(worksheet.Cell("A1").Value, Is.EqualTo("TCU SPORTS BROADCASTING CREW LIST"));
-        Assert.That(worksheet.Cell("A2").Value, Is.EqualTo("TCU BASKETBALL vs Texas"));
-        Assert.That(worksheet.Cell("A3").Value, Is.EqualTo("Wednesday 11-06-24"));
-        Assert.That(worksheet.Cell("A4").Value, Is.EqualTo("6:00 PM"));
-        Assert.That(worksheet.Cell("A8").Value, Is.EqualTo("DIRECTOR"));
-        Assert.That(worksheet.Cell("B8").Value, Is.EqualTo("John Smith"));
-        Assert.That(worksheet.Cell("C8").Value, Is.EqualTo("17:00"));
-        Assert.That(worksheet.Cell("D8").Value, Is.EqualTo("CONTROL ROOM"));
+        Assert.That(worksheet.Cell("B1").Value, Is.EqualTo("BASKETBALL"));
+        Assert.That(worksheet.Cell("B2").Value, Is.EqualTo("vs"));
+        Assert.That(worksheet.Cell("B3").Value, Is.EqualTo("Texas"));
+        Assert.That(worksheet.Cell("B4").Value, Is.EqualTo("November 06, 2024"));
+        Assert.That(worksheet.Cell("B5").Value, Is.EqualTo("6:00 PM"));
+        Assert.That(worksheet.Cell("A10").Value, Is.EqualTo("DIRECTOR"));
+        Assert.That(worksheet.Cell("B10").Value, Is.EqualTo("John Smith"));
+        Assert.That(worksheet.Cell("C10").Value, Is.EqualTo("17:00"));
+        Assert.That(worksheet.Cell("D10").Value, Is.EqualTo("CONTROL ROOM"));
 
       }
       

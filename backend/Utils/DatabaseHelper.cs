@@ -51,4 +51,8 @@ public class DatabaseHelper
     
     public ApplicationUser? GetUserByEmail(string email) => _context.Users
         .FirstOrDefault(u => u.Email == email);
+
+    public List<Notification> GetNotificationsByUserId(int userId) => _context.Notifications
+        .Where(n => n.UserId == userId)
+        .ToList();
 }

@@ -25,6 +25,12 @@
   <ItemGroup>
     <ProjectReference Include="..\backend\backend.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="..\backend\Images\TCU_Sports Broadcasting Athletics Style.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+</ItemGroup>
 
   <ItemGroup>
     <None Update="..\backend\appsettings.json">
