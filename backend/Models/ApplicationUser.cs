@@ -16,9 +16,9 @@ public class ApplicationUser : IdentityUser<int>
     
     
     [MaxLength(50)]
-    public required string? FirstName { get; set; }
+    public required string FirstName { get; set; }
     [MaxLength(50)]
-    public required string? LastName { get; set; }
+    public required string LastName { get; set; }
     [MaxLength(25)]
     public string? PayRate { get; set; }
 

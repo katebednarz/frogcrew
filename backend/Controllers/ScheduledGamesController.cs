@@ -105,7 +105,7 @@ public class ScheduledGamesController : Controller
         var newCrewedUser = new CrewedUser
         {
             UserId = (int)trade.ReceiverId!,
-            GameId = crewedUser!.GameId,
+            GameId = crewedUser.GameId,
             PositionId = crewedUser.PositionId,
             ArrivalTime = crewedUser.ArrivalTime,
         };

@@ -87,7 +87,7 @@ public class UserController : Controller
             await _userManager.DeleteAsync(user);
             return new ObjectResult(new Result(false, 400, "Role not found", request.Role));
         }
-        
+        _context.Users.Attach(user);
         foreach (var pos in request.Position)
         {
             var newPosition = new UserQualifiedPosition

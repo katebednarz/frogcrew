@@ -1,18 +1,17 @@
 ﻿using backend.Controllers;
-using Moq;
 using Microsoft.AspNetCore.Mvc;
 using backend.Models;
 using backend.DTO;
 using backend.Utils;
 using Microsoft.EntityFrameworkCore;
-using misc;
+
 
 namespace TestFrogCrew.Controllers;
 
   [TestFixture()]
   public class AvailabilityControllerTests
   {
-    private Mock<FrogcrewContext>? _mockContext;
+    private FrogcrewContext _context;
     private AvailabilityController? _controller;
     private NotificationsHelper? _notificationsHelper;
 
@@ -20,34 +19,41 @@ namespace TestFrogCrew.Controllers;
     [SetUp]
     public void Setup()
     {
-      _mockContext = new Mock<FrogcrewContext>();
-      _notificationsHelper = new NotificationsHelper(_mockContext.Object);
-      _controller = new AvailabilityController(_mockContext.Object,_notificationsHelper);
+      var options = new DbContextOptionsBuilder<FrogcrewContext>()
+        .UseInMemoryDatabase(databaseName: "TestDatabase")
+        .Options;
+      
+      _context = new FrogcrewContext(options);
+      
+      _context.Database.EnsureDeleted();
+      _context.Database.EnsureCreated();
+      
+      // Adding Test Data
+      _context.Users.AddRange(
+        new ApplicationUser { Id = 1, FirstName = "Kate", LastName = "Bednarz"},
+        new ApplicationUser { Id = 2, FirstName = "Aliya", LastName = "Suri"}
+      );
+      
+      _context.Games.AddRange(
+        new Game { Id = 1, ScheduleId = 1},
+        new Game { Id = 2, ScheduleId = 1}
+      );
+      
+      _context.Schedules.AddRange(
+        new Schedule {Id = 1, Sport = "Basketball"}
+      );
+      
+      _context.SaveChanges();
+      
+      _notificationsHelper = new NotificationsHelper(_context);
+      _controller = new AvailabilityController(_context,_notificationsHelper);
     }
 
     [TearDown]
     public void Teardown()
     {
+      _context?.Dispose();
       _controller?.Dispose();
-    }
-    
-    private Mock<DbSet<T>> CreateMockDbSet<T>(List<T> sourceList) where T : class
-    {
-      var queryable = sourceList.AsQueryable();
-      var mockDbSet = new Mock<DbSet<T>>();
-
-      // Setup IQueryable methods
-      mockDbSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(new TestAsyncQueryProvider<T>(queryable.Provider));
-      mockDbSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(queryable.Expression);
-      mockDbSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
-      mockDbSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
-
-      // Setup IAsyncEnumerable method
-      mockDbSet.As<IAsyncEnumerable<T>>()
-        .Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
-        .Returns(new TestAsyncEnumerator<T>(queryable.GetEnumerator()));
-
-      return mockDbSet;
     }
 
     [Test()]
@@ -70,48 +76,6 @@ namespace TestFrogCrew.Controllers;
         }
       };
       
-      var availabilityList = new List<Availability>
-      {
-        new() {
-          UserId = 1,
-          GameId = 1,
-          Available = 1,
-          Comments = "Coming from another game, will be 30 mins late."
-        },
-        new() {
-          UserId = 1,
-          GameId = 2,
-          Available = 0,
-          Comments = null
-        }
-      };
-
-      var users = new List<ApplicationUser>
-      {
-        new()
-        {
-          Id = 1,
-          FirstName = "John",
-          LastName = "Doe",
-        }
-      };
-
-      var games = new List<Game>
-      {
-        new()
-        {
-          Id = 1,
-        }
-      };
-
-      var mockUserSet = CreateMockDbSet(users);
-      var mockDbSet = CreateMockDbSet(availabilityList);
-      var mockGamesSet = CreateMockDbSet(games);
-      
-      _mockContext?.Setup(m => m.Users).Returns(mockUserSet.Object);
-      _mockContext?.Setup(m => m.Games).Returns(mockGamesSet.Object);
-      _mockContext?.Setup(c => c.Availabilities).Returns(mockDbSet.Object);
-
       // Act
       var result = await _controller!.SubmitAvailability(request) as ObjectResult;
       var response = result?.Value as Result;

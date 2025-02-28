@@ -1,86 +1,128 @@
-﻿using System.Text;
-using Moq;
+﻿using Moq;
 using Microsoft.AspNetCore.Mvc;
 using backend.Models;
 using backend.DTO;
-using backend.Auth;
 using backend.Controllers;
 using backend.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using misc;
-using Moq.EntityFrameworkCore;
-using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace TestFrogCrew.Controllers
 {
   [TestFixture()]
   public class UserControllerTest
   {
-    private Mock<FrogcrewContext>? _mockContext;
+    private FrogcrewContext _context;
     private IConfiguration? _config;
-    private Mock<ISession>? _mockSession;
     private UserController? _controller;
-    private Mock<UserManager<ApplicationUser>> _userManagerMock;
-    private Mock<SignInManager<ApplicationUser>> _signInManagerMock;
+    private UserManager<ApplicationUser> _userManager;
+    private SignInManager<ApplicationUser> _signInManager;
     private DatabaseHelper? _dbHelper;
     private NotificationsHelper _notificationHelper;
 
     [SetUp]
-    public void Setup()
+    public async Task Setup()
     {
-      _mockContext = new Mock<FrogcrewContext>();
-      _dbHelper = new DatabaseHelper(_mockContext.Object);
-      _notificationHelper = new NotificationsHelper(_mockContext.Object);
-      _userManagerMock = new Mock<UserManager<ApplicationUser>>(
-        new Mock<IUserStore<ApplicationUser>>().Object,
-        null,
-        null,
-        null,
-        null,
+      var options = new DbContextOptionsBuilder<FrogcrewContext>()
+        .UseInMemoryDatabase(databaseName: "TestDatabase")
+        .Options;
+      
+      _context = new FrogcrewContext(options);
+      
+      _context.Database.EnsureDeleted();
+      _context.Database.EnsureCreated();
+      
+      var userStore = new UserStore<ApplicationUser,ApplicationRole,FrogcrewContext,int>(_context);
+      
+      _userManager = new UserManager<ApplicationUser>(
+        userStore,
+        null, // No password validators needed for testing
+        new PasswordHasher<ApplicationUser>(),
+        new List<IUserValidator<ApplicationUser>>(),
+        new List<IPasswordValidator<ApplicationUser>>(),
         null,
         null,
         null,
         null
       );
-      var _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
-      var _userClaimsPrincipalFactoryMock = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
-      _signInManagerMock = new Mock<SignInManager<ApplicationUser>>(
-        _userManagerMock.Object,
-        _httpContextAccessorMock.Object,
-        _userClaimsPrincipalFactoryMock.Object,
+      
+      _signInManager = new SignInManager<ApplicationUser>(
+        _userManager,
+        new Mock<IHttpContextAccessor>().Object,
+        new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>().Object,
         null,
         null,
         null,
         null
       );
+
+      var user = new ApplicationUser
+      {
+        UserName = "john.doe@gmail.com",
+        Email = "john.doe@gmail.com",
+        PhoneNumber = "0123456789",
+        FirstName = "John",
+        LastName = "Doe",
+        IsActive = true
+      };
+      
+      // Adding Test Data
+      _context.Roles.AddRange(
+        new ApplicationRole{ Id = 1, Name = "STUDENT", NormalizedName = "STUDENT" },
+        new ApplicationRole{ Id = 2, Name = "UPDATED_ROLE", NormalizedName = "UPDATED_ROLE"}
+      );
+      
+      _context.Users.AddRange(
+        new ApplicationUser { Id = 1, FirstName = "Kate", LastName = "Bednarz", Email = "kate.bednarz@tcu.edu", IsActive = true},
+        new ApplicationUser { Id = 2, FirstName = "Aliya", LastName = "Suri", IsActive = true}
+      );
+      
+      _context.Positions.AddRange(
+        new Position {PositionId = 1, PositionName = "DIRECTOR", PositionLocation = "CONTROL ROOM"},
+        new Position {PositionId = 2, PositionName = "PRODUCER", PositionLocation = "CONTROL ROOM"},
+        new Position { PositionId = 3, PositionName = "UPDATED_POSITION_1", PositionLocation = "CONTROL ROOM" },
+        new Position { PositionId = 4, PositionName = "UPDATED_POSITION_2", PositionLocation = "CONTROL ROOM"}
+      );
+      
+      _context.UserQualifiedPositions.AddRange(
+        new UserQualifiedPosition {PositionId = 1, UserId = 1},
+        new UserQualifiedPosition {PositionId = 1, UserId = 3}
+      );
+      
+      _context.Invitations.AddRange(
+        new Invitation {Token = "token"}
+      );
+      
+      _context.SaveChanges();
+      
+      await _userManager.CreateAsync(user, "Password!1");
+      await _userManager.AddToRoleAsync(user, "STUDENT");
+      
+      _notificationHelper = new NotificationsHelper(_context);
       _config = new ConfigurationBuilder()
           .SetBasePath(AppContext.BaseDirectory)
           .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
           .Build();
-      _mockSession = new Mock<ISession>();
 
-      var httpContext = new DefaultHttpContext
-      {
-        Session = _mockSession.Object
-      };
-
-      _controller = new UserController(_userManagerMock.Object, _signInManagerMock.Object, _mockContext.Object, _config, _notificationHelper)
-      {
-        ControllerContext = new ControllerContext
-        {
-          HttpContext = httpContext
-        }
-      };
-
+      _dbHelper = new DatabaseHelper(_context);
+      _controller = new UserController(
+        _userManager, 
+        _signInManager,
+        _context,
+        _config,
+        _notificationHelper);
     }
 
     [TearDown]
     public void Teardown()
     {
+      _context?.Dispose();
       _controller?.Dispose();
+      _userManager?.Dispose();
     }
     
     private Mock<DbSet<T>> CreateMockDbSet<T>(List<T> sourceList) where T : class
@@ -106,29 +148,6 @@ namespace TestFrogCrew.Controllers
     public async Task CreateCrewMemberTestSuccess()
     {
       // Arrange
-      int positionId = 1;
-      string positionName = "DIRECTOR";
-      
-      _mockContext?.Setup(c => c.Positions)
-        .ReturnsDbSet(new List<Position>
-        {
-          new()
-          {
-            PositionId = 1, 
-            PositionName = "DIRECTOR",
-            PositionLocation = "CONTROL ROOM"
-          },
-          new()
-          {
-            PositionId = 2, 
-            PositionName = "PRODUCER",
-            PositionLocation = "CONTROL ROOM"
-          }
-        });
-
-      _mockContext?.Setup(c => c.Invitations)
-        .ReturnsDbSet(new List<Invitation> { new Invitation {Token = "token"} });
-      
       var request = new UserDTO
       {
         Email = "test@example.com",
@@ -138,16 +157,7 @@ namespace TestFrogCrew.Controllers
         Role = "STUDENT",
         Position = ["DIRECTOR", "PRODUCER"]
       };
-
-      _userManagerMock.Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
-        .ReturnsAsync(IdentityResult.Success);
-
-      _userManagerMock.Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), request.Role))
-        .ReturnsAsync(IdentityResult.Success);
-
-      var dbSetMock = new Mock<DbSet<UserQualifiedPosition>>();
-      _mockContext.Setup(db => db.Set<UserQualifiedPosition>()).Returns(dbSetMock.Object);
-
+      
       //Act
       var result = await _controller!.CreateCrewMember(request,"token") as ObjectResult;
       var response = result?.Value as Result;
@@ -162,296 +172,221 @@ namespace TestFrogCrew.Controllers
       });
 
       //Verify Data
-      var userDTO = response?.Data as UserDTO;
-      Assert.That(userDTO, Is.Not.Null);
+      var userDto = response?.Data as UserDTO;
+      Assert.That(userDto, Is.Not.Null);
       Assert.Multiple(() =>
       {
-        Assert.That(userDTO?.Email, Is.EqualTo(request.Email));
-        Assert.That(userDTO?.FirstName, Is.EqualTo(request.FirstName));
-        Assert.That(userDTO?.LastName, Is.EqualTo(request.LastName));
-        Assert.That(userDTO?.PhoneNumber, Is.EqualTo(request.PhoneNumber));
-        Assert.That(userDTO?.Role, Is.EqualTo(request.Role));
+        Assert.That(userDto?.Email, Is.EqualTo(request.Email));
+        Assert.That(userDto?.FirstName, Is.EqualTo(request.FirstName));
+        Assert.That(userDto?.LastName, Is.EqualTo(request.LastName));
+        Assert.That(userDto?.PhoneNumber, Is.EqualTo(request.PhoneNumber));
+        Assert.That(userDto?.Role, Is.EqualTo(request.Role));
       });
-
-      //Verify Database Saves
-      _userManagerMock.Verify(um => um.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Once);
-      _mockContext?.Verify(c => c.SaveChanges(), Times.Exactly(2)); //2 for positions
+      
     }
 
-    [Test()]
-    public async Task CreateCrewMemberTestBadRequest()
-    {
-      // Arrange
-      var request = new UserDTO  // Empty DTO to simulate missing required fields
-      {
-        FirstName = null,
-        LastName = null,
-        Email = null,
-        PhoneNumber = null,
-        Role = null,
-        Position = null
-      };
-      _controller?.ModelState.AddModelError("firstName", "first name is required.");
-      _controller?.ModelState.AddModelError("lastName", "last name is required.");
-      _controller?.ModelState.AddModelError("email", "email is required.");
-      _controller?.ModelState.AddModelError("phoneNumber", "phone number is required.");
-      _controller?.ModelState.AddModelError("role", "role is required.");
-      _controller?.ModelState.AddModelError("position", "position is required.");
+     [Test()]
+     public async Task CreateCrewMemberTestBadRequest()
+     {
+       // Arrange
+       var request = new UserDTO  // Empty DTO to simulate missing required fields
+       {
+         FirstName = null,
+         LastName = null,
+         Email = null,
+         PhoneNumber = null,
+         Role = null,
+         Position = null
+       };
+       _controller?.ModelState.AddModelError("firstName", "first name is required.");
+       _controller?.ModelState.AddModelError("lastName", "last name is required.");
+       _controller?.ModelState.AddModelError("email", "email is required.");
+       _controller?.ModelState.AddModelError("phoneNumber", "phone number is required.");
+       _controller?.ModelState.AddModelError("role", "role is required.");
+       _controller?.ModelState.AddModelError("position", "position is required.");
 
-      // Act
-      var result = await _controller!.CreateCrewMember(request,"token") as ObjectResult;
-      var response = result?.Value as Result;
+       // Act
+       var result = await _controller!.CreateCrewMember(request,"token") as ObjectResult;
+       var response = result?.Value as Result;
 
-      // Expected data
-      var expectedData = new Dictionary<string, string>
-        {
-            { "firstName", "first name is required." },
-            { "lastName", "last name is required." },
-            { "email", "email is required." },
-            { "phoneNumber", "phone number is required." },
-            { "role", "role is required." },
-            { "position", "position is required." }
-        };
+       // Expected data
+       var expectedData = new Dictionary<string, string>
+         {
+             { "firstName", "first name is required." },
+             { "lastName", "last name is required." },
+             { "email", "email is required." },
+             { "phoneNumber", "phone number is required." },
+             { "role", "role is required." },
+             { "position", "position is required." }
+         };
 
-      // Assert
-      Assert.Multiple(() =>
-      {
-        Assert.That(response?.Flag, Is.False); //Verify Flag
-        Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
-        Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
-      });
+       // Assert
+       Assert.Multiple(() =>
+       {
+         Assert.That(response?.Flag, Is.False); //Verify Flag
+         Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
+         Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
+       });
 
-      // Check that the data contains the expected error messages
-      Assert.That(response?.Data, Is.Not.Null);
-      var errors = response?.Data as List<string>;
-      foreach (var error in expectedData)
-      {
-        Assert.That(errors?.Any(e => e.Contains(error.Value)), Is.True, $"Expected error message '{error.Value}' not found.");
-      }
-    }
+       // Check that the data contains the expected error messages
+       Assert.That(response?.Data, Is.Not.Null);
+       var errors = response?.Data as List<string>;
+       foreach (var error in expectedData)
+       {
+         Assert.That(errors?.Any(e => e.Contains(error.Value)), Is.True, $"Expected error message '{error.Value}' not found.");
+       }
+     }
 
-    [Test()]
-    public async Task ValidateInvitationTokenTestSuccess()
-    {
-        // Arrange
-        string token = "valid-token";
-        var invitation = new Invitation { Token = token };
+     [Test()]
+     public async Task ValidateInvitationTokenTestSuccess()
+     {
+         // Arrange
+         string token = "token";
 
-        _mockContext?.Setup(c => c.Invitations).ReturnsDbSet(new List<Invitation> { invitation });
+         // Act
+         var result = await _controller!.ValidateInvitation(token) as ObjectResult;
+         var response = result?.Value as Result;
 
-        // Act
-        var result = await _controller!.ValidateInvitation(token) as ObjectResult;
-        var response = result?.Value as Result;
+         // Assert
+         Assert.Multiple(() =>
+         {
+             Assert.That(result, Is.Not.Null);
+             Assert.That(response?.Flag, Is.True); // Verify Flag
+             Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
+             Assert.That(response?.Message, Is.EqualTo("Invitation valid")); // Verify Message
+         });
 
-        // Assert
-        Assert.Multiple(() =>
-        {
-            Assert.That(result, Is.Not.Null);
-            Assert.That(response?.Flag, Is.True); // Verify Flag
-            Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
-            Assert.That(response?.Message, Is.EqualTo("Invitation valid")); // Verify Message
-        });
+         var data = response?.Data as dynamic;
+         Assert.That(data, Is.Not.Null);
+     }
 
-        var data = response?.Data as dynamic;
-        Assert.That(data, Is.Not.Null);
-    }
+     [Test()]
+     public async Task ValidateInvitationTokenTestBadRequest()
+     {
+         // Arrange
+         string token = null; // simulating missing token
 
-    [Test()]
-    public async Task ValidateInvitationTokenTestBadRequest()
-    {
-        // Arrange
-        string token = null; // simulating missing token
+         // Act
+         var result = await _controller!.ValidateInvitation(token) as ObjectResult;
+         var response = result?.Value as Result;
 
-        // Act
-        var result = await _controller!.ValidateInvitation(token) as ObjectResult;
-        var response = result?.Value as Result;
+         // Assert
+         Assert.Multiple(() =>
+         {
+             Assert.That(result, Is.Not.Null);
+             Assert.That(response?.Flag, Is.False); // verify flag
+             Assert.That(response?.Code, Is.EqualTo(400)); // verify code
+             Assert.That(response?.Message, Is.EqualTo("Token is required")); // verify message
+         });
+     }
 
-        // Assert
-        Assert.Multiple(() =>
-        {
-            Assert.That(result, Is.Not.Null);
-            Assert.That(response?.Flag, Is.False); // verify flag
-            Assert.That(response?.Code, Is.EqualTo(400)); // verify code
-            Assert.That(response?.Message, Is.EqualTo("Token is required")); // verify message
-        });
-    }
+     [Test()]
+     public async Task InviteCrewMemberTestSuccess()
+     {
+       // Arrange
+       var request = new EmailDTO
+       {
+         Emails = ["test1@example.com", "test2@example.com"]
+       };
 
-    [Test()]
-    public async Task InviteCrewMemberTestSuccess()
-    {
-      // Arrange
-      var request = new EmailDTO
-      {
-        Emails = ["test1@example.com", "test2@example.com"]
-      };
+       // Act
+       var result = await _controller!.InviteCrewMember(request) as ObjectResult;
+       var response = result?.Value as Result;
 
-      // Act
-      var result = await _controller!.InviteCrewMember(request) as ObjectResult;
-      var response = result?.Value as Result;
+       // Assert
+       Assert.Multiple(() =>
+       {
+         Assert.That(result, Is.Not.Null);
+         Assert.That(response?.Flag, Is.True); //Verify Flag
+         Assert.That(response?.Code, Is.EqualTo(200)); //Verify Code
+         Assert.That(response?.Message, Is.EqualTo("Invite success")); //Verify Message
+       });
+       CollectionAssert.AreEquivalent(request.Emails, response?.Data as List<string>);
+     }
 
-      // Assert
-      Assert.Multiple(() =>
-      {
-        Assert.That(result, Is.Not.Null);
-        Assert.That(response?.Flag, Is.True); //Verify Flag
-        Assert.That(response?.Code, Is.EqualTo(200)); //Verify Code
-        Assert.That(response?.Message, Is.EqualTo("Invite success")); //Verify Message
-      });
-      CollectionAssert.AreEquivalent(request.Emails, response?.Data as List<string>);
-    }
+     [Test()]
+     public async Task InviteCrewMemberTestBadRequest()
+     {
+       // Arrange
+       var request = new EmailDTO // Empty or invalid DTO to simulate model validation failure
+       {
+         Emails = null
+       };
 
-    [Test()]
-    public async Task InviteCrewMemberTestBadRequest()
-    {
-      // Arrange
-      var request = new EmailDTO // Empty or invalid DTO to simulate model validation failure
-      {
-        Emails = null
-      };
+       _controller?.ModelState.AddModelError("Emails", "Emails are required.");
 
-      _controller?.ModelState.AddModelError("Emails", "Emails are required.");
+       // Act
+       var result = await _controller!.InviteCrewMember(request) as ObjectResult;
+       var response = result?.Value as Result;
 
-      // Act
-      var result = await _controller!.InviteCrewMember(request) as ObjectResult;
-      var response = result?.Value as Result;
+       // Expected data
+       var expectedErrors = new List<string> { "Emails are required." };
 
-      // Expected data
-      var expectedErrors = new List<string> { "Emails are required." };
+       // Assert
+       Assert.Multiple(() =>
+       {
+         Assert.That(result, Is.Not.Null);
+         Assert.That(response?.Flag, Is.False);
+         Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
+         Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
+       });
+       // Check that the data contains the expected error message
+       CollectionAssert.AreEquivalent(expectedErrors, response?.Data as List<string>);
+     }
 
-      // Assert
-      Assert.Multiple(() =>
-      {
-        Assert.That(result, Is.Not.Null);
-        Assert.That(response?.Flag, Is.False);
-        Assert.That(response?.Code, Is.EqualTo(400)); //Verify Code
-        Assert.That(response?.Message, Is.EqualTo("Provided arguments are invalid, see data for details.")); //Verify Message
-      });
-      // Check that the data contains the expected error message
-      CollectionAssert.AreEquivalent(expectedErrors, response?.Data as List<string>);
-    }
+     [Test]
+     public async Task LoginSuccessTest()
+     {
+       // Arrange
+       var email = "john.doe@gmail.com";
+       var password = "Password!1";
+       
+       // Act
+       var result = await _controller!.Login(email, password) as ObjectResult;
+       var response = result?.Value as Result;
 
-    [Test]
-    public async Task LoginSuccessTest()
-    {
-      // Arrange
-      var email = "test@example.com";
-      var password = "Password!1";
-      var user = new ApplicationUser
-      {
-        Id = 1,
-        UserName = email,
-        Email = email,
-        FirstName = "John",
-        LastName = "Doe",
-        IsActive = true
-      };
+       // Assert
+       Assert.Multiple(() =>
+       {
+         Assert.That(result, Is.Not.Null);
+         Assert.That(response?.Flag, Is.True); // Verify Flag
+         Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
+         Assert.That(response?.Message, Is.EqualTo("Login successful")); // Verify Message
+       });
 
-      _userManagerMock.Setup(um => um.FindByEmailAsync(email)).ReturnsAsync(user);
-      _signInManagerMock.Setup(sm => sm.CheckPasswordSignInAsync(user, password, false)).ReturnsAsync(SignInResult.Success);
-      _userManagerMock.Setup(um => um.GetRolesAsync(user)).ReturnsAsync(new List<string> { "STUDENT" });
+       var authDTO = response?.Data as AuthDTO;
+       Assert.That(authDTO, Is.Not.Null);
+       Assert.Multiple(() =>
+       {
+         Assert.That(authDTO?.UserId, Is.EqualTo(3));
+         Assert.That(authDTO?.Role, Is.EqualTo("STUDENT"));
+         Assert.That(authDTO?.Token, Is.Not.Null.And.Not.Empty);
+       });
+     }
 
-      // Act
-      var result = await _controller!.Login(email, password) as ObjectResult;
-      var response = result?.Value as Result;
+   [Test]
+   public async Task LoginBadCredentialTest()
+   {
+     // Arrange
+     var email = "wrong.email@example.com";
+     var password = "WrongPassword123!";
+     
 
-      // Assert
-      Assert.Multiple(() =>
-      {
-        Assert.That(result, Is.Not.Null);
-        Assert.That(response?.Flag, Is.True); // Verify Flag
-        Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
-        Assert.That(response?.Message, Is.EqualTo("Login successful")); // Verify Message
-      });
+     // Act
+     var result = await _controller!.Login(email, password) as ObjectResult;
+     var response = result?.Value as Result;
 
-      var authDTO = response?.Data as AuthDTO;
-      Assert.That(authDTO, Is.Not.Null);
-      Assert.Multiple(() =>
-      {
-        Assert.That(authDTO?.UserId, Is.EqualTo(user.Id));
-        Assert.That(authDTO?.Role, Is.EqualTo("STUDENT"));
-        Assert.That(authDTO?.Token, Is.Not.Null.And.Not.Empty);
-      });
-    }
-
-  [Test]
-  public async Task LoginBadCredentialTest()
-  {
-    // Arrange
-    var email = "wrong.email@example.com";
-    var password = "WrongPassword123!";
-
-    _userManagerMock.Setup(um => um.FindByEmailAsync(email)).ReturnsAsync((ApplicationUser)null);
-
-    // Act
-    var result = await _controller!.Login(email, password) as ObjectResult;
-    var response = result?.Value as Result;
-
-    //Assert
-    Assert.IsInstanceOf<Result>(response);
-    Assert.That(response?.Code, Is.EqualTo(401));
-    Assert.That(response?.Message, Is.EqualTo("username or password is incorrect"));
-  }
-  
+     //Assert
+     Assert.IsInstanceOf<Result>(response);
+     Assert.That(response?.Code, Is.EqualTo(401));
+     Assert.That(response?.Message, Is.EqualTo("username or password is incorrect"));
+   }
+   
   [Test]
   public async Task FindUserByIdSuccessTest()
 {
     // Arrange
-    var userId = 1;
-    var user = new ApplicationUser
-    {
-        Id = userId,
-        FirstName = "Jane",
-        LastName = "Doe",
-        Email = "jane@gmail.com",
-        PhoneNumber = "3333333333",
-        IsActive = true
-    };
-
-    var positions = new List<Position>
-    {
-        new()
-        {
-            PositionId = 1,
-            PositionName = "DIRECTOR",
-            PositionLocation = "CONTROL ROOM"
-        },
-        new()
-        {
-            PositionId = 2,
-            PositionName = "PRODUCER",
-            PositionLocation = "CONTROL ROOM"
-        }
-    };
-
-    var userQualifiedPositions = new List<UserQualifiedPosition>
-    {
-        new()
-        {
-            UserId = userId,
-            PositionId = 1,
-            Position = new Position { PositionId = 1, PositionName = "DIRECTOR", PositionLocation = "CONTROL ROOM"}
-        },
-        new()
-        {
-            UserId = userId,
-            PositionId = 2,
-            Position = new Position { PositionId = 2, PositionName = "PRODUCER", PositionLocation = "CONTROL ROOM"}
-        }
-    };
-
-    // Mock DbSets for Positions and UserQualifiedPositions
-    var mockPositionSet = CreateMockDbSet(positions);
-    var mockUserQualifiedPositionSet = CreateMockDbSet(userQualifiedPositions);
-    List<string> roles = new List<string>
-    {
-      "role"
-    };
-    // Setup mock context
-    _mockContext?.Setup(c => c.Positions).Returns(mockPositionSet.Object);
-    _mockContext?.Setup(c => c.UserQualifiedPositions).Returns(mockUserQualifiedPositionSet.Object);
-    _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync(user);
-    _mockContext?.Setup(c => c.UserQualifiedPositions).ReturnsDbSet(userQualifiedPositions);
-    _userManagerMock?.Setup(um => um.GetRolesAsync(user)).ReturnsAsync(roles);
+    var userId = 3;
 
     // Act
     var result = await _controller!.FindUserById(userId) as ObjectResult;
@@ -465,29 +400,23 @@ namespace TestFrogCrew.Controllers
         Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
         Assert.That(response?.Message, Is.EqualTo("Find Success")); // Verify Message
     });
-
-    // Check that data is correctly returned as a UserDTO
     var foundUserDto = response?.Data as FoundUserDTO;
     Assert.That(foundUserDto, Is.Not.Null);
-    Assert.That(foundUserDto?.UserId, Is.EqualTo(user.Id));
-
-    // Verify UserQualifiedPositions query works as expected
-    var retrievedPositions = foundUserDto?.Positions ?? new List<string>();
-    var expectedPositions = positions.Select(p => p.PositionName).ToList();
-
-    Assert.That(retrievedPositions, Is.EquivalentTo(expectedPositions));
-
-    // Verify FindAsync was called once
-    _mockContext?.Verify(c => c.Users.FindAsync(userId), Times.Once);
+    Assert.Multiple(() =>
+      {
+        Assert.That(foundUserDto?.UserId, Is.EqualTo(userId));
+        Assert.That(foundUserDto?.FirstName, Is.EqualTo("John"));
+        Assert.That(foundUserDto?.LastName, Is.EqualTo("Doe"));
+        Assert.That(foundUserDto?.Positions[0], Is.EqualTo("DIRECTOR"));
+      }
+    );
 }
-
 
 [Test]
 public async Task FindUserByIdBadRequestTest()
 {
     // Arrange
     int userId = 999; // Non-existent user ID
-    _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync((ApplicationUser)null);
 
     // Act
     var result = await _controller!.FindUserById(userId) as ObjectResult;
@@ -503,217 +432,132 @@ public async Task FindUserByIdBadRequestTest()
     });
 }
 
-  [Test]
-  public async Task UpdateUserByIdSuccessTest()
-  {
-      // Arrange
-      var userId = 1;
-      var request = new UserDTO
-      {
-          FirstName = "UpdatedFirstName",
-          LastName = "UpdatedLastName",
-          Email = "updated.email@example.com",
-          PhoneNumber = "9876543210",
-          Role = "UPDATED_ROLE",
-          Position = new List<string> { "UPDATED_POSITION_1", "UPDATED_POSITION_2" }
-      };
+   [Test]
+   public async Task UpdateUserByIdSuccessTest()
+   {
+       // Arrange
+       var userId = 3;
+       var request = new UserDTO
+       {
+           FirstName = "UpdatedFirstName",
+           LastName = "UpdatedLastName",
+           Email = "updated.email@example.com",
+           PhoneNumber = "9876543210",
+           Role = "UPDATED_ROLE",
+           Position = new List<string> { "UPDATED_POSITION_1", "UPDATED_POSITION_2" }
+       };
 
-      var user = new ApplicationUser
-      {
-          Id = userId,
-          FirstName = "OriginalFirstName",
-          LastName = "OriginalLastName",
-          Email = "original.email@example.com",
-          PhoneNumber = "1234567890"
-      };
+       // Act
+       var result = await _controller!.UpdateUserByUserId(request, userId) as ObjectResult;
+       var response = result?.Value as Result;
 
-      var positions = new List<Position>
-      {
-          new Position { PositionId = 1, PositionName = "UPDATED_POSITION_1", PositionLocation = "CONTROL ROOM" },
-          new Position { PositionId = 2, PositionName = "UPDATED_POSITION_2", PositionLocation = "CONTROL ROOM"}
-      };
+       // Assert
+       Assert.Multiple(() =>
+       {
+           Assert.That(result, Is.Not.Null);
+           Assert.That(response?.Flag, Is.True); // Verify Flag
+           Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
+           Assert.That(response?.Message, Is.EqualTo("Update Success")); // Verify Message
+       });
 
-      var userQualifiedPositions = new List<UserQualifiedPosition>
-      {
-          new UserQualifiedPosition { UserId = userId, PositionId = 1 },
-          new UserQualifiedPosition { UserId = userId, PositionId = 2 }
-      };
+       // Verify the updated user details
+       var updatedUser = response?.Data as FoundUserDTO;
+       Assert.That(updatedUser, Is.Not.Null);
+       Assert.Multiple(() =>
+       {
+           Assert.That(updatedUser?.UserId, Is.EqualTo(userId));
+           Assert.That(updatedUser?.FirstName, Is.EqualTo(request.FirstName));
+           Assert.That(updatedUser?.LastName, Is.EqualTo(request.LastName));
+           Assert.That(updatedUser?.Email, Is.EqualTo(request.Email));
+           Assert.That(updatedUser?.PhoneNumber, Is.EqualTo(request.PhoneNumber));
+           Assert.That(updatedUser?.Role, Is.EqualTo(request.Role));
+           Assert.That(updatedUser?.Positions, Is.EquivalentTo(request.Position));
+       });
+   }
 
-      // Mock DbSets for Positions and UserQualifiedPositions
-      var mockPositionSet = CreateMockDbSet(positions);
-      var mockUserQualifiedPositionSet = CreateMockDbSet(userQualifiedPositions);
+   [Test]
+   public async Task UpdateUserByIdUserNotFoundTest()
+   {
+     // Arrange
+     int userId = 999; // Non-existent user ID
 
-      // Setup mock context
-      _mockContext?.Setup(c => c.Positions).Returns(mockPositionSet.Object);
-      _mockContext?.Setup(c => c.UserQualifiedPositions).Returns(mockUserQualifiedPositionSet.Object);
-      _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync(user);
-      _mockContext?.Setup(c => c.UserQualifiedPositions).ReturnsDbSet(userQualifiedPositions);
+     // Act
+     var result = await _controller!.FindUserById(userId) as ObjectResult;
+     var response = result?.Value as Result;
 
-      // Mock SaveChangesAsync to return the number of affected rows
-      _mockContext?.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+     // Assert
+     Assert.Multiple(() =>
+     {
+       Assert.That(result, Is.Not.Null);
+       Assert.That(response?.Flag, Is.False); // Verify Flag
+       Assert.That(response?.Code, Is.EqualTo(404)); // Verify Code
+       Assert.That(response?.Message, Is.EqualTo($"User with ID {userId} not found.")); // Verify Message
+     });
+   }
 
-      // Mock UserManager and SignInManager
-      _userManagerMock.Setup(um => um.GetRolesAsync(user)).ReturnsAsync(new List<string> { "ORIGINAL_ROLE" });
-      _userManagerMock.Setup(um => um.RemoveFromRolesAsync(user, It.IsAny<IEnumerable<string>>())).ReturnsAsync(IdentityResult.Success);
-      _userManagerMock.Setup(um => um.AddToRoleAsync(user, request.Role)).ReturnsAsync(IdentityResult.Success);
+   [Test]
+   public async Task DisableUserByIdSuccessTest()
+   {
+     // Arrange
+     var userId = 1;
 
+     // Act
+     var result = await _controller!.DisableUser(userId) as ObjectResult;
+     var response = result?.Value as Result;
+
+     // Assert
+     Assert.Multiple(() =>
+     {
+       Assert.That(result, Is.Not.Null);
+       Assert.That(response?.Flag, Is.True); // Verify Flag
+       Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
+       Assert.That(response?.Message, Is.EqualTo("Disable Success")); // Verify Message
+     });
+     
+     var user = _context.Users.SingleOrDefault(u => u.Id == userId);
+     Assert.That(user.IsActive, Is.False);
+     
+   }
+
+   [Test]
+   public async Task DisableUserByIdUserNotFoundTest()
+   {
+     // Arrange
+     int userId = 999; // Non-existent user ID
+
+     // Act
+     var result = await _controller!.DisableUser(userId) as ObjectResult;
+     var response = result?.Value as Result;
+
+     // Assert
+     Assert.Multiple(() =>
+     {
+       Assert.That(result, Is.Not.Null);
+       Assert.That(response?.Flag, Is.False); // Verify Flag
+       Assert.That(response?.Code, Is.EqualTo(404)); // Verify Code
+       Assert.That(response?.Message, Is.EqualTo($"User with ID {userId} not found.")); // Verify Message
+     });
+   }
+
+   [Test]
+     public async Task GetUsersTestSuccess()
+     {
       // Act
-      var result = await _controller!.UpdateUserByUserId(request, userId) as ObjectResult;
-      var response = result?.Value as Result;
+       var result = await _controller!.GetUsers() as ObjectResult;
+       var response = result?.Value as Result;
 
-      // Assert
-      Assert.Multiple(() =>
-      {
-          Assert.That(result, Is.Not.Null);
-          Assert.That(response?.Flag, Is.True); // Verify Flag
-          Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
-          Assert.That(response?.Message, Is.EqualTo("Update Success")); // Verify Message
-      });
+       // Assert
+       Assert.Multiple(() =>
+       {
+         Assert.That(result, Is.Not.Null);
+         Assert.That(response?.Flag, Is.True); // Verify Flag
+         Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
+         Assert.That(response?.Message, Is.EqualTo("Found Users")); // Verify Message
+       });
 
-      // Verify the updated user details
-      var updatedUser = response?.Data as FoundUserDTO;
-      Assert.That(updatedUser, Is.Not.Null);
-      Assert.Multiple(() =>
-      {
-          Assert.That(updatedUser?.UserId, Is.EqualTo(userId));
-          Assert.That(updatedUser?.FirstName, Is.EqualTo(request.FirstName));
-          Assert.That(updatedUser?.LastName, Is.EqualTo(request.LastName));
-          Assert.That(updatedUser?.Email, Is.EqualTo(request.Email));
-          Assert.That(updatedUser?.PhoneNumber, Is.EqualTo(request.PhoneNumber));
-          Assert.That(updatedUser?.Role, Is.EqualTo(request.Role));
-          Assert.That(updatedUser?.Positions, Is.EquivalentTo(request.Position));
-      });
-
-      // Verify that the user's roles and positions were updated
-      _userManagerMock.Verify(um => um.RemoveFromRolesAsync(user, It.IsAny<IEnumerable<string>>()), Times.Once);
-      _userManagerMock.Verify(um => um.AddToRoleAsync(user, request.Role), Times.Once);
-
-      // Verify that SaveChangesAsync was called at least once
-      _mockContext?.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.AtLeastOnce);
-  }
-
-  [Test]
-  public async Task UpdateUserByIdUserNotFoundTest()
-  {
-    // Arrange
-    int userId = 999; // Non-existent user ID
-    _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync((ApplicationUser)null);
-
-    // Act
-    var result = await _controller!.FindUserById(userId) as ObjectResult;
-    var response = result?.Value as Result;
-
-    // Assert
-    Assert.Multiple(() =>
-    {
-      Assert.That(result, Is.Not.Null);
-      Assert.That(response?.Flag, Is.False); // Verify Flag
-      Assert.That(response?.Code, Is.EqualTo(404)); // Verify Code
-      Assert.That(response?.Message, Is.EqualTo($"User with ID {userId} not found.")); // Verify Message
-    });
-  }
-
-  [Test]
-  public async Task DisableUserByIdSuccessTest()
-  {
-    // Arrange
-    var userId = 1;
-    var user = new ApplicationUser
-    {
-      Id = userId,
-      FirstName = "John",
-      LastName = "Doe",
-      Email = "john.doe@example.com",
-      PhoneNumber = "1234567890",
-      IsActive = true // Initially, the user is active
-    };
-
-    // Mock the Users DbSet to return the user when FindAsync is called
-    _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync(user);
-
-    // Mock SaveChangesAsync to return the number of affected rows
-    _mockContext?.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
-
-    // Act
-    var result = await _controller!.DisableUser(userId) as ObjectResult;
-    var response = result?.Value as Result;
-
-    // Assert
-    Assert.Multiple(() =>
-    {
-      Assert.That(result, Is.Not.Null);
-      Assert.That(response?.Flag, Is.True); // Verify Flag
-      Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
-      Assert.That(response?.Message, Is.EqualTo("Disable Success")); // Verify Message
-    });
-
-    // Verify that the user's IsActive property was set to false
-    Assert.That(user.IsActive, Is.False);
-
-    // Verify that SaveChangesAsync was called once
-    _mockContext?.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-  }
-
-  [Test]
-  public async Task DisableUserByIdUserNotFoundTest()
-  {
-    // Arrange
-    int userId = 999; // Non-existent user ID
-    _mockContext?.Setup(c => c.Users.FindAsync(userId)).ReturnsAsync((ApplicationUser)null);
-
-    // Act
-    var result = await _controller!.DisableUser(userId) as ObjectResult;
-    var response = result?.Value as Result;
-
-    // Assert
-    Assert.Multiple(() =>
-    {
-      Assert.That(result, Is.Not.Null);
-      Assert.That(response?.Flag, Is.False); // Verify Flag
-      Assert.That(response?.Code, Is.EqualTo(404)); // Verify Code
-      Assert.That(response?.Message, Is.EqualTo($"User with ID {userId} not found.")); // Verify Message
-    });
-  }
-
-  [Test]
-    public async Task GetUsersTestSuccess()
-    {
-      // Arrange
-      var users = new List<ApplicationUser>
-        {
-        new ApplicationUser { Id = 1, FirstName = "John", LastName = "Doe", Email = "john.doe@example.com", PhoneNumber = "1234567890", IsActive = true },
-        new ApplicationUser { Id = 2, FirstName = "Jane", LastName = "Smith", Email = "jane.smith@example.com", PhoneNumber = "0987654321", IsActive = true }
-        };
-      
-      _mockContext?.Setup(c => c.Users).ReturnsDbSet(users);
-
-      // Act
-      var result = await _controller!.GetUsers() as ObjectResult;
-      var response = result?.Value as Result;
-
-      // Assert
-      Assert.Multiple(() =>
-      {
-        Assert.That(result, Is.Not.Null);
-        Assert.That(response?.Flag, Is.True); // Verify Flag
-        Assert.That(response?.Code, Is.EqualTo(200)); // Verify Code
-        Assert.That(response?.Message, Is.EqualTo("Found Users")); // Verify Message
-      });
-
-      var userDTOs = response?.Data as List<UserSimpleDTO>;
-      Assert.That(userDTOs, Is.Not.Null);
-      Assert.That(userDTOs?.Count, Is.EqualTo(users.Count));
-      for (int i = 0; i < users.Count; i++)
-      {
-        Assert.Multiple(() =>
-        {
-          Assert.That(userDTOs?[i].UserId, Is.EqualTo(users[i].Id));
-          Assert.That(userDTOs?[i].FullName, Is.EqualTo($"{users[i].FirstName} {users[i].LastName}"));
-          Assert.That(userDTOs?[i].Email, Is.EqualTo(users[i].Email));
-          Assert.That(userDTOs?[i].PhoneNumber, Is.EqualTo(users[i].PhoneNumber));
-        });
-      }
-    }
-  }
-
+       var userDTOs = response?.Data as List<UserSimpleDTO>;
+       Assert.That(userDTOs, Is.Not.Null);
+       Assert.That(userDTOs?.Count, Is.EqualTo(1));
+     }
+   }
 } 
