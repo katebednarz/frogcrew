@@ -455,8 +455,44 @@ public class UserController : Controller
     return Ok(new Result(true, 200, "Password reset successful", null));
   }
 
+  [HttpPost("auth/forgotPassword/{email}")]
+  public async Task<IActionResult> ForgotPassword(String email)
+  {
+    var user = await _userManager.FindByEmailAsync(email);
+    
+    // generate unique invite token
+    var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+    var resetLink = $"ADD LINK TO RESET PASSWORD HERE (token={resetToken})";
 
-  //send reset for kate
-  //var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user); use this to generate token
+    // email setup
+    var fromAddress = new MailAddress("frog.crew.invitation@gmail.com", "FrogCrew");
+    var toAddress = new MailAddress(email);
+    const string fromPassword = "icbu ddnf yuhi lssz"; // gmail app key
+    const string subject = "FrogCrew Reset Password";
+    string body = "Please click the link below to reset your password for FrogCrew:\n\n" + resetLink;
+
+    // configure SMTP client
+    var smtp = new SmtpClient
+    {
+      Host = "smtp.gmail.com",
+      Port = 587, // SMTP port
+      EnableSsl = true,
+      DeliveryMethod = SmtpDeliveryMethod.Network,
+      UseDefaultCredentials = false,
+      Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+    };
+
+    using (var message = new MailMessage(fromAddress, toAddress)
+           {
+             Subject = subject,
+             Body = body
+           })
+    {
+      smtp.Send(message);
+    }
+    
+    var response = new Result(true, 200, "Password reset email sent successfully", null);
+    return Ok(response);
+  }
 }
 
