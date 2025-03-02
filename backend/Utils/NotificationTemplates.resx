@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="InvitationEmail">
+        Hello
+    </data>
+    <data name="ResetPasswordEmail">
+        Hello
+    </data>
+    <data name="AvailabiltyPostedNotification">
+        <value>{0} {1} has submitted availability for {2} game(s) for {3}.</value>
+    </data>
+    <data name="AvailabiltyEditedNotification">
+        <value>{0} {1} has edited availability for {2} game(s) for {3}.</value>
+    </data>
+    <data name="UserCreatedNotification">
+        <value>{0} {1} has created an account.</value>
+    </data>
+    <data name="UserCrewedNotification">
+        <value>You have been crewed as {0} for {1} vs. {2} on {3}.</value>
+    </data>
+    <data name="DroppedShiftNotification">
+        <value>{0} {1} as {2} has requested shift coverage for {3} on {4}.</value>
+    </data>
+    <data name="PickedUpShiftNotification">
+        <value>{0} {1} has requested to pick up a shift for {2} {3} for {4} on {5}.</value>
+    </data>
+    <data name="ApprovedShiftPickUpNotification">
+        <value>Your shift has been picked up and approved for {0} on {1}.</value>
+    </data>
+</root>

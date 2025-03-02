@@ -55,4 +55,19 @@ public class DatabaseHelper
     public List<Notification> GetNotificationsByUserId(int userId) => _context.Notifications
         .Where(n => n.UserId == userId)
         .ToList();
+    
+   public List<ApplicationUser> GetNonAdminUser() => _context.Users
+       .Where( u => u.IsActive)
+       .Join(_context.UserRoles,
+           u => u.Id,
+           ur => ur.UserId,
+           (u, ur) => new { u, ur })
+       .Join(_context.Roles, 
+           combined => combined.ur.RoleId, 
+           r => r.Id, 
+           (combined, r) => new { combined.u, Role = r })
+       .Where(result => result.Role.Name != "ADMIN")
+       .Select(result => result.u)
+       .ToList();
+        
 }

@@ -23,18 +23,21 @@ public class UserController : Controller
   private readonly FrogcrewContext _context;
   private readonly IConfiguration _configuration;
   private readonly DatabaseHelper _dbHelper;
+    private readonly NotificationsHelper _notificationsHelper;
 
   public UserController(
       UserManager<ApplicationUser> userManager,
       SignInManager<ApplicationUser> signInManager,
       FrogcrewContext context,
-      IConfiguration configuration)
+      IConfiguration configuration,
+        NotificationsHelper notificationsHelper)
   {
     _userManager = userManager;
     _signInManager = signInManager;
     _context = context;
     _configuration = configuration;
     _dbHelper = new DatabaseHelper(context);
+        _notificationsHelper = notificationsHelper;
   }
 
   /*
@@ -84,7 +87,7 @@ public class UserController : Controller
       await _userManager.DeleteAsync(user);
       return new ObjectResult(new Result(false, 400, "Role not found", request.Role));
     }
-
+_context.Users.Attach(user);
     foreach (var pos in request.Position)
     {
       var newPosition = new UserQualifiedPosition
@@ -101,6 +104,9 @@ public class UserController : Controller
       _context.Invitations.Remove(_dbHelper.GetInvitationByToken(token));
       _context.SaveChanges();
     }
+        
+        string notificationMessage = NotificationContent.GetNotificationTemplate("UserCreatedNotification", [request.FirstName, request.LastName]);
+        _notificationsHelper.SendNotificationToAdmin(notificationMessage);
 
     return Ok(new Result(true, 200, "Add Success", request));
   }
@@ -251,24 +257,23 @@ public class UserController : Controller
       * @return The result of the operation
   */
 
-  //need to change to 'crewMember', will need to update frontend
-  [HttpGet("users")]
-  public async Task<IActionResult> GetUsers()
-  {
-    var users = await _context.Users.ToListAsync();
-
-    List<UserSimpleDTO> userDTOs = [];
-    foreach (var user in users)
+    //need to change to 'crewMember', will need to update frontend
+    [HttpGet("users")]
+    public async Task<IActionResult> GetUsers()
     {
-      if (user.IsActive)
-      {
-        var userDto = new UserSimpleDTO
+        var users = _dbHelper.GetNonAdminUser();
+        List<UserSimpleDTO> userDTOs = [];
+        foreach (var user in users)
         {
-          UserId = user.Id,
-          FullName = user.FirstName + " " + user.LastName,
-          Email = user.Email,
-          PhoneNumber = user.PhoneNumber
-        };
+            if (user.IsActive)
+            {
+                var userDto = new UserSimpleDTO
+                {
+                    UserId = user.Id,
+                    FullName = user.FirstName + " " + user.LastName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber
+                };
 
         userDTOs.Add(userDto);
       }

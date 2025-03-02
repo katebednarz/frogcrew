@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Models;
 using backend.DTO;
+using backend.Utils;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace backend.Controllers
@@ -10,9 +12,11 @@ namespace backend.Controllers
 	public class AvailabilityController : Controller
 	{
 		private readonly FrogcrewContext _context;
-		public AvailabilityController(FrogcrewContext context)
+		private readonly NotificationsHelper _notificationsHelper;
+		public AvailabilityController(FrogcrewContext context, NotificationsHelper notificationsHelper)
 		{
 			_context = context;
+			_notificationsHelper = notificationsHelper;
 		}
 
 		/*
@@ -56,7 +60,11 @@ namespace backend.Controllers
 					Comments = availability.Comments
 				});
 			}
-
+			var user = _context.Users.Find(request[0].UserId);
+			var game = await _context.Games.Include(g => g.Schedule).FirstOrDefaultAsync(g => g.Id == request[0].GameId);
+			
+			string notificationMessage = NotificationContent.GetNotificationTemplate("AvailabiltyPostedNotification", [user.FirstName, user.LastName, availabilityList.Count, game.Schedule.Sport]);
+			_notificationsHelper.SendNotificationToAdmin(notificationMessage);
 			var response = new Result(true, 200, "Add Success", availabilityDTO);
 			return Ok(response);
 		}

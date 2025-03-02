@@ -100,6 +100,8 @@ namespace backend.Controllers
                 return new ObjectResult(errorResponse) { StatusCode = 400 };
             }
             
+            //TODO
+            //Kate, this is bad code 
             var x = _dbHelper.GetGameIdByScheduleIdAndDate(request.ScheduleId, request.GameDate);
             if (x > 0)
                 return new ObjectResult(new Result(false, 409, "Game already exists")) { StatusCode = 409 };

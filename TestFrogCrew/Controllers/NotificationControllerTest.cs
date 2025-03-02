@@ -15,73 +15,52 @@ namespace TestFrogCrew.Controllers;
 [TestFixture]
 public class NotificationControllerTest
 {
-    private Mock<FrogcrewContext>? _mockContext;
+    private FrogcrewContext _context;
     private NotificationController _controller;
 
     [SetUp]
     public void Setup()
     {
-        _mockContext = new Mock<FrogcrewContext>();
-        _controller = new NotificationController(_mockContext.Object);
+        var options = new DbContextOptionsBuilder<FrogcrewContext>()
+            .UseInMemoryDatabase(databaseName: "TestDatabase")
+            .Options;
+      
+        _context = new FrogcrewContext(options);
+      
+        _context.Database.EnsureDeleted();
+        _context.Database.EnsureCreated();
+      
+        // Adding Test Data
+        _context.Notifications.AddRange(
+            new Notification { Id = 1, UserId = 1, Message = "Test 1" },
+            new Notification { Id = 2, UserId = 1, Message = "Test 2"},
+            new Notification { Id = 3, UserId = 1, Message = "Test 3", IsRead = true}
+        );
+        
+        _context.Users.AddRange(
+            new ApplicationUser { Id = 1, FirstName = "Kate", LastName = "Bednarz"}
+        );
+        
+        _context.SaveChanges();
+      
+        _controller = new NotificationController(_context);
     }
     
     [TearDown]
     public void Teardown()
     {
+        _context?.Dispose();
         _controller?.Dispose();
-    }
-    
-    private Mock<DbSet<T>> CreateMockDbSet<T>(List<T> sourceList) where T : class
-    {
-        var queryable = sourceList.AsQueryable();
-        var mockDbSet = new Mock<DbSet<T>>();
-
-        // Setup IQueryable methods
-        mockDbSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(new TestAsyncQueryProvider<T>(queryable.Provider));
-        mockDbSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(queryable.Expression);
-        mockDbSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
-        mockDbSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
-
-        // Setup IAsyncEnumerable method
-        mockDbSet.As<IAsyncEnumerable<T>>()
-            .Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
-            .Returns(new TestAsyncEnumerator<T>(queryable.GetEnumerator()));
-
-        return mockDbSet;
     }
 
     [Test]
     public async Task GetNotificationsUserNotFound()
     {
-        // Arrange
-        var notifications = new List<Notification>()
-        {
-            new Notification()
-            {
-                Id = 1,
-                UserId = 1,
-            },
-            new Notification()
-            {
-                Id = 2,
-                UserId = 1,
-            },
-            new Notification()
-            {
-                Id = 2,
-                UserId = 1,
-            },
-        };
-        var users = new List<ApplicationUser>();
+        // Ararange
+        var userId = 4;
         
-        var mockUserSet = CreateMockDbSet(users);
-        _mockContext?.Setup(m => m.Users).Returns(mockUserSet.Object);
-        var mockNotificationsSet = CreateMockDbSet(notifications);
-        _mockContext?.Setup(m => m.Notifications).Returns(mockNotificationsSet.Object);
-        //_mockContext?.Setup(m => m.Users.FindAsync(1)).;
-
         // Act
-        var result = await _controller.GetNotifications(1) as ObjectResult;
+        var result = await _controller.GetNotifications(userId) as ObjectResult;
         var response = result?.Value as Result; 
         
         // Assert
@@ -90,7 +69,7 @@ public class NotificationControllerTest
             Assert.That(result, Is.Not.Null);
             Assert.That(response?.Flag, Is.False); //Verify Flag
             Assert.That(response?.Code, Is.EqualTo(404)); //Verify Code
-            Assert.That(response?.Message, Is.EqualTo("Could not find user with id 1")); //Verify Message
+            Assert.That(response?.Message, Is.EqualTo("Could not find user with id 4")); //Verify Message
         });
     }
     
@@ -98,44 +77,10 @@ public class NotificationControllerTest
     public async Task GetNotificationsSuccess()
     {
         // Arrange
-        var user = new ApplicationUser()
-        {
-            Id = 1,
-            FirstName = "Test",
-            LastName = "User",
-        };
+        var userId = 1;
         
-        var notifications = new List<Notification>()
-        {
-            new()
-            {
-                Id = 1,
-                UserId = 1,
-                Message = "Test 1",
-                IsRead = false,
-            },
-            new()
-            {
-                Id = 2,
-                UserId = 1,
-                Message = "Test 2",
-                IsRead = false,
-            },
-            new()
-            {
-                Id = 3,
-                UserId = 1,
-                Message = "Test 3",
-                IsRead = true,
-            },
-        };
-        
-        var mockNotificationsSet = CreateMockDbSet(notifications);
-        _mockContext?.Setup(m => m.Notifications).Returns(mockNotificationsSet.Object);
-        _mockContext?.Setup(m => m.Users.FindAsync(1)).ReturnsAsync(user);
-
         // Act
-        var result = await _controller.GetNotifications(1) as ObjectResult;
+        var result = await _controller.GetNotifications(userId) as ObjectResult;
         var response = result?.Value as Result; 
         
         // Assert
@@ -166,23 +111,11 @@ public class NotificationControllerTest
     public async Task MarkNotificationAsReadNotificationNotFound()
     {
         // Arrange
-        var notifications = new List<Notification>()
-        {
-            new()
-            {
-                Id = 1,
-                UserId = 1,
-                Message = "Test 1",
-                IsRead = false,
-            }
-        };
+        var notificationId = 4;
         
-        var mockNotificationsSet = CreateMockDbSet(notifications);
-        _mockContext?.Setup(m => m.Notifications).Returns(mockNotificationsSet.Object);
-        _mockContext?.Setup(m => m.Notifications.FindAsync(1)).ReturnsAsync(notifications[0]);
         
         // Act
-        var result = await _controller.MarkNotificationAsRead(2) as ObjectResult;
+        var result = await _controller.MarkNotificationAsRead(notificationId) as ObjectResult;
         var response = result?.Value as Result;
         
         // Assert
@@ -191,7 +124,7 @@ public class NotificationControllerTest
             Assert.That(result, Is.Not.Null);
             Assert.That(response?.Flag, Is.False); //Verify Flag
             Assert.That(response?.Code, Is.EqualTo(404)); //Verify Code
-            Assert.That(response?.Message, Is.EqualTo("Could not find notification with id 2")); //Verify Message
+            Assert.That(response?.Message, Is.EqualTo("Could not find notification with id 4")); //Verify Message
         });
     }
     
@@ -199,23 +132,10 @@ public class NotificationControllerTest
     public async Task MarkNotificationAsReadSuccess()
     {
         // Arrange
-        var notifications = new List<Notification>()
-        {
-            new()
-            {
-                Id = 1,
-                UserId = 1,
-                Message = "Test 1",
-                IsRead = false,
-            }
-        };
-        
-        var mockNotificationsSet = CreateMockDbSet(notifications);
-        _mockContext?.Setup(m => m.Notifications).Returns(mockNotificationsSet.Object);
-        _mockContext?.Setup(m => m.Notifications.FindAsync(1)).ReturnsAsync(notifications[0]);
+        var notificationId = 1;
         
         // Act
-        var result = await _controller.MarkNotificationAsRead(1) as ObjectResult;
+        var result = await _controller.MarkNotificationAsRead(notificationId) as ObjectResult;
         var response = result?.Value as Result;
         
         // Assert
@@ -235,23 +155,10 @@ public class NotificationControllerTest
     public async Task DeleteNotificationNotificationNotFound()
     {
         // Arrange
-        var notifications = new List<Notification>()
-        {
-            new()
-            {
-                Id = 1,
-                UserId = 1,
-                Message = "Test 1",
-                IsRead = false,
-            }
-        };
-        
-        var mockNotificationsSet = CreateMockDbSet(notifications);
-        _mockContext?.Setup(m => m.Notifications).Returns(mockNotificationsSet.Object);
-        _mockContext?.Setup(m => m.Notifications.FindAsync(1)).ReturnsAsync(notifications[0]);
+        var notificationId = 4;
         
         // Act
-        var result = await _controller.DeleteNotification(2) as ObjectResult;
+        var result = await _controller.DeleteNotification(notificationId) as ObjectResult;
         var response = result?.Value as Result;
         
         // Assert
@@ -260,7 +167,7 @@ public class NotificationControllerTest
             Assert.That(result, Is.Not.Null);
             Assert.That(response?.Flag, Is.False); //Verify Flag
             Assert.That(response?.Code, Is.EqualTo(404)); //Verify Code
-            Assert.That(response?.Message, Is.EqualTo("Could not find notification with id 2")); //Verify Message
+            Assert.That(response?.Message, Is.EqualTo("Could not find notification with id 4")); //Verify Message
         });
     }
     
@@ -268,23 +175,10 @@ public class NotificationControllerTest
     public async Task DeleteNotificationSuccess()
     {
         // Arrange
-        var notifications = new List<Notification>()
-        {
-            new()
-            {
-                Id = 1,
-                UserId = 1,
-                Message = "Test 1",
-                IsRead = false,
-            }
-        };
-        
-        var mockNotificationsSet = CreateMockDbSet(notifications);
-        _mockContext?.Setup(m => m.Notifications).Returns(mockNotificationsSet.Object);
-        _mockContext?.Setup(m => m.Notifications.FindAsync(1)).ReturnsAsync(notifications[0]);
+        var notificationId = 1;
         
         // Act
-        var result = await _controller.DeleteNotification(1) as ObjectResult;
+        var result = await _controller.DeleteNotification(notificationId) as ObjectResult;
         var response = result?.Value as Result;
         
         // Assert

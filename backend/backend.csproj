@@ -28,4 +28,19 @@
     <Folder Include="Images\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Update="Utils\NotificationTemplates.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>NotificationTemplates.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Utils\NotificationTemplates.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>NotificationTemplates.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>
