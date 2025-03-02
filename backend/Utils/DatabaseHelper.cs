@@ -26,6 +26,9 @@ public class DatabaseHelper
     public Invitation? GetInvitationByToken(string token) => _context.Invitations
         .FirstOrDefault(i => i.Token == token);
     
+    public ResetPasswordToken? GetResetPasswordTokenByToken(string token) => _context.ResetPasswordTokens
+        .FirstOrDefault(i => i != null && i.Token == token);
+    
     public CrewedUser? GetCrewedUserById(int userId, int gameId) => _context.CrewedUsers
         .FirstOrDefault(u => u.UserId == userId && u.GameId == gameId);
     
@@ -46,6 +49,9 @@ public class DatabaseHelper
         .Select(g => g.Id)
         .FirstOrDefault();
     
+    public ApplicationUser? GetUserByEmail(string email) => _context.Users
+        .FirstOrDefault(u => u.Email == email);
+
     public List<Notification> GetNotificationsByUserId(int userId) => _context.Notifications
         .Where(n => n.UserId == userId)
         .ToList();

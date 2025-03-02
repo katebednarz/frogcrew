@@ -98,6 +98,11 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<DatabaseHelper>();
 builder.Services.AddScoped<NotificationsHelper>();
 
+
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(1); // Expire in 3 hours
+});
     
 var app = builder.Build();
 
