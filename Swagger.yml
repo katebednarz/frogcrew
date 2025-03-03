@@ -590,6 +590,39 @@ paths:
                 code: 404
                 message: Could not find schedule with id 1
                 data: null
+  /gameSchedule/publish/{scheduleId}:
+    put:
+      tags:
+        - game schedule
+      summary: Publish game schedule
+      description: Publish a game schedule.
+      parameters:
+        - in: path
+          name: scheduleId
+          description: Id of the game schedule
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Game schedule published
+          content:
+            application/json:
+              example:
+                flag: true
+                code: 200
+                message: Publish Success
+                data: null
+        '404':
+          description: schedule not found
+          content:
+            application/json:
+              example:
+                flag: false
+                code: 404
+                message: Could not find schedule with id 1
+                data: null
   /gameSchedule/{scheduleId}/games:
     post:
       tags:
