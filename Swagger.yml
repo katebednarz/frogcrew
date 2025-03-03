@@ -538,7 +538,6 @@ paths:
     put:
       tags:
         - game schedule
-        - NYI
       summary: Update game schedule
       description: Update an existing game schedule and return the updated one.
       parameters:
@@ -1060,7 +1059,6 @@ paths:
     get:
       tags:
         - crew list
-        - NYI
       summary: Export crew list
       description: Export a crew list to a file.
       parameters:
@@ -1096,6 +1094,7 @@ paths:
     get:
       tags:
         - scheduledGames
+        - NYI
       summary: Find scheduled games by userId
       description: Return a list of games that a crew member is scheduled to work.
       parameters:
@@ -1853,7 +1852,6 @@ paths:
     get:
       tags:
         - Template/Position
-        - NYI
       summary: Find all crew list template
       description: Return a list of all crew list templates
       responses:
