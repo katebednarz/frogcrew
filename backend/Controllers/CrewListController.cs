@@ -96,8 +96,6 @@ namespace backend.Controllers
             string imagePath = Path.Combine("backend", "Images", "TCU_Sports Broadcasting Athletics Style.jpg");
             string logoPath = Path.Combine(solutionRoot, imagePath);
             
-            Console.WriteLine($"Looking for image at: {logoPath}");
-            
             //string logoPath = Path.Combine(Directory.GetCurrentDirectory(), "Images/TCU_Sports Broadcasting Athletics Style.jpg");
 
             using (var workbook = new XLWorkbook())

@@ -265,7 +265,7 @@ paths:
                 code: 404
                 message: Could not find user with id 1
                 data: null
-  /crewMember/{gameId}/{position}:
+  /CrewedUser/{gameId}/{position}:
     get:
       tags:
         - crew members
