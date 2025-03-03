@@ -1490,7 +1490,7 @@ paths:
   /report/crewMember/{userId}:
     get:
       tags:
-        - report
+        - reports
         - NYI
       summary: Generate crew member report
       description: Generate a report for a specific crew member.
@@ -1525,7 +1525,7 @@ paths:
   /report/financial/{gameId}:
     get:
       tags:
-        - report
+        - reports
         - NYI
       summary: Generate financial report
       description: Generate a financial report for a specific game.
@@ -1557,21 +1557,21 @@ paths:
                 code: 404
                 message: Could not find game with id 1
                 data: null
-  /report/position/{position}:
+  /report/position/{positionId}:
     get:
       tags:
-        - report
+        - reports
         - NYI
       summary: Generate position report
       description: Generate a report for a specific position.
       parameters:
         - in: path
-          name: position
+          name: positionId
           description: Position of the crew member
           required: true
           schema:
             type: string
-            example: DIRECTOR
+            example: 1
       responses:
         '200':
           description: Report Generated and returned
@@ -1590,7 +1590,7 @@ paths:
               example:
                 flag: false
                 code: 404
-                message: Could not find position DIRECTOR
+                message: Could not find position with id 1
                 data: null
   /auth/login:
     post:
