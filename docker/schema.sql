@@ -53,7 +53,8 @@ GO
 CREATE TABLE Schedule (
     id INT IDENTITY(1,1) PRIMARY KEY,
     sport NVARCHAR(255),
-    season NVARCHAR(255)
+    season NVARCHAR(255),
+    isPublished BIT DEFAULT 0
 );
 GO
 
@@ -65,7 +66,7 @@ CREATE TABLE Game (
     gameDate DATE,
     gameStart TIME,
     venue NVARCHAR(255),
-    isFinalized BIT,
+    isFinalized BIT DEFAULT 0,
     FOREIGN KEY (scheduleId) REFERENCES Schedule(id)
 );
 GO
@@ -308,13 +309,13 @@ INSERT INTO UserQualifiedPositions VALUES
     (5,18);
 
 -- Schedule Values
-INSERT INTO Schedule (sport,season) VALUES
-    ('Football', '2024-2025'),
-    ('Women''s Basketball', '2024-2025'),
-    ('Men''s Basketball', '2024-2025'),
-    ('Baseball', '2024-2025'),
-    ('Volleyball', '2024-2025'),
-    ('Soccer', '2024-2025');
+INSERT INTO Schedule (sport,season,isPublished) VALUES
+    ('Football', '2024-2025', 1),
+    ('Women''s Basketball', '2024-2025', 1),
+    ('Men''s Basketball', '2024-2025', 1),
+    ('Baseball', '2024-2025', 1),
+    ('Volleyball', '2024-2025',1 ),
+    ('Soccer', '2024-2025',1 );
 
 -- Game Values
 -- Football

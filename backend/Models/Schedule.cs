@@ -11,6 +11,8 @@ public partial class Schedule
     public string? Sport { get; set; }
 
     public string? Season { get; set; }
+    
+    public bool? IsPublished { get; set; }
 
     public virtual ICollection<Game> Games { get; set; } = new List<Game>();
 

@@ -201,11 +201,14 @@ public partial class FrogcrewContext : IdentityDbContext<ApplicationUser,Applica
         
         modelBuilder.Entity<Schedule>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            entity.HasKey(e => e.Id).HasName("PK__Schedule__3213E83F2C4ECACD");
 
             entity.ToTable("Schedule");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.IsPublished)
+                .HasDefaultValue(false)
+                .HasColumnName("isPublished");
             entity.Property(e => e.Season)
                 .HasMaxLength(255)
                 .HasColumnName("season");
