@@ -35,6 +35,10 @@ public class ReportControllerTest
             new Position {PositionId = 2, PositionName = "PRODUCER", PositionLocation = "CONTROL ROOM"}
         );
         
+        _context.Schedules.AddRange(
+            new Schedule { Id = 1, Sport = "Football", Season = "2024-2025", IsPublished = false}
+        );
+        
         _context.SaveChanges();
         
         _notificationsHelper = new NotificationsHelper(_context);
@@ -54,9 +58,10 @@ public class ReportControllerTest
         Assert.Pass();
         // Arrange
         var userId = 1;
+        var season = "2024-2025";
         
         // Act
-        var result = await _controller.GetUserReport(userId) as ObjectResult;
+        var result = await _controller.GetUserReport(userId,season) as ObjectResult;
         var response = result?.Value as Result; 
         
         // Assert
@@ -75,9 +80,10 @@ public class ReportControllerTest
         Assert.Pass();
         // Arrange
         var userId = 1;
+        var season = "2024-2025";
         
         // Act
-        var result = await _controller.GetUserReport(userId) as ObjectResult;
+        var result = await _controller.GetUserReport(userId,season) as ObjectResult;
         var response = result?.Value as Result; 
         
         // Assert
@@ -93,7 +99,7 @@ public class ReportControllerTest
         var gameId = 1;
         
         // Act
-        var result = await _controller.GetPositionReport(gameId) as ObjectResult;
+        var result = await _controller.GetFinancialReport(gameId) as ObjectResult;
         var response = result?.Value as Result; 
         
         // Assert
@@ -109,7 +115,7 @@ public class ReportControllerTest
         var gameId = 1;
         
         // Act
-        var result = await _controller.GetPositionReport(gameId) as ObjectResult;
+        var result = await _controller.GetFinancialReport(gameId) as ObjectResult;
         var response = result?.Value as Result; 
         
         // Assert
@@ -123,9 +129,10 @@ public class ReportControllerTest
         Assert.Pass();
         // Arrange
         var positionId = 1;
+        var season = "2024-2025";
         
         // Act
-        var result = await _controller.GetPositionReport(positionId) as ObjectResult;
+        var result = await _controller.GetPositionReport(positionId,season) as ObjectResult;
         var response = result?.Value as Result; 
         
         // Assert
@@ -139,9 +146,10 @@ public class ReportControllerTest
         Assert.Pass();
         // Arrange
         var positionId = 1;
+        var season = "2024-2025";
         
         // Act
-        var result = await _controller.GetPositionReport(positionId) as ObjectResult;
+        var result = await _controller.GetPositionReport(positionId,season) as ObjectResult;
         var response = result?.Value as Result;
         
         // Assert 

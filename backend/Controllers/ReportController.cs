@@ -19,8 +19,8 @@ public class ReportController
         _dbHelper = dbHelper;
     }
 
-    [HttpGet("crewMember/{userId}")]
-    public async Task<IActionResult> GetUserReport(int userId)
+    [HttpGet("crewMember/{userId}/{season}")]
+    public async Task<IActionResult> GetUserReport(int userId, string season)
     {
         throw new NotImplementedException();
     }
@@ -31,8 +31,8 @@ public class ReportController
         throw new NotImplementedException();
     }
 
-    [HttpGet("position/{positionId}")]
-    public async Task<IActionResult> GetPositionReport(int positionId)
+    [HttpGet("position/{positionId}/{season}")]
+    public async Task<IActionResult> GetPositionReport(int positionId, string season)
     {
         throw new NotImplementedException();
     }
